@@ -5,9 +5,11 @@ import datetime
 import hashlib
 import json
 import random
+import os
 
 # Importar nuestro módulo de base de datos Supabase
 import db
+from procesar_y_guardar_db import ejecutar_crawler
 
 app = Flask(__name__)
 CORS(app)
@@ -139,6 +141,42 @@ def get_posts_by_source():
     except Exception as e:
         print(f"❌ Error obteniendo posts por fuente: {e}")
         return jsonify({"error": "Error interno del servidor"}), 500
+
+# ---------------------------
+#   NUEVO ENDPOINT PARA PROCESAR NOTICIAS
+# ---------------------------
+
+@app.route('/procesar', methods=['GET'])
+def procesar_noticias_externo():
+    """Endpoint para ejecutar el crawler de noticias desde externo."""
+    
+    # Opcional: agregar seguridad con una clave secreta
+    secret_key = request.headers.get('X-Secret-Key')
+    expected_key = os.environ.get('CRON_SECRET')
+    
+    if expected_key and secret_key != expected_key:
+        return jsonify({"error": "Acceso denegado"}), 403
+
+    try:
+        print("🔄 Iniciando proceso de crawler desde endpoint externo...")
+        
+        # Ejecutar el crawler
+        resultado = ejecutar_crawler()
+        
+        # Si hay error en el crawler
+        if "error" in resultado:
+            return jsonify({"error": f"Error en el crawler: {resultado['error']}"}), 500
+        
+        # Éxito
+        return jsonify({
+            "mensaje": "Crawler ejecutado con éxito", 
+            "data": resultado,
+            "timestamp": datetime.datetime.now().isoformat()
+        }), 200
+        
+    except Exception as e:
+        print(f"❌ Error ejecutando crawler: {str(e)}")
+        return jsonify({"error": f"Error al ejecutar el crawler: {str(e)}"}), 500
 
 # ---------------------------
 #   RUTA FRASE DEL DÍA MEJORADA
@@ -368,7 +406,8 @@ def home():
             "related_posts": "/api/related-posts",
             "frase_del_dia": "/api/frase-del-dia",
             "stats": "/api/stats",
-            "health": "/api/health"
+            "health": "/api/health",
+            "procesar": "/procesar (GET) - Ejecuta el crawler de noticias"
         }
     })
 
@@ -383,4 +422,5 @@ if __name__ == "__main__":
     print("   - POST /api/translate-apod")
     print("   - POST /api/noticias/<id>/click")
     print("   - GET  /api/health")
+    print("   - GET  /procesar - Ejecuta el crawler de noticias")
     app.run(debug=True, port=5000)

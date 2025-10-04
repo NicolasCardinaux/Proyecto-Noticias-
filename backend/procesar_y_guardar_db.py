@@ -160,7 +160,7 @@ def procesar_y_guardar_noticias():
 
     if not todas_las_noticias:
         print("❌ No se encontraron noticias NUEVAS para procesar. Todas las noticias ya están en la base de datos.")
-        return
+        return {"nuevas_guardadas": 0, "mensaje": "No se encontraron noticias nuevas"}
 
     print(f"\n📝 Procesando y guardando {len(todas_las_noticias)} NOTICIAS NUEVAS en Supabase...\n")
     
@@ -202,7 +202,7 @@ def procesar_y_guardar_noticias():
                 print(f"⚠️  Duplicado omitido: {art.get('title')[:50]}... Error: {e}")
                 continue
     
-    # Limpiar noticias antiguas (mantener sólo 24)
+    # Limpiar noticias antiguas (mantener sólo las de menos de 6 meses)
     db.delete_old_noticias(max_months=6)
     
     print(f"\n✅ ¡Proceso completado! Se guardaron {noticias_guardadas} NUEVAS noticias en Supabase")
@@ -210,6 +210,27 @@ def procesar_y_guardar_noticias():
     # Mostrar estadísticas actualizadas
     stats = db.get_stats()
     print(f"📈 Total de noticias en la base de datos: {stats['total_noticias']}")
+    
+    return {
+        "nuevas_guardadas": noticias_guardadas,
+        "total_noticias": stats['total_noticias'],
+        "total_clics": stats['total_clics'],
+        "noticias_hoy": stats['noticias_hoy']
+    }
+
+# --- FUNCIÓN PARA EL ENDPOINT ---
+def ejecutar_crawler():
+    """Función que ejecuta el crawler y retorna resultados para el endpoint."""
+    print("🚀 INICIANDO CRAWLER DESDE ENDPOINT")
+    print("=" * 50)
+    
+    try:
+        resultado = procesar_y_guardar_noticias()
+        print("🎯 CRAWLER COMPLETADO EXITOSAMENTE")
+        return resultado
+    except Exception as e:
+        print(f"❌ ERROR EN CRAWLER: {e}")
+        return {"error": str(e), "nuevas_guardadas": 0}
 
 if __name__ == "__main__":
-    procesar_y_guardar_noticias()
+    ejecutar_crawler()
