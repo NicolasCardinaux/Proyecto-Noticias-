@@ -6,7 +6,7 @@ Un agregador de noticias argentinas y globales que usa IA para eliminar amarilli
 
 **Tu aplicación está 100% desplegada:**
 - **Frontend**: Listo para Vercel
-- **Backend**: Desplegado en Render (`https://proyecto-noticias-api.onrender.com`)
+- **Backend**: Desplegado en Render 
 - **Base de datos**: Supabase configurada
 
 ## 🚀 **Instalación y Desarrollo**
@@ -43,7 +43,7 @@ cd frontend
 npm install
 
 # Configura .env con:
-# VITE_API_URL=https://proyecto-noticias-api.onrender.com
+# VITE_API_URL=
 # VITE_CLIMA_API_KEY=tu_key_clima
 # VITE_NASA_API_KEY=tu_key_nasa
 # VITE_GEO_API_KEY=tu_key_geo
@@ -84,7 +84,7 @@ GEMINI_API_KEY=tu_gemini_key
 
 ### Frontend (.env)
 ```env
-VITE_API_URL=https://proyecto-noticias-api.onrender.com
+VITE_API_URL=
 VITE_CLIMA_API_KEY=tu_openweather_key
 VITE_NASA_API_KEY=tu_nasa_key
 VITE_GEO_API_KEY=tu_geo_key
@@ -107,6 +107,3 @@ VITE_GEO_API_KEY=tu_geo_key
 2. Configura las variables de entorno en el dashboard
 3. Deploy automático
 
-### Backend en Render (✅ Ya desplegado):
-- URL: `https://proyecto-noticias-api.onrender.com`
-- Web Service con auto-deploy desde GitHub
