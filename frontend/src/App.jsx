@@ -7,6 +7,7 @@ import NoticiaDetalle from './components/NoticiaDetalle';
 import QuienesSomos from './components/QuienesSomos';
 import AllNews from './components/AllNews';
 import Contacto from './components/Contacto'; 
+import ChatBot from './components/ChatBot'; // ✅ NUEVO IMPORT
 import './index.css';
 
 function App() {
@@ -22,10 +23,11 @@ function App() {
             <Route path="/search" element={<NoticiasList />} />
             <Route path="/quienes-somos" element={<QuienesSomos />} />
             <Route path="/all-news" element={<AllNews />} />
-            <Route path="/contacto" element={<Contacto />} /> {}
+            <Route path="/contacto" element={<Contacto />} />
           </Routes>
         </main>
         <Footer />
+        <ChatBot /> {/* ✅ CHATBOT SIEMPRE VISIBLE - ESQUINA INFERIOR DERECHA */}
       </div>
     </Router>
   );

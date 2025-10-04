@@ -1,0 +1,478 @@
+/* ===== CHATBOT STYLES - MISMOS COLORES QUE ANTIHUMO NEWS ===== */
+.chatbot-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 10000;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+}
+
+/* Botón flotante - Mismos colores que las noticias */
+.chatbot-toggle-btn {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #b3000c, #8a0009); /* Igual que .noticia-category-badge */
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); /* Igual que .noticia-card */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: float 3s ease-in-out infinite;
+}
+
+.chatbot-toggle-btn:hover {
+  transform: translateY(-6px) scale(1.02); /* Igual que .noticia-card:hover */
+  border-color: #b3000c;
+  box-shadow: 0 16px 40px rgba(179, 0, 12, 0.25); /* Igual que .noticia-card:hover */
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
+}
+
+.chat-icon {
+  font-size: 24px;
+  filter: brightness(0) invert(1);
+}
+
+.pulse-dot {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 12px;
+  height: 12px;
+  background: #4CAF50;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+  border: 2px solid white;
+}
+
+@keyframes pulse {
+  0% { transform: scale(0.8); opacity: 1; }
+  50% { transform: scale(1.2); opacity: 0.7; }
+  100% { transform: scale(0.8); opacity: 1; }
+}
+
+/* Ventana del chat - Mismos fondos que las noticias */
+.chatbot-window {
+  width: 380px;
+  height: 550px;
+  background: linear-gradient(145deg, #1a1a1a, #2a2a2a); /* Igual que .noticia-card */
+  border: 1px solid #3e4451; /* Igual que .noticia-card */
+  border-radius: 16px; /* Igual que .noticia-card */
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); /* Igual que .noticia-card */
+  display: flex;
+  flex-direction: column;
+  animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideIn {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Header - Mismo gradiente que los badges */
+.chatbot-header {
+  background: linear-gradient(135deg, #b3000c, #8a0009); /* Igual que .noticia-category-badge */
+  color: white;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #3e4451; /* Igual que .noticia-card */
+}
+
+.chatbot-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bot-avatar {
+  font-size: 24px;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 8px;
+  border-radius: 50%;
+}
+
+.title-content h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+}
+
+.context-badge {
+  font-size: 10px;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.chatbot-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.action-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  font-size: 14px;
+}
+
+.action-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.1);
+}
+
+.close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Mensajes - Mismos fondos que el contenido de noticias */
+.chatbot-messages {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  background: #121212; /* Igual que .noticias-list */
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  scrollbar-width: thin;
+  scrollbar-color: #b3000c #1a1a1a;
+}
+
+.chatbot-messages::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chatbot-messages::-webkit-scrollbar-track {
+  background: #1a1a1a;
+  border-radius: 3px;
+}
+
+.chatbot-messages::-webkit-scrollbar-thumb {
+  background: #b3000c;
+  border-radius: 3px;
+}
+
+.message {
+  max-width: 85%;
+  animation: messageSlide 0.3s ease;
+}
+
+@keyframes messageSlide {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.message.user {
+  align-self: flex-end;
+}
+
+.message.bot {
+  align-self: flex-start;
+}
+
+.message-content {
+  padding: 14px 18px;
+  border-radius: 18px;
+  line-height: 1.5;
+  font-size: 14px;
+  word-wrap: break-word;
+  position: relative;
+}
+
+/* Mensaje del usuario - Color principal */
+.message.user .message-content {
+  background: linear-gradient(135deg, #b3000c, #8a0009); /* Mismo gradiente principal */
+  color: white;
+  border-bottom-right-radius: 6px;
+  box-shadow: 0 2px 8px rgba(179, 0, 12, 0.3);
+}
+
+/* Mensaje del bot - Mismo fondo que las tarjetas */
+.message.bot .message-content {
+  background: linear-gradient(145deg, #1a1a1a, #2a2a2a); /* Igual que .noticia-card */
+  color: #f5f5f5; /* Igual que .noticias-list */
+  border: 1px solid #3e4451; /* Igual que .noticia-card */
+  border-bottom-left-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.message.error .message-content {
+  background: #2a1a1a;
+  color: #ff6b6b;
+  border: 1px solid #5a1a1a;
+  border-left: 4px solid #d00;
+}
+
+.message-time {
+  font-size: 11px;
+  color: #8a8a8a; /* Igual que .noticia-date */
+  margin-top: 6px;
+  text-align: right;
+  font-weight: 500;
+}
+
+.message.bot .message-time {
+  text-align: left;
+}
+
+/* Indicadores de contexto */
+.context-indicator {
+  font-size: 10px;
+  color: #b3000c; /* Color principal */
+  margin-top: 8px;
+  font-style: italic;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.context-indicator.general {
+  color: #b3000c; /* Mantener consistencia */
+}
+
+/* Loading indicator */
+.message-content.loading {
+  background: #2a2a2a !important;
+  border: 1px solid #3e4451 !important;
+}
+
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #b3b3b3; /* Igual que .noticia-summary */
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.typing-dots {
+  display: flex;
+  gap: 3px;
+}
+
+.typing-dots span {
+  width: 6px;
+  height: 6px;
+  background: #b3000c; /* Color principal */
+  border-radius: 50%;
+  animation: typing 1.4s infinite ease-in-out;
+}
+
+.typing-dots span:nth-child(1) { animation-delay: -0.32s; }
+.typing-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes typing {
+  0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+/* Input area - Mismos fondos */
+.chatbot-input-container {
+  padding: 16px 20px;
+  background: #1a1a1a; /* Fondo consistente */
+  border-top: 1px solid #3e4451; /* Mismo borde */
+}
+
+.input-wrapper {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.input-wrapper textarea {
+  flex: 1;
+  border: 1px solid #3e4451; /* Mismo borde */
+  border-radius: 20px;
+  padding: 14px 18px;
+  resize: none;
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s ease;
+  max-height: 120px;
+  background: #2a2a2a; /* Fondo de input */
+  color: #f5f5f5; /* Texto blanco como noticias */
+  line-height: 1.4;
+}
+
+.input-wrapper textarea::placeholder {
+  color: #8a8a8a; /* Igual que .noticia-date */
+}
+
+.input-wrapper textarea:focus {
+  border-color: #b3000c; /* Color principal al focus */
+  box-shadow: 0 0 0 2px rgba(179, 0, 12, 0.2);
+}
+
+.input-wrapper textarea:disabled {
+  background: #1a1a1a;
+  color: #666;
+  cursor: not-allowed;
+}
+
+.send-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #b3000c, #8a0009); /* Mismo gradiente */
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.send-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #8a0009, #660006);
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(179, 0, 12, 0.4);
+}
+
+.send-btn:disabled {
+  background: #333;
+  color: #666;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.send-btn.loading {
+  animation: pulse 2s infinite;
+}
+
+.input-hint {
+  font-size: 11px;
+  color: #8a8a8a; /* Igual que .noticia-date */
+  margin-top: 8px;
+  text-align: center;
+  font-weight: 500;
+}
+
+/* RESPONSIVE CORREGIDO - SIEMPRE ESQUINA INFERIOR DERECHA */
+@media (max-width: 768px) {
+  .chatbot-container {
+    bottom: 15px;
+    right: 15px;
+    left: auto;
+  }
+  
+  .chatbot-window {
+    width: 90vw;
+    max-width: 350px;
+    height: 65vh;
+    min-height: 500px;
+    border-radius: 12px;
+    right: 0;
+  }
+  
+  .chatbot-toggle-btn {
+    width: 56px;
+    height: 56px;
+    right: 15px;
+  }
+  
+  .chat-icon {
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 480px) {
+  .chatbot-container {
+    bottom: 10px;
+    right: 10px;
+    left: auto;
+  }
+  
+  .chatbot-window {
+    width: 95vw;
+    max-width: none;
+    height: 70vh;
+    min-height: 450px;
+  }
+  
+  .chatbot-toggle-btn {
+    width: 52px;
+    height: 52px;
+    right: 10px;
+  }
+  
+  .message-content {
+    padding: 12px 16px;
+    font-size: 13px;
+  }
+  
+  .input-wrapper textarea {
+    padding: 12px 16px;
+    font-size: 13px;
+  }
+}
+
+/* Para pantallas muy pequeñas (ej: iPhone SE) */
+@media (max-width: 320px) {
+  .chatbot-container {
+    bottom: 5px;
+    right: 5px;
+  }
+  
+  .chatbot-window {
+    width: 98vw;
+    height: 75vh;
+  }
+}
+
+/* Dark mode optimizations */
+@media (prefers-color-scheme: dark) {
+  .chatbot-window {
+    background: linear-gradient(145deg, #1a1a1a, #2a2a2a);
+  }
+  
+  .chatbot-messages {
+    background: #121212;
+  }
+}
+
+/* Efecto hover similar a las noticias */
+.chatbot-window::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(179, 0, 12, 0.05), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: 16px;
+}
+
+.chatbot-window:hover::before {
+  opacity: 1;
+}

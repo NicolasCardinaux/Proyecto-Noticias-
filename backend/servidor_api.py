@@ -9,6 +9,7 @@ import os
 
 import db
 from procesar_y_guardar_db import ejecutar_crawler
+from chatbot_service import chatbot_service  # ✅ NUEVO IMPORT
 
 app = Flask(__name__)
 CORS(app)
@@ -33,9 +34,7 @@ frase_cache = {
     "frase": None
 }
 
-
 EXTERNAL_QUOTES_API = "https://frasedeldia.azurewebsites.net/api/phrase"
-
 
 FRASES_RESPALDO = [
     {"texto": "La educación es el arma más poderosa para cambiar el mundo.", "autor": "Nelson Mandela"},
@@ -45,8 +44,80 @@ FRASES_RESPALDO = [
     {"texto": "El éxito es la suma de pequeños esfuerzos repetidos día tras día.", "autor": "Robert Collier"}
 ]
 
+# ==================== RUTAS CHATBOT ====================
+
+@app.route("/api/chat", methods=["POST"])
+def chat_con_noticia():
+    """Endpoint para chat contextual con noticias."""
+    try:
+        # Verificar método
+        if request.method != 'POST':
+            return jsonify({"error": "Método no permitido"}), 405
+            
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({"error": "Datos JSON requeridos"}), 400
+        
+        pregunta = data.get("pregunta")
+        noticia_id = data.get("noticia_id")
+        
+        print(f"🤖 Pregunta recibida: {pregunta[:50]}...")
+        print(f"📰 Noticia ID: {noticia_id}")
+        
+        if not pregunta or not pregunta.strip():
+            return jsonify({"error": "La pregunta es requerida"}), 400
+        
+        # Validar noticia_id si se proporciona
+        noticia_id_int = None
+        if noticia_id is not None:
+            try:
+                noticia_id_int = int(noticia_id)
+            except (ValueError, TypeError):
+                return jsonify({"error": "noticia_id debe ser un número válido"}), 400
+        
+        # Generar respuesta usando el servicio
+        resultado = chatbot_service.generar_respuesta(pregunta.strip(), noticia_id_int)
+        
+        print(f"✅ Respuesta generada - Tipo: {resultado['tipo_contexto']}")
+        
+        return jsonify(resultado)
+        
+    except Exception as e:
+        print(f"❌ Error en endpoint /api/chat: {e}")
+        return jsonify({
+            "respuesta": "❌ Error interno del servidor. Por favor, intenta más tarde.",
+            "tipo_contexto": "error", 
+            "noticia_id": None,
+            "noticia_info": "error",
+            "titulo_noticia": None,
+            "exito": False,
+            "modelo": "error"
+        }), 500
+
+@app.route("/api/chat/health", methods=["GET"])
+def chat_health_check():
+    """Health check específico para el chatbot."""
+    try:
+        # Probar conexión básica
+        test_response = chatbot_service.generar_respuesta("Hola, ¿estás funcionando?", None)
+        
+        return jsonify({
+            "status": "healthy",
+            "chatbot": "operational",
+            "model": chatbot_service.modelo_actual,
+            "timestamp": datetime.datetime.now().isoformat()
+        })
+    except Exception as e:
+        return jsonify({
+            "status": "unhealthy", 
+            "chatbot": "error",
+            "error": str(e),
+            "timestamp": datetime.datetime.now().isoformat()
+        }), 500
+
 # ---------------------------
-#   RUTAS PRINCIPALES
+#   RUTAS PRINCIPALES EXISTENTES
 # ---------------------------
 
 @app.route("/api/noticias", methods=["GET"])
@@ -149,7 +220,6 @@ def get_posts_by_source():
 def procesar_noticias_externo():
     """Endpoint para ejecutar el crawler de noticias desde externo."""
     
-
     secret_key = request.headers.get('X-Secret-Key')
     expected_key = os.environ.get('CRON_SECRET')
     
@@ -159,14 +229,11 @@ def procesar_noticias_externo():
     try:
         print("🔄 Iniciando proceso de crawler desde endpoint externo...")
         
-
         resultado = ejecutar_crawler()
         
-
         if "error" in resultado:
             return jsonify({"error": f"Error en el crawler: {resultado['error']}"}), 500
         
-
         return jsonify({
             "mensaje": "Crawler ejecutado con éxito", 
             "data": resultado,
@@ -185,11 +252,9 @@ def frase_del_dia():
     """Devuelve una frase del día (la misma para todos durante ese día)."""
     today = datetime.date.today().isoformat()
 
-
     if frase_cache["date"] == today and frase_cache["frase"]:
         print(f"✅ Devolviendo frase en caché para hoy: {today}")
         return jsonify(frase_cache["frase"])
-
 
     try:
         print("🔄 Intentando obtener frase de la API externa...")
@@ -200,11 +265,9 @@ def frase_del_dia():
         print(f"📝 Respuesta de la API: {data}")
 
         if isinstance(data, dict):
-
             texto = data.get("phrase") or data.get("texto") or data.get("frase")
             autor = data.get("author") or data.get("autor")
         elif isinstance(data, str):
-
             texto = data
             autor = "Anónimo"
         else:
@@ -217,9 +280,7 @@ def frase_del_dia():
                 "autor": autor or "Anónimo"
             }
         else:
-
             raise ValueError("Estructura de respuesta no reconocida")
-
 
         frase_cache["date"] = today
         frase_cache["frase"] = nueva_frase
@@ -231,11 +292,9 @@ def frase_del_dia():
         print(f"❌ Error obteniendo frase externa: {str(e)}")
         print("🔄 Usando frase de respaldo...")
         
-
         random.seed(today)  
         frase_respaldo = random.choice(FRASES_RESPALDO)
         
-
         frase_cache["date"] = today
         frase_cache["frase"] = frase_respaldo
         
@@ -255,13 +314,10 @@ def translate_apod():
     if not title or not explanation or not apod_date:
         return jsonify({"error": "Faltan datos requeridos"}), 400
 
-
     user_ip = get_user_ip()
     
-
     content_hash = hashlib.md5(f"{title}{explanation}".encode()).hexdigest()
     
-
     cached_translation = db.get_cached_apod_translation(apod_date, user_ip)
     if cached_translation:
         print(f"✅ Devolviendo traducción en caché para IP: {user_ip}")
@@ -271,17 +327,13 @@ def translate_apod():
             "fromCache": True
         })
     
-
     try:
-
         url = "https://api.mymemory.translated.net/get"
         
-
         title_response = requests.get(url, params={"q": title, "langpair": "en|es"})
         title_response.raise_for_status()
         translated_title = title_response.json()["responseData"]["translatedText"]
         
-
         explanation_chunks = []
         chunk_size = 500
         for i in range(0, len(explanation), chunk_size):
@@ -292,7 +344,6 @@ def translate_apod():
         
         translated_explanation = " ".join(explanation_chunks)
         
-
         db.save_apod_translation(
             apod_date, 
             content_hash, 
@@ -369,19 +420,35 @@ def search_noticias():
         return jsonify({"error": "Error interno del servidor"}), 500
 
 # ---------------------------
-#   HEALTH CHECK
+#   HEALTH CHECK MEJORADO
 # ---------------------------
 
 @app.route("/api/health", methods=["GET"])
 def health_check():
     """Endpoint para verificar el estado del servidor."""
     try:
-
+        # Verificar base de datos
         db.get_noticias(limit=1)
+        
+        # Verificar chatbot
+        chat_status = "operational"
+        try:
+            test_chat = chatbot_service.generar_respuesta("Test de salud", None)
+            chat_status = "operational" if test_chat["exito"] else "degraded"
+        except Exception as e:
+            chat_status = f"error: {str(e)}"
+        
         return jsonify({
             "status": "healthy",
             "timestamp": datetime.datetime.now().isoformat(),
-            "database": "connected"
+            "database": "connected",
+            "chatbot": chat_status,
+            "endpoints": {
+                "noticias": "active",
+                "chat": "active", 
+                "frase_del_dia": "active",
+                "apod": "active"
+            }
         })
     except Exception as e:
         return jsonify({
@@ -394,14 +461,21 @@ def health_check():
 def home():
     """Página de inicio de la API."""
     return jsonify({
-        "message": "Bienvenido a la API de Noticias",
+        "message": "Bienvenido a la API de AntiHumo News",
         "version": "1.0",
         "database": "Supabase",
+        "features": {
+            "noticias": "Agregador con IA",
+            "chatbot": "AntiBot Assistant con Groq",
+            "apod": "Astronomy Picture of the Day",
+            "frase_del_dia": "Frase inspiradora diaria"
+        },
         "endpoints": {
             "noticias": "/api/noticias",
             "popular_posts": "/api/popular-posts",
             "random_posts": "/api/random-posts",
             "related_posts": "/api/related-posts",
+            "chat": "/api/chat (POST)",
             "frase_del_dia": "/api/frase-del-dia",
             "stats": "/api/stats",
             "health": "/api/health",
@@ -411,8 +485,10 @@ def home():
 
 if __name__ == "__main__":
     print("🚀 Iniciando servidor Flask con Supabase en http://localhost:5000")
+    print("🤖 AntiBot Assistant integrado y listo")
     print("📊 Endpoints disponibles:")
     print("   - GET  /api/noticias")
+    print("   - POST /api/chat 🤖 NUEVO")
     print("   - GET  /api/popular-posts")
     print("   - GET  /api/random-posts") 
     print("   - GET  /api/related-posts")
@@ -421,4 +497,4 @@ if __name__ == "__main__":
     print("   - POST /api/noticias/<id>/click")
     print("   - GET  /api/health")
     print("   - GET  /procesar - Ejecuta el crawler de noticias")
-    app.run()
+    app.run(debug=True)
