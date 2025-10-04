@@ -1,12 +1,13 @@
+# procesar-y-guardar-db.py - VERSIÓN SIN NEWSPAPER3K
 import os
 import requests
-from newspaper import Article, ArticleException
 from dotenv import load_dotenv
 import google.generativeai as genai
 from time import sleep
 from tqdm import tqdm
 from datetime import datetime
 import hashlib
+import re
 
 # Importar nuestro módulo de base de datos Supabase
 import db
@@ -92,33 +93,51 @@ def obtener_noticias_por_categoria(categoria, max_noticias=3, urls_existentes=No
     print(f"✅ Encontradas {len(noticias_nuevas)} noticias nuevas para '{CATEGORIAS.get(categoria, categoria)}'")
     return noticias_nuevas
 
-# --- Scraping del texto ---
+# --- Scraping del texto SIMPLIFICADO (sin newspaper3k) ---
 def scrapear_texto(url, fallback_description=None):
-    """Descarga y parsea el texto completo del artículo usando newspaper3k."""
+    """Descarga y extrae texto básico de la página - versión simplificada."""
     try:
-        art = Article(url, language="es")
-        art.download()
-        art.parse()
-        return art.text if art.text else fallback_description
-    except (ArticleException, Exception):
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()
+        
+        # Extraer texto básico usando regex (evita dependencias complejas)
+        text = response.text
+        
+        # Limpiar HTML tags básicos
+        clean = re.compile('<.*?>')
+        text = re.sub(clean, '', text)
+        
+        # Limitar tamaño y limpiar espacios
+        text = ' '.join(text.split()[:500])  # Tomar solo 500 palabras máximo
+        
+        if len(text) > 100:
+            return text
+        else:
+            return fallback_description
+            
+    except Exception as e:
+        print(f"⚠️  Error en scraping simplificado para {url}: {e}")
         return fallback_description
 
-# --- Resumen con Gemini (con fallback manual) ---
+# --- Resumen con Gemini (con fallback mejorado) ---
 def resumir_texto(texto):
     """Genera un resumen del texto usando el modelo Gemini."""
-    if not texto or len(texto.split()) < 40:
+    if not texto or len(texto.split()) < 30:
         return "Contenido insuficiente para generar un resumen."
 
     # Limitar texto si es muy largo para evitar errores
-    if len(texto) > 15000:
-        texto = texto[:15000]
+    if len(texto) > 12000:
+        texto = texto[:12000]
 
     prompt = f"""
     Eres un editor de noticias experto, objetivo y riguroso. Tu única tarea es crear un resumen informativo y de alta calidad del texto proporcionado.
     
     Sigue estas reglas estrictas:
     1. **Formato**: El resumen debe ser un solo párrafo, sin encabezados ni viñetas.
-    2. **Longitud**: El resumen no puede superar las 400 palabras. Sé conciso y elimina toda la información secundaria.
+    2. **Longitud**: El resumen no puede superar las 300 palabras. Sé conciso y elimina toda la información secundaria.
     3. **Contenido**: Céntrate exclusivamente en los **hechos clave**: Qué sucedió, Quién o qué está involucrado, Cuándo y dónde ocurrieron los eventos, y Por qué sucedió (si se menciona la causa).
     4. **Tono**: El lenguaje debe ser completamente objetivo. Elimina cualquier opinión, especulación, juicio personal, lenguaje emocional o de 'clickbait'.
     5. **Idioma**: El resumen debe estar en español.
@@ -134,9 +153,10 @@ def resumir_texto(texto):
         return resp.text.strip()
     except Exception as e:
         print(f"⚠️  Error al generar resumen con Gemini: {repr(e)}")
-        # Fallback: tomar las primeras 5 oraciones del texto original si Gemini falla.
-        fallback = " ".join(texto.split(".")[:5]) + "..."
-        return fallback if fallback.strip() != "..." else "El servicio de resumen no está disponible en este momento."
+        # Fallback mejorado: tomar las primeras 3-4 oraciones del texto original
+        sentences = texto.split('.')
+        fallback = ". ".join(sentences[:4]) + "."
+        return fallback if len(fallback) > 20 else "Resumen no disponible en este momento."
 
 # --- Procesar y guardar NOTICIAS NUEVAS ---
 def procesar_y_guardar_noticias():
@@ -166,10 +186,15 @@ def procesar_y_guardar_noticias():
     
     noticias_guardadas = 0
     for art in tqdm(todas_las_noticias, desc="Guardando noticias nuevas"):
-        texto_completo = scrapear_texto(art.get("url"), art.get("description"))
+        # Usar la descripción como fallback principal (más confiable que scraping)
+        texto_completo = art.get("description") or ""
+        
+        # Solo hacer scraping si la descripción es muy corta
+        if not texto_completo or len(texto_completo.split()) < 30:
+            texto_completo = scrapear_texto(art.get("url"), art.get("description"))
         
         # Si no hay suficiente texto, saltar esta noticia
-        if not texto_completo or len(texto_completo.split()) < 40:
+        if not texto_completo or len(texto_completo.split()) < 25:
             continue
             
         resumen = resumir_texto(texto_completo)
@@ -199,7 +224,7 @@ def procesar_y_guardar_noticias():
                 noticias_guardadas += 1
             except Exception as e:
                 # Ignora si la URL o el título ya existen
-                print(f"⚠️  Duplicado omitido: {art.get('title')[:50]}... Error: {e}")
+                print(f"⚠️  Duplicado omitido: {art.get('title')[:50]}...")
                 continue
     
     # Limpiar noticias antiguas (mantener sólo las de menos de 6 meses)

@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from typing import List, Dict, Any, Optional
 from datetime import datetime, timedelta
 import hashlib
+import random
 
 load_dotenv()
 
@@ -42,10 +43,31 @@ def get_popular_posts(limit: int = 5, exclude_id: Optional[int] = None) -> List[
     return _handle_response(response)
 
 def get_random_posts(limit: int = 4) -> List[Dict[str, Any]]:
-    """Obtiene noticias aleatorias."""
-    # En Postgres podemos usar RANDOM() en SQL
-    response = supabase.table("noticias").select("*").order("random()").limit(limit).execute()
-    return _handle_response(response)
+    """Obtiene noticias aleatorias - VERSIÓN CORREGIDA."""
+    try:
+        # Estrategia eficiente: obtener un sample y mezclar en Python
+        sample_size = min(limit * 3, 50)  # Obtener 3x el límite, máximo 50
+        
+        response = supabase.table("noticias").select("*").order("fecha", desc=True).limit(sample_size).execute()
+        noticias = _handle_response(response)
+        
+        if not noticias:
+            return []
+            
+        # Mezclar aleatoriamente
+        random.shuffle(noticias)
+        
+        return noticias[:limit]
+        
+    except Exception as e:
+        print(f"❌ Error obteniendo posts aleatorios: {e}")
+        # Fallback seguro
+        try:
+            all_noticias = get_noticias(limit=20)
+            random.shuffle(all_noticias)
+            return all_noticias[:limit]
+        except:
+            return []
 
 def get_latest_by_category() -> List[Dict[str, Any]]:
     """Obtiene la última noticia de cada categoría."""
@@ -84,8 +106,6 @@ def get_sources() -> List[str]:
 
 def get_stats() -> Dict[str, Any]:
     """Obtiene estadísticas generales."""
-    from datetime import datetime
-    
     # Total de noticias
     total_response = supabase.table("noticias").select("id", count="exact").execute()
     total_noticias = len(total_response.data)
@@ -117,9 +137,17 @@ def search_noticias(query: str, tipo: str = "titulo") -> List[Dict[str, Any]]:
 
 # --- Operaciones de escritura ---
 def insert_noticia(noticia: Dict[str, Any]) -> Dict[str, Any]:
-    """Inserta una nueva noticia."""
-    response = supabase.table("noticias").insert(noticia).execute()
-    return _handle_response(response)
+    """Inserta una nueva noticia con manejo elegante de duplicados."""
+    try:
+        response = supabase.table("noticias").insert(noticia).execute()
+        return _handle_response(response)
+    except Exception as e:
+        # Manejar específicamente el error de duplicado
+        error_msg = str(e)
+        if "duplicate key" in error_msg or "23505" in error_msg:
+            raise Exception("Noticia duplicada") from e
+        else:
+            raise e
 
 def noticia_existe(titulo: str, url: str) -> bool:
     """Verifica si una noticia ya existe por título o URL."""
