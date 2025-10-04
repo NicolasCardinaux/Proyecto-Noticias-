@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import '../styles/Footer.css';
+import '../styles/footer.css';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { 
   faMapMarkerAlt, 
