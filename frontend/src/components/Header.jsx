@@ -43,6 +43,7 @@ function Header() {
   const handleSectionNavigate = (sectionId) => {
     setActiveSection(sectionId);
     
+
     if (window.location.pathname === '/') {
       const element = document.getElementById(sectionId);
       if (element) {
@@ -74,22 +75,6 @@ function Header() {
     if (sectionId) {
       handleSectionNavigate(sectionId);
     }
-  };
-
-  const handleContacto = (e) => {
-    e.preventDefault();
-    navigate('/contacto');
-    setTimeout(() => {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, 100);
-  };
-
-  const handleQuienesSomos = (e) => {
-    e.preventDefault();
-    navigate('/quienes-somos');
-    setTimeout(() => {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, 100);
   };
 
   return (
@@ -134,19 +119,12 @@ function Header() {
           </select>
 
           {}
-          <button 
-            onClick={handleContacto}
-            className="text-lg font-extrabold hover:text-gray-300 transition-colors"
-          >
+          <Link to="/contacto" className="text-lg font-extrabold">
             Contacto
-          </button>
-          
-          <button 
-            onClick={handleQuienesSomos}
-            className="text-lg font-extrabold hover:text-gray-300 transition-colors"
-          >
+          </Link>
+          <Link to="/quienes-somos" className="text-lg font-extrabold">
             Quiénes Somos
-          </button>
+          </Link>
         </div>
 
         {}
