@@ -1,0 +1,315 @@
+/* NewPosts.css - Versión Mejorada con Imagen Completa */
+.new-posts-container {
+  max-width: 1400px;
+  margin: 4rem auto 2rem;
+  padding: 1rem;
+}
+
+.new-posts-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.new-posts-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: white;
+  border-left: 4px solid #b3000c;
+  padding-left: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.show-all-button {
+  background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+  border: 2px solid rgba(179, 0, 12, 0.5);
+  color: #ffffff;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.show-all-button:hover {
+  background: linear-gradient(135deg, #b3000c, #8a0009);
+  border-color: #b3000c;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(179, 0, 12, 0.4);
+}
+
+.show-all-button:active {
+  transform: translateY(0);
+}
+
+.new-posts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.post-item-card {
+  display: flex;
+  align-items: stretch; /* Cambiado a stretch para que la imagen ocupe toda la altura */
+  background: linear-gradient(145deg, #1a1a1a, #2a2a2a);
+  border: 1px solid rgba(62, 68, 81, 0.3);
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  position: relative;
+  transform: translateZ(0);
+  min-height: 140px; /* Altura mínima para consistencia */
+}
+
+.post-item-card:hover {
+  transform: translateY(-8px);
+  border-color: #b3000c;
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.6),
+    0 0 0 2px rgba(179, 0, 12, 0.3),
+    0 0 30px rgba(179, 0, 12, 0.2);
+}
+
+/* Contenedor de imagen - OCUPA TODA LA ALTURA */
+.post-item-image-container {
+  position: relative;
+  width: 160px; /* Un poco más ancho para mejor proporción */
+  flex-shrink: 0;
+  overflow: hidden;
+  /* Bordes redondeados solo en el lado izquierdo */
+  border-top-left-radius: 16px;
+  border-bottom-left-radius: 16px;
+}
+
+.post-item-image {
+  width: 100%;
+  height: 100%; /* OCUPA EL 100% DE LA ALTURA */
+  object-fit: cover; /* Se corta para llenar el espacio */
+  transition: transform 0.6s ease;
+  /* Asegurar que herede los bordes redondeados */
+  border-top-left-radius: inherit;
+  border-bottom-left-radius: inherit;
+}
+
+.post-item-card:hover .post-item-image {
+  transform: scale(1.1);
+}
+
+/* Overlay para la imagen - ahora ocupa toda la altura */
+.post-image-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.4) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 2;
+  border-top-left-radius: inherit;
+  border-bottom-left-radius: inherit;
+}
+
+.post-item-card:hover .post-image-overlay {
+  opacity: 1;
+}
+
+.post-item-content {
+  padding: 1.25rem;
+  flex-grow: 1;
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Distribuye el contenido verticalmente */
+}
+
+.post-item-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.4;
+  margin-bottom: 0.75rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.4em;
+}
+
+.post-item-summary {
+  color: #b3b3b3;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.5em;
+  flex-grow: 1; /* Ocupa el espacio disponible */
+}
+
+.post-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.75rem;
+  margin-top: auto; /* Empuja el meta hacia abajo */
+}
+
+.post-date {
+  color: #8a8a8a;
+  font-weight: 500;
+}
+
+.post-category {
+  color: #b3000c;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: rgba(179, 0, 12, 0.1);
+  padding: 0.3rem 0.6rem;
+  border-radius: 12px;
+  border: 1px solid rgba(179, 0, 12, 0.3);
+}
+
+/* Efectos premium adicionales */
+.post-item-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(179, 0, 12, 0.05), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: 16px;
+}
+
+.post-item-card:hover::before {
+  opacity: 1;
+}
+
+/* Efecto de barrido en hover */
+.post-item-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.03), 
+    transparent);
+  transition: left 0.6s ease;
+  pointer-events: none;
+  border-radius: 16px;
+}
+
+.post-item-card:hover::after {
+  left: 100%;
+}
+
+/* Animaciones */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.post-item-card {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.post-item-card:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.post-item-card:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+.post-item-card:nth-child(4) {
+  animation-delay: 0.3s;
+}
+
+.post-item-card:nth-child(5) {
+  animation-delay: 0.4s;
+}
+
+.post-item-card:nth-child(6) {
+  animation-delay: 0.5s;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .new-posts-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .new-posts-title {
+    font-size: 1.7rem;
+  }
+  
+  .post-item-card {
+    flex-direction: column;
+    align-items: stretch;
+    min-height: auto;
+  }
+  
+  .post-item-image-container {
+    width: 100%;
+    height: 160px; /* Altura fija en móvil */
+    border-radius: 0;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    border-bottom-left-radius: 0;
+  }
+  
+  .post-item-image {
+    border-radius: inherit;
+  }
+  
+  .post-image-overlay {
+    border-radius: inherit;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.4) 0%, transparent 70%);
+  }
+  
+  .post-item-content {
+    padding: 1rem;
+  }
+  
+  .post-item-title {
+    font-size: 1rem;
+  }
+}
+
+/* Efecto de carga */
+.new-posts-loading {
+  text-align: center;
+  padding: 2rem;
+  color: #b3000c;
+  font-size: 1.1rem;
+  font-weight: 600;
+}

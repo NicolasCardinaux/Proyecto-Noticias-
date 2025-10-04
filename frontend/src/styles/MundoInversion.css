@@ -1,0 +1,346 @@
+/* src/styles/MundoInversion.css */
+
+/*
+* ==============================
+* ✅ Global Widget Container
+* ==============================
+*/
+.mi-widget-container {
+    position: relative;
+    width: 100vw;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+    overflow: hidden;
+    padding: 1rem 0; /* --- CAMBIO: Menor padding --- */
+  }
+  
+  /*
+  * ==============================
+  * ✅ Background and Effects
+  * ==============================
+  */
+  .mi-background {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    bottom: 20px;
+    background-size: cover;
+    background-position: center;
+    filter: blur(8px) brightness(0.7);
+    z-index: 1;
+  }
+  
+  /*
+  * ==============================
+  * ✅ Header and Navigation
+  * ==============================
+  */
+  .mi-header {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 1rem; /* --- CAMBIO: Menor margin --- */
+  }
+  
+  .mi-title {
+    position: relative;
+    z-index: 10;
+    font-size: 2rem; /* --- CAMBIO: Título un poco más pequeño --- */
+    font-weight: 700;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    text-shadow:
+      -1px -1px 0 #5c0006,
+      1px -1px 0 #5c0006,
+      -1px 1px 0 #5c0006,
+      1px 1px 0 #5c0006,
+      4px 4px 8px rgba(0, 0, 0, 0.7);
+  }
+  
+  .mi-title-underline {
+    margin-top: 0.5rem;
+    height: 3px;
+    width: 7rem;
+    background: linear-gradient(to right, transparent, #b3000c, transparent);
+  }
+  
+  .mi-nav-buttons {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 0.5rem; /* --- CAMBIO: Menor espacio entre botones --- */
+  }
+  
+  .mi-nav-button {
+    background-color: rgba(46, 0, 3, 0.7);
+    color: white;
+    border: 1px solid #8a0009;
+    border-radius: 8px;
+    width: 2.2rem; /* --- CAMBIO: Botones más pequeños --- */
+    height: 2.2rem; /* --- CAMBIO: Botones más pequeños --- */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2rem; /* --- CAMBIO: Iconos más pequeños --- */
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(5px);
+  }
+  
+  .mi-nav-button:hover {
+    background-color: #b3000c;
+    border-color: #ff3341;
+    transform: scale(1.1);
+  }
+  
+  /*
+  * ==============================
+  * ✅ Carousel and Slides
+  * ==============================
+  */
+  .mi-section-title {
+    text-align: center;
+    font-size: 1.35rem; /* --- CAMBIO: Título de sección más pequeño --- */
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+    margin-bottom: 1rem; /* --- CAMBIO: Menor margin --- */
+    transition: opacity 0.5s ease;
+  }
+  
+  .mi-carousel-container {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .mi-carousel-container::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .mi-carousel-container {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+  
+  .mi-slide {
+    flex: 0 0 100%;
+    scroll-snap-align: start;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 0.25rem 0.5rem 0.5rem 0.5rem; /* --- CAMBIO: Menor padding --- */
+  }
+  
+  /*
+  * ==============================
+  * ✅ Card and List
+  * ==============================
+  */
+  .mi-card {
+    background-color: rgba(40, 44, 52, 0.85);
+    border: 1px solid #5c0006;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.7);
+    color: #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    backdrop-filter: blur(12px);
+    width: 100%;
+    max-width: 750px; /* --- CAMBIO: Contenedor más estrecho --- */
+    min-height: 350px; /* --- CAMBIO: Altura más pequeña --- */
+  }
+  
+  .mi-card-title {
+    font-size: 1.25rem; /* --- CAMBIO: Título de la tarjeta más pequeño --- */
+    font-weight: 700;
+    background-color: rgba(0, 0, 0, 0.35);
+    padding: 0.75rem 1rem; /* --- CAMBIO: Padding más pequeño --- */
+    border-bottom: 2px solid #b3000c;
+    text-align: center;
+    flex-shrink: 0;
+    color: #fff;
+  }
+  
+  .mi-card-list {
+    padding: 0.25rem; /* --- CAMBIO: Menor padding --- */
+    overflow-y: auto;
+    max-height: 280px;
+    flex-grow: 1;
+  }
+  
+  .mi-card-list::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .mi-card-list::-webkit-scrollbar-track {
+    background: #282c34;
+  }
+  
+  .mi-card-list::-webkit-scrollbar-thumb {
+    background-color: #8a0009;
+    border-radius: 10px;
+  }
+  
+  .mi-card-list::-webkit-scrollbar-thumb:hover {
+    background-color: #b3000c;
+  }
+  
+  .mi-list-item {
+    padding: 0.6rem 0.75rem; /* --- CAMBIO: Padding más pequeño para compactar elementos --- */
+    border-bottom: 1px solid #4a505c;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem; /* --- CAMBIO: Menor espacio entre elementos --- */
+    flex-wrap: nowrap;
+    transition: background-color 0.2s ease;
+  }
+  
+  .mi-list-item:hover {
+    background-color: rgba(179, 0, 12, 0.15);
+  }
+  
+  .mi-list-item:last-child {
+    border-bottom: none;
+  }
+  
+  /*
+  * ==============================
+  * ✅ List Item Content
+  * ==============================
+  */
+  .mi-item-name {
+    font-size: 0.95rem; /* --- CAMBIO: Fuente más pequeña --- */
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem; /* --- CAMBIO: Menor espacio --- */
+    flex-grow: 1;
+  }
+  
+  .mi-item-symbol {
+    font-weight: 700;
+    width: 3.5rem;
+    text-align: center;
+    flex-shrink: 0;
+    color: #b3000c;
+    font-size: 0.8rem; /* --- CAMBIO: Fuente más pequeña --- */
+  }
+  
+  .mi-item-symbol.currency {
+    font-size: 1.1rem; /* --- CAMBIO: Fuente de símbolo más pequeña --- */
+  }
+  
+  .mi-crypto-icon {
+    width: 22px; /* --- CAMBIO: Icono más pequeño --- */
+    height: 22px; /* --- CAMBIO: Icono más pequeño --- */
+  }
+  
+  .mi-item-value {
+    font-size: 0.95rem; /* --- CAMBIO: Fuente más pequeña --- */
+    font-weight: 700;
+    font-family: 'Roboto Mono', 'Courier New', monospace;
+    color: #fff;
+  }
+  
+  .mi-item-details {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.15rem; /* --- CAMBIO: Menor espacio entre valor y cambio --- */
+    text-align: right;
+  }
+  
+  .mi-local-conversion {
+    font-size: 0.75rem; /* --- CAMBIO: Fuente más pequeña para la conversión --- */
+    color: #ccc;
+    opacity: 0.8;
+    font-style: italic;
+    font-family: 'Roboto Mono', 'Courier New', monospace;
+  }
+  
+  /*
+  * ==============================
+  * ✅ Status and Messages
+  * ==============================
+  */
+  .price-up {
+    color: #4ade80;
+    font-weight: 600;
+    font-size: 0.85rem; /* --- CAMBIO: Fuente más pequeña --- */
+  }
+  
+  .price-down {
+    color: #f87171;
+    font-weight: 600;
+    font-size: 0.85rem; /* --- CAMBIO: Fuente más pequeña --- */
+  }
+  
+  .mi-message {
+    text-align: center;
+    color: white;
+    font-size: 1rem; /* --- CAMBIO: Fuente más pequeña --- */
+    padding: 1.5rem; /* --- CAMBIO: Menor padding --- */
+  }
+  
+  .mi-message.error {
+    color: #b3000c;
+    font-weight: bold;
+  }
+  
+  /*
+  * ==============================
+  * ✅ Responsive Design
+  * ==============================
+  */
+  @media (max-width: 768px) {
+    .mi-title {
+      font-size: 1.6rem;
+    }
+  
+    .mi-section-title {
+      font-size: 1.2rem;
+    }
+  
+    .mi-nav-buttons {
+      position: static;
+      transform: none;
+      margin-top: 0.75rem;
+      justify-content: center;
+    }
+  
+    .mi-card {
+      min-height: 320px;
+      max-width: 95%;
+    }
+  
+    .mi-card-list {
+      max-height: 220px;
+    }
+  
+    .mi-item-name,
+    .mi-item-value {
+      font-size: 0.9rem;
+    }
+  
+    .mi-list-item {
+      padding: 0.6rem;
+    }
+  
+    .mi-crypto-icon {
+      width: 18px;
+      height: 18px;
+    }
+  }

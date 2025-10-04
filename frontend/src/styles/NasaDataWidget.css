@@ -1,0 +1,678 @@
+/* --- Contenedor Global --- */
+.nasa-widget-container {
+    position: relative;
+    width: 100vw;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+    overflow: hidden;
+    padding: 1rem 0;
+}
+
+/* --- Fondo y Efectos --- */
+.nasa-background {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    bottom: 20px;
+    background-size: cover;
+    background-position: center;
+    filter: blur(8px) brightness(0.6);
+    z-index: 1;
+}
+
+/* --- Cabecera y Navegación --- */
+.nasa-header {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-top: 1rem;
+}
+
+.nasa-title {
+    position: relative;
+    z-index: 10;
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    text-shadow:
+        -1px -1px 0 #2a3a7a,
+        1px -1px 0 #2a3a7a,
+        -1px 1px 0 #2a3a7a,
+        1px 1px 0 #2a3a7a,
+        4px 4px 8px rgba(0, 0, 0, 0.7);
+    animation: glow 2s infinite alternate;
+}
+@keyframes glow {
+    from { text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #b3000c; }
+    to { text-shadow: 0 0 10px #b3000c, 0 0 20px #b3000c, 0 0 30px #b3000c; }
+}
+
+.nasa-title-underline {
+    margin-top: 0.5rem;
+    height: 3px;
+    width: 8rem;
+    background: linear-gradient(to right, transparent, #b3000c, #ff3341, #b3000c, transparent);
+    animation: pulse 2s infinite ease-in-out;
+}
+@keyframes pulse {
+    0%, 100% { transform: scaleX(1); }
+    50% { transform: scaleX(1.2); }
+}
+
+.nasa-nav-buttons {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 0.5rem;
+}
+
+.nasa-nav-button {
+    background-color: rgba(10, 25, 47, 0.7);
+    color: white;
+    border: 1px solid #306bac;
+    border-radius: 8px;
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(5px);
+}
+.nasa-nav-button:hover {
+    background-color: #ff3341;
+    border-color: #fff;
+    transform: scale(1.1) translateY(-2px);
+    box-shadow: 0 0 15px #ff3341;
+}
+
+/* --- Carrusel y Slides --- */
+.nasa-section-title {
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+    margin-bottom: 1.5rem;
+    transition: opacity 0.5s ease;
+}
+
+.nasa-carousel-container {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+}
+.nasa-carousel-container::-webkit-scrollbar { display: none; }
+.nasa-carousel-container { -ms-overflow-style: none; scrollbar-width: none; }
+
+.nasa-slide {
+    flex: 0 0 100%;
+    scroll-snap-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 0 1rem;
+}
+
+/* --- Tarjetas y Listas --- */
+.nasa-card {
+    background-color: rgba(10, 25, 47, 0.85);
+    border: 1px solid #1d3557;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.7);
+    color: #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    backdrop-filter: blur(12px);
+    width: 100%;
+    max-width: 900px;
+    min-height: 450px;
+    transition: transform 0.3s ease;
+}
+.nasa-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.9);
+}
+
+.nasa-card-title {
+    font-size: 1.35rem;
+    font-weight: 700;
+    background-color: rgba(0, 0, 0, 0.35);
+    padding: 0.75rem 1rem;
+    border-bottom: 2px solid #b3000c;
+    text-align: center;
+    flex-shrink: 0;
+    color: #fff;
+}
+
+.nasa-card-list {
+    padding: 0.5rem;
+    overflow-y: auto;
+    max-height: 380px;
+    flex-grow: 1;
+}
+.nasa-card-list::-webkit-scrollbar { width: 8px; }
+.nasa-card-list::-webkit-scrollbar-track { background: #0a192f; }
+.nasa-card-list::-webkit-scrollbar-thumb { background-color: #b3000c; border-radius: 10px; }
+
+.nasa-list-item {
+    padding: 0.8rem 1rem;
+    border-bottom: 1px solid #1d3557;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: nowrap;
+    transition: background-color 0.2s ease;
+}
+.nasa-list-item:hover { background-color: rgba(179, 0, 12, 0.15); }
+.nasa-list-item:last-child { border-bottom: none; }
+
+.nasa-item-name {
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    flex-grow: 1;
+}
+
+.nasa-item-details {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.15rem;
+    text-align: right;
+    font-family: 'Roboto Mono', 'Courier New', monospace;
+    font-size: 0.9rem;
+}
+
+.item-details-box {
+    background-color: rgba(0, 0, 0, 0.25);
+    border: 1px solid #4a505c;
+    border-radius: 6px;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #ccc;
+    text-align: center;
+}
+
+.nasa-message {
+    text-align: center;
+    color: white;
+    font-size: 1.1rem;
+    padding: 2rem;
+}
+.nasa-message.error {
+    color: #b3000c;
+    font-weight: bold;
+}
+
+/* --- Estilos Específicos para APOD --- */
+.apod-card {
+    padding: 0;
+    width: 90%;
+    max-width: 900px;
+    min-height: 480px;
+    max-height: 500px;
+}
+.apod-image {
+    width: 100%;
+    height: 280px;
+    object-fit: cover;
+    flex-shrink: 0;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+}
+.apod-image:hover {
+    transform: scale(1.02);
+    box-shadow: 0 5px 20px rgba(255, 51, 65, 0.4);
+}
+.apod-content {
+    padding: 1rem;
+    overflow-y: auto;
+}
+.apod-content::-webkit-scrollbar { width: 8px; }
+.apod-content::-webkit-scrollbar-track { background: #0a192f; }
+.apod-content::-webkit-scrollbar-thumb { background-color: #b3000c; border-radius: 10px; }
+
+.apod-title {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #fff;
+    margin-bottom: 0.75rem;
+}
+.apod-explanation {
+    font-size: 1rem;
+    color: #ccc;
+    line-height: 1.6;
+}
+
+/* --- Estilos Específicos para Marte --- */
+.mars-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 0.75rem;
+    padding: 1rem;
+    overflow-y: auto;
+    max-height: 380px;
+}
+.mars-grid::-webkit-scrollbar { width: 8px; }
+.mars-grid::-webkit-scrollbar-track { background: #0a192f; }
+.mars-grid::-webkit-scrollbar-thumb { background-color: #b3000c; border-radius: 10px; }
+
+.mars-photo {
+    width: 100%;
+    height: 130px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+.mars-photo:hover {
+    border-color: #ff3341;
+    transform: scale(1.05);
+    box-shadow: 0 0 10px rgba(255, 51, 65, 0.8);
+}
+
+/* --- Modal para la Imagen Astronómica del Día --- */
+.apod-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.95);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 2rem;
+}
+
+.apod-modal-content {
+    position: relative;
+    max-width: 90%;
+    max-height: 90%;
+    display: flex;
+    flex-direction: column;
+    background-color: #0a192f;
+    border-radius: 12px;
+    box-shadow: 0 0 50px rgba(255, 51, 65, 0.6);
+    overflow: hidden;
+    border: 2px solid #b3000c;
+}
+
+.apod-modal-close-button {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background-color: #ff3341;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.2s ease, background 0.3s ease;
+    box-shadow: 0 0 15px rgba(255, 51, 65, 0.8);
+    z-index: 2;
+}
+
+.apod-modal-close-button:hover {
+    transform: scale(1.1);
+    background-color: #ff001e;
+}
+
+.apod-modal-image {
+    width: 100%;
+    max-height: 70vh;
+    object-fit: contain;
+    background: #000;
+}
+
+.apod-modal-details {
+    padding: 1.5rem;
+    color: #fff;
+    max-height: 30vh;
+    overflow-y: auto;
+}
+
+.apod-modal-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 1rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.apod-modal-explanation {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #ccc;
+    margin-bottom: 1rem;
+}
+
+.apod-modal-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    color: #999;
+    border-top: 1px solid #333;
+    padding-top: 1rem;
+}
+
+/* Scrollbar para el modal APOD */
+.apod-modal-details::-webkit-scrollbar {
+    width: 8px;
+}
+
+.apod-modal-details::-webkit-scrollbar-track {
+    background: #0a192f;
+}
+
+.apod-modal-details::-webkit-scrollbar-thumb {
+    background-color: #b3000c;
+    border-radius: 10px;
+}
+
+/* --- Estilos Modal/Lightbox para las fotos de Marte --- */
+.mars-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.mars-modal-content {
+    position: relative;
+    max-width: 85%;
+    max-height: 80%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #000;
+    border-radius: 10px;
+    padding: 1rem;
+    box-shadow: 0 0 50px rgba(255, 51, 65, 0.5);
+    overflow: hidden;
+}
+
+.mars-modal-close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #ff3341;
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.2s ease, background 0.3s ease;
+    box-shadow: 0 0 10px rgba(255, 51, 65, 0.8);
+    z-index: 2;
+}
+.mars-modal-close-button:hover {
+    transform: scale(1.1);
+    background-color: #ff001e;
+}
+
+/* Icono en X */
+.close-icon-line {
+    position: absolute;
+    width: 20px;
+    height: 2.5px;
+    background-color: white;
+    border-radius: 2px;
+}
+.line-1 {
+    transform: rotate(45deg);
+}
+.line-2 {
+    transform: rotate(-45deg);
+}
+
+.mars-modal-image {
+    max-width: 90%;
+    max-height: 60vh;
+    border-radius: 8px;
+    object-fit: contain;
+}
+
+.mars-modal-details {
+    margin-top: 1rem;
+    color: #fff;
+    text-align: center;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    padding: 0.5rem;
+}
+
+.mars-nav-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.5);
+    border: none;
+    color: white;
+    font-size: 2rem;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 50%;
+    z-index: 1001;
+}
+
+.mars-nav-button.left {
+    left: 10px;
+}
+
+.mars-nav-button.right {
+    right: 10px;
+}
+
+.mars-nav-button:hover {
+    background: rgba(0,0,0,0.8);
+}
+
+/* --- Estilos Específicos para Asteroides --- */
+.hazard-tag {
+    background-color: #b3000c;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: bold;
+    padding: 0.2rem 0.5rem;
+    border-radius: 12px;
+    text-transform: uppercase;
+    animation: blink 1.5s infinite;
+}
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+.passing-date {
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+
+/* --- Responsividad --- */
+@media (max-width: 768px) {
+    .nasa-title { font-size: 1.6rem; }
+    .nasa-section-title { font-size: 1.2rem; }
+    .nasa-nav-buttons { position: static; transform: none; margin-top: 0.75rem; justify-content: center; }
+    .nasa-card { min-height: 400px; max-width: 95%; }
+    .apod-card { max-height: 420px; width: 95%; }
+    .apod-image { height: 220px; }
+    .mars-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+    .mars-photo { height: 100px; }
+    
+    /* Responsividad para el modal APOD */
+    .apod-modal-overlay {
+        padding: 1rem;
+    }
+    
+    .apod-modal-content {
+        max-width: 95%;
+        max-height: 95%;
+    }
+    
+    .apod-modal-image {
+        max-height: 50vh;
+    }
+    
+    .apod-modal-details {
+        max-height: 40vh;
+        padding: 1rem;
+    }
+    
+    .apod-modal-title {
+        font-size: 1.2rem;
+    }
+    
+    .apod-modal-explanation {
+        font-size: 0.9rem;
+    }
+    
+    .apod-modal-meta {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: flex-start;
+    }
+    
+    /* Responsividad para el modal Marte */
+    .mars-modal-content {
+        max-width: 95%;
+        max-height: 85%;
+        padding: 0.5rem;
+    }
+    
+    .mars-modal-image {
+        max-width: 95%;
+        max-height: 50vh;
+    }
+    
+    .mars-modal-details {
+        font-size: 0.8rem;
+        padding: 0.25rem;
+    }
+    
+    .mars-nav-button {
+        font-size: 1.5rem;
+        padding: 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    .nasa-title { font-size: 1.4rem; }
+    .nasa-section-title { font-size: 1.1rem; }
+    .nasa-card { min-height: 350px; }
+    .apod-card { max-height: 380px; }
+    .apod-image { height: 180px; }
+    .mars-grid { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 0.5rem; }
+    .mars-photo { height: 80px; }
+    
+    /* Responsividad para el modal APOD */
+    .apod-modal-content {
+        max-width: 98%;
+        max-height: 98%;
+    }
+    
+    .apod-modal-image {
+        max-height: 45vh;
+    }
+    
+    .apod-modal-details {
+        max-height: 45vh;
+        padding: 0.8rem;
+    }
+    
+    .apod-modal-title {
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .apod-modal-explanation {
+        font-size: 0.85rem;
+        line-height: 1.5;
+    }
+    
+    .apod-modal-meta {
+        font-size: 0.8rem;
+    }
+    
+    /* Responsividad para el modal Marte */
+    .mars-modal-content {
+        max-width: 98%;
+        max-height: 90%;
+    }
+    
+    .mars-modal-image {
+        max-height: 45vh;
+    }
+    
+    .mars-modal-details {
+        font-size: 0.75rem;
+    }
+    
+    .mars-nav-button {
+        font-size: 1.2rem;
+        padding: 6px;
+    }
+    
+    .mars-modal-close-button {
+        width: 30px;
+        height: 30px;
+        top: 5px;
+        right: 5px;
+    }
+    
+    .close-icon-line {
+        width: 16px;
+        height: 2px;
+    }
+}
+
+/* Ajustes adicionales para tablets */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .nasa-title { font-size: 2rem; }
+    .nasa-card { max-width: 95%; }
+    .apod-card { width: 95%; }
+    
+    .apod-modal-content {
+        max-width: 85%;
+        max-height: 85%;
+    }
+    
+    .mars-modal-content {
+        max-width: 80%;
+        max-height: 75%;
+    }
+}

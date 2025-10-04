@@ -1,0 +1,749 @@
+/* Estilos para NoticiasList - Versión Corregida Sin Superposición */
+.noticias-list {
+  background-color: #121212;
+  color: #f5f5f5;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.noticias-list h2 {
+  color: #f5f5f5;
+}
+
+.noticias-list p {
+  color: #d1d5db;
+}
+
+/* Contenedor principal de noticias */
+.noticias-grid-container {
+  max-width: 1400px; /* Ancho reducido */
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+/* Grid de noticias - Espaciado mejorado */
+.noticias-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); /* Ancho reducido */
+  gap: 2rem; /* Espacio consistente */
+  margin-top: 2rem;
+}
+
+/* Tarjeta de noticia - Proporciones mejoradas */
+.noticia-card {
+  background: linear-gradient(145deg, #1a1a1a, #2a2a2a);
+  border: 1px solid #3e4451;
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  position: relative;
+  height: 450px; /* Altura reducida para ser más compacta */
+  display: flex;
+  flex-direction: column;
+}
+
+.noticia-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  border-color: #b3000c;
+  box-shadow: 0 16px 40px rgba(179, 0, 12, 0.25);
+}
+
+/* Imagen de la noticia */
+.noticia-image-container {
+  position: relative;
+  overflow: hidden;
+  height: 200px;
+  flex-shrink: 0;
+}
+
+.noticia-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.noticia-card:hover .noticia-image {
+  transform: scale(1.05);
+}
+
+/* Badge de categoría */
+.noticia-category-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: linear-gradient(135deg, #b3000c, #8a0009);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  z-index: 2;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Contenido de la tarjeta - Espacio mejorado */
+.noticia-content {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  height: calc(100% - 200px);
+  min-height: 250px; /* Ajustado a la nueva altura de la tarjeta */
+}
+
+/* Título - MÁXIMO 2 LÍNEAS */
+.noticia-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: white;
+  line-height: 1.4;
+  margin-bottom: 1rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.8em;
+  max-height: 2.8em;
+  flex-shrink: 0;
+}
+
+/* Resumen - 3 líneas máximo */
+.noticia-summary {
+  color: #b3b3b3;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  flex-grow: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: 0.75rem; /* Menos espacio antes de la línea */
+  min-height: 4.5em;
+  max-height: 4.5em;
+}
+
+.noticia-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 0.75rem; /* Ligeramente reducido para consistencia */
+  border-top: 1px solid #3e4451;
+  flex-shrink: 0;
+  min-height: 2.5rem;
+}
+
+.noticia-date {
+  color: #8a8a8a;
+  font-size: 0.8rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.noticia-source {
+  color: #b3000c;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1.2;
+}
+
+/* Header de sección */
+.section-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+/* TÍTULOS DE SECCIÓN MÁS GRANDES Y PROMINENTES */
+/* TÍTULOS DE SECCIÓN MUCHO MÁS GRANDES - ESPECIFICIDAD ALTA */
+.noticias-list .noticias-grid-container .section-header .section-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 2rem;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.8);
+  line-height: 1.1;
+  position: relative;
+  padding: 0 1rem;
+}
+
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 4px;
+  background: linear-gradient(90deg, #b3000c, #ff4444);
+  border-radius: 2px;
+}
+
+.section-subtitle {
+  color: #b3b3b3;
+  font-size: 1.3rem;
+  margin-bottom: 2rem;
+  font-weight: 400;
+  font-style: italic;
+  margin-top: 2rem;
+}
+
+.section-divider {
+  height: 3px;
+  width: 100px;
+  background: linear-gradient(90deg, transparent, #b3000c, transparent);
+  margin: 0 auto;
+  border-radius: 2px;
+}
+
+/* Estados de carga y error */
+.loading-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+  color: #b3b3b3;
+  font-size: 1.2rem;
+  font-weight: 300;
+}
+
+.error-state {
+  text-align: center;
+  padding: 2rem;
+  color: #b3000c;
+  font-size: 1.1rem;
+  background: rgba(179, 0, 12, 0.1);
+  border-radius: 12px;
+  margin: 2rem auto;
+  max-width: 500px;
+  border: 1px solid rgba(179, 0, 12, 0.3);
+}
+
+/* Efectos de hover */
+.noticia-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(179, 0, 12, 0.05), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: 16px;
+}
+
+.noticia-card:hover::before {
+  opacity: 1;
+}
+
+/* Colores de categoría */
+.noticia-card[data-category="tecnologia"] .noticia-category-badge {
+  background: linear-gradient(135deg, #b3000c, #8a0009);
+}
+
+.noticia-card[data-category="deportes"] .noticia-category-badge {
+  background: linear-gradient(135deg, #b3000c, #8a0009);
+}
+
+.noticia-card[data-category="entretenimiento"] .noticia-category-badge {
+  background: linear-gradient(135deg, #b3000c, #8a0009);
+}
+
+.noticia-card[data-category="ciencia"] .noticia-category-badge {
+  background: linear-gradient(135deg, #b3000c, #8a0009);
+}
+
+.noticia-card[data-category="salud"] .noticia-category-badge {
+  background: linear-gradient(135deg, #b3000c, #8a0009);
+}
+
+.noticia-card[data-category="negocios"] .noticia-category-badge {
+  background: linear-gradient(135deg, #b3000c, #8a0009);
+}
+
+/* RESPONSIVE MEJORADO - Sin superposición */
+@media (max-width: 768px) {
+  .noticias-grid-container {
+    max-width: 100%;
+    padding: 1rem;
+  }
+  
+  .noticias-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+  }
+  
+  .noticia-card {
+    height: 420px;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+  
+  /* Títulos más grandes en móviles */
+  .section-title {
+    font-size: 2.5rem;
+    letter-spacing: 2px;
+  }
+  
+  .section-title::after {
+    width: 150px;
+    bottom: -12px;
+  }
+  
+  .section-subtitle {
+    font-size: 1.1rem;
+    margin-top: 1.5rem;
+  }
+  
+  .noticia-content {
+    padding: 1.25rem;
+    min-height: 240px;
+  }
+  
+  .noticia-title {
+    font-size: 1.2rem;
+  }
+  
+  .noticia-image-container {
+    height: 180px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1023px) {
+  .noticias-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.75rem;
+  }
+  
+  .noticia-card {
+    height: 430px;
+  }
+  
+  .noticia-content {
+    min-height: 230px;
+  }
+  
+  /* Títulos en tablets */
+  .section-title {
+    font-size: 3rem;
+  }
+  
+  .section-title::after {
+    width: 180px;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1399px) {
+  .noticias-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+  
+  .noticia-card {
+    height: 450px;
+  }
+  
+  .noticia-content {
+    min-height: 250px;
+  }
+}
+
+@media (min-width: 1400px) {
+  .noticias-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2.5rem;
+  }
+  
+  .noticia-card {
+    height: 470px;
+  }
+  
+  .noticia-content {
+    padding: 1.75rem;
+    min-height: 270px;
+  }
+  
+  .noticia-title {
+    font-size: 1.35rem;
+  }
+}
+
+/* Animación de entrada */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.noticia-card {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* Mejora de rendimiento */
+@media (hover: hover) {
+  .noticia-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+}
+
+/* Focus para accesibilidad */
+.noticia-card:focus {
+  outline: 2px solid #b3000c;
+  outline-offset: 2px;
+}
+
+/* Estilos para el botón de limpiar filtros */
+.clear-filters-btn {
+  background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+  border: 2px solid rgba(179, 0, 12, 0.5);
+  color: #ffffff;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  margin-top: 1rem;
+}
+
+.clear-filters-btn:hover {
+  background: linear-gradient(135deg, #b3000c, #8a0009);
+  border-color: #b3000c;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(179, 0, 12, 0.4);
+}
+
+.clear-filters-btn:active {
+  transform: translateY(0);
+}
+
+/* Ajustes para la sección de header cuando hay filtros */
+.section-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  position: relative;
+}
+
+
+
+
+/* Filtro en la izquierda - POSICIÓN CORREGIDA */
+.filtro-left-container {
+  position: absolute;
+  left: 2rem;
+  top: 8rem;
+  z-index: 20;
+}
+
+.filtro-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  min-width: 200px;
+}
+
+.filtro-label {
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  margin-bottom: 0.5rem;
+}
+
+/* Select MEJORADO - DROPDOWN COMPLETAMENTE REDISEÑADO */
+.filtro-select {
+  width: 100%;
+  background: #1a1a1a;
+  border: 2px solid #b3000c;
+  color: #ffffff;
+  padding: 0.8rem 1rem;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 700; /* Más grueso */
+  cursor: pointer;
+  transition: all 0.3s ease;
+  outline: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23b3000c'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1rem;
+}
+
+.filtro-select:hover {
+  background: #2a1a1a;
+  border-color: #ff4444;
+  box-shadow: 0 4px 15px rgba(179, 0, 12, 0.3);
+}
+
+.filtro-select:focus {
+  background: #2a1a1a;
+  border-color: #ff4444;
+  box-shadow: 0 0 0 3px rgba(179, 0, 12, 0.2);
+}
+
+/* ESTILOS MEJORADOS PARA LAS OPCIONES DESPLEGADAS */
+.filtro-select option {
+  background: #1a1a1a !important; /* Fondo negro */
+  color: #ffffff !important; /* Letras blancas */
+  padding: 12px 16px !important;
+  font-size: 0.95rem !important;
+  font-weight: 700 !important; /* Más grueso */
+  border: none !important;
+  border-bottom: 1px solid #b3000c !important; /* Separador rojo */
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+/* Efecto hover para las opciones */
+.filtro-select option:hover {
+  background: #b3000c !important; /* Fondo rojo al hover */
+  color: #ffffff !important;
+  font-weight: 800 !important;
+}
+
+/* Primera opción sin borde superior */
+.filtro-select option:first-child {
+  border-top: 1px solid #b3000c !important;
+}
+
+/* Última opción sin borde inferior */
+.filtro-select option:last-child {
+  border-bottom: none !important;
+}
+
+/* Estilo para opción seleccionada */
+.filtro-select option:checked {
+  background: #b3000c !important;
+  color: #ffffff !important;
+  font-weight: 800 !important;
+}
+
+/* Estilos para el dropdown cuando está abierto */
+.filtro-select:focus option {
+  background: #1a1a1a !important;
+  color: #ffffff !important;
+}
+
+/* Mejora visual para el contenedor del dropdown */
+.filtro-group {
+  position: relative;
+}
+
+/* Efecto adicional para el grupo cuando el dropdown está activo */
+.filtro-group:has(.filtro-select:focus) {
+  transform: translateY(-2px);
+  transition: transform 0.3s ease;
+}
+
+/* Header CENTRADO - Ajustado para dar más espacio */
+.section-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  position: relative;
+  margin-top: 2rem;
+}
+
+.section-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8);
+  line-height: 1.1;
+}
+
+.section-subtitle {
+  color: #b3b3b3;
+  font-size: 1.2rem;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+  font-style: italic;
+}
+
+.section-divider {
+  height: 3px;
+  width: 100px;
+  background: linear-gradient(90deg, transparent, #b3000c, transparent);
+  margin: 0 auto;
+  border-radius: 2px;
+}
+
+/* Badge para noticias populares */
+.noticia-popular-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: linear-gradient(135deg, #b3000c, #8a0009);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  z-index: 2;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Contador de clics */
+.noticia-meta-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+.noticia-clics {
+  color: #b3000c;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Estados de carga y error */
+.loading-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+  color: #b3b3b3;
+  font-size: 1.2rem;
+  font-weight: 300;
+}
+
+.error-state {
+  text-align: center;
+  padding: 2rem;
+  color: #b3000c;
+  font-size: 1.1rem;
+  background: rgba(179, 0, 12, 0.1);
+  border-radius: 12px;
+  margin: 2rem auto;
+  max-width: 500px;
+  border: 1px solid rgba(179, 0, 12, 0.3);
+}
+
+/* Botón para volver */
+.clear-filters-btn {
+  background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+  border: 2px solid rgba(179, 0, 12, 0.5);
+  color: #ffffff;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  margin-top: 1rem;
+}
+
+.clear-filters-btn:hover {
+  background: linear-gradient(135deg, #b3000c, #8a0009);
+  border-color: #b3000c;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(179, 0, 12, 0.4);
+}
+
+.clear-filters-btn:active {
+  transform: translateY(0);
+}
+
+/* Responsive para filtros - MEJORADO */
+@media (max-width: 768px) {
+  .filtro-left-container {
+    position: static;
+    margin-bottom: 2rem;
+    text-align: center;
+    margin-top: 1rem;
+  }
+  
+  .filtro-group {
+    min-width: 100%;
+    align-items: center;
+  }
+  
+  .filtro-select {
+    width: 100%;
+    max-width: 250px;
+    font-size: 1rem; /* Un poco más grande en móviles */
+  }
+}
+
+/* Para pantallas más grandes */
+@media (min-width: 1400px) {
+  .filtro-left-container {
+    top: 10rem;
+  }
+  
+  .filtro-select {
+    font-size: 1rem; /* Tamaño de fuente consistente */
+  }
+}
+
+/* Asegurar que no haya superposición con otros elementos */
+.noticias-list .relative.z-10 {
+  position: relative;
+}
+
+/* ANIMACIÓN MEJORADA PARA EL DROPDOWN */
+@keyframes dropdownOpen {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Aplicar animación al select cuando está enfocado */
+.filtro-select:focus {
+  animation: dropdownOpen 0.3s ease-out;
+}
+/* Asegurar que el filtro se mantenga en todas las vistas de categorías */
+.noticias-grid-container {
+  position: relative;
+  min-height: 100vh;
+}
+
+/* Mejorar la visualización del badge de clics en categorías */
+.noticia-popular-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: linear-gradient(135deg, #b3000c, #8a0009);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  z-index: 2;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}

@@ -1,0 +1,239 @@
+/* header.css - Con navegación rápida */
+
+/* Estilos generales para el header */
+.header {
+  background: linear-gradient(to right, #000000, #2e0003);
+  color: #ffffff;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.7);
+  padding: 1rem;
+  height: 5rem;
+  display: flex;
+  align-items: center;
+  backdrop-filter: blur(10px);
+}
+
+/* Contenedor principal */
+.header .container {
+  margin-left: 0;
+  padding-left: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+/* Logo y elementos existentes */
+.logo-container {
+  display: flex;
+  align-items: center;
+  max-height: 5rem;
+  overflow: hidden;
+}
+
+.logo-icon {
+  width: 5rem;
+  height: 5rem;
+  object-fit: contain;
+  transition: transform 0.3s ease;
+  cursor: pointer;
+}
+
+.logo-icon:hover {
+  transform: scale(1.1);
+}
+
+.text-3d {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5), 
+               0 4px 8px rgba(179, 0, 12, 0.3);
+  transform: perspective(500px) rotateX(15deg);
+  transition: transform 0.3s ease, text-shadow 0.3s ease;
+}
+
+.text-3d:hover {
+  transform: perspective(500px) rotateX(0deg);
+  text-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Select de navegación rápida */
+.navigation-select {
+  appearance: none;
+  background-color: #2e0003;
+  color: #ffffff;
+  border: 1px solid #5c0006;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20' stroke='%23b3000c'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1.2em 1.2em;
+  padding: 0.75rem 2.5rem 0.75rem 1rem;
+  border-radius: 9999px;
+  font-size: 1rem;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  min-width: 200px;
+}
+
+.navigation-select:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(179, 0, 12, 0.5);
+  border-color: #b3000c;
+}
+
+.navigation-select:hover {
+  border-color: #b3000c;
+  background-color: #3a0004;
+}
+
+.navigation-select option {
+  background-color: #5c0006;
+  color: #ffffff;
+  padding: 0.5rem;
+  transition: background-color 0.2s ease;
+}
+
+.navigation-select option:hover {
+  background-color: #8a0009;
+}
+
+.navigation-select option:checked {
+  background-color: #b3000c;
+  color: #ffffff;
+}
+
+/* Enlaces del menú */
+.header a {
+  transition: color 0.3s ease, text-shadow 0.3s ease;
+  text-decoration: none;
+  color: #b3000c;
+  font-size: 1.125rem;
+  font-weight: 800;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.header a:hover {
+  color: #8a0009;
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+}
+
+/* Barra de búsqueda */
+.header input {
+  background-color: #2e0003;
+  color: #ffffff;
+  border: 1px solid #5c0006;
+  padding: 0.75rem;
+  border-radius: 9999px;
+  width: 20rem;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.header input:focus {
+  border-color: #b3000c;
+  box-shadow: 0 0 0 3px rgba(179, 0, 12, 0.5);
+}
+
+.header input:hover {
+  border-color: #8a0009;
+}
+
+.header button {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: #b3000c;
+  color: #ffffff;
+  padding: 0.5rem;
+  border-radius: 9999px;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.header button:hover {
+  background-color: #8a0009;
+  transform: translateY(-50%) scale(1.05);
+}
+
+.header button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(179, 0, 12, 0.5);
+}
+
+.header button svg {
+  height: 1.25rem;
+  width: 1.25rem;
+}
+
+/* Ajustes de layout */
+.header .space-x-8 > * + * {
+  margin-left: 2rem;
+}
+
+/* Ajustes responsivos para pantallas pequeñas */
+@media (max-width: 1024px) {
+  .navigation-select {
+    min-width: 180px;
+  }
+  
+  .header input {
+    width: 16rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .header .container {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  
+  .logo-icon {
+    width: 3rem;
+    height: 3rem;
+  }
+  
+  .header {
+    height: auto;
+    padding: 0.75rem;
+  }
+  
+  .navigation-select {
+    min-width: 150px;
+    font-size: 0.9rem;
+  }
+  
+  .header input {
+    width: 12rem;
+    font-size: 0.9rem;
+  }
+  
+  .header a {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .header .container {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .logo-container {
+    justify-content: center;
+    width: 100%;
+  }
+  
+  .navigation-select {
+    width: 100%;
+    min-width: auto;
+  }
+  
+  .header input {
+    width: 100%;
+  }
+  
+  .header .space-x-8 > * + * {
+    margin-left: 1rem;
+  }
+}

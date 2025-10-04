@@ -1,0 +1,47 @@
+/* Eleva el breadcrumb para quedarse justo debajo del header */
+.breadcrumb-wrapper {
+  margin-top: -1.0rem; /* Ajusta si es necesario para alinear con el header */
+  position: relative;
+  z-index: 30; /* Para que quede por encima del fondo/partículas */
+  padding-left: -3rem; /* Mantiene alineado con el contenido */
+}
+
+/* Estilos del breadcrumb */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  font-size: 0.95rem;
+  margin-bottom: 1rem; /* Reducido según la sugerencia */
+  flex-wrap: wrap;
+}
+
+.crumb {
+  cursor: pointer;
+  transition: color 0.3s ease;
+  color: #f5f5f5;
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+.crumb:hover {
+  color: #b3000c;
+  background-color: rgba(179, 0, 12, 0.1);
+}
+
+.separator {
+  margin: 0 0.5rem;
+  color: #aaa;
+}
+
+.active {
+  font-weight: 400;
+  color: #cccccc;
+  cursor: default;
+  background-color: transparent;
+}
+
+.active:hover {
+  color: #cccccc;
+  background-color: transparent;
+}
