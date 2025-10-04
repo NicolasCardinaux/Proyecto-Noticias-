@@ -20,6 +20,9 @@ import NasaDataWidget from './NasaDataWidget';
 import EntertainmentSportsNews from './EntertainmentSportsNews';
 import QuoteOfTheDay from './QuoteOfTheDay';
 
+// URL base de la API
+const API_BASE_URL = "https://proyecto-noticias-api.onrender.com";
+
 function NoticiasList() {
   const [noticias, setNoticias] = useState([]);
   const [filteredNoticias, setFilteredNoticias] = useState([]);
@@ -44,7 +47,7 @@ function NoticiasList() {
 
   const fetchNoticias = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/noticias');
+      const response = await axios.get(`${API_BASE_URL}/api/noticias`);
       setNoticias(response.data);
     } catch (err) {
       setError('Error al cargar las noticias');
@@ -139,7 +142,7 @@ function NoticiasList() {
   };
 
   const handleClick = (noticia) => {
-    axios.post(`http://localhost:5000/api/noticias/${noticia.id}/click`)
+    axios.post(`${API_BASE_URL}/api/noticias/${noticia.id}/click`)
       .catch(err => console.error('Error al registrar el clic:', err));
     navigate(`/noticia/${noticia.id}`);
   };

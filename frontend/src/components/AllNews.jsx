@@ -7,6 +7,9 @@ import ParticlesBackground from './ParticlesBackground';
 import CategoryFilter from './CategoryFilter';
 import '../styles/noticiasList.css';
 
+// URL base de la API
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+
 function AllNews() {
   const [noticias, setNoticias] = useState([]);
   const [filteredNoticias, setFilteredNoticias] = useState([]);
@@ -28,7 +31,7 @@ function AllNews() {
   const fetchAllNoticias = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:5000/api/noticias');
+      const response = await axios.get(`${API_BASE_URL}/api/noticias`);
       setNoticias(response.data);
       setError(null);
     } catch (err) {
@@ -68,7 +71,7 @@ function AllNews() {
   };
 
   const handleClick = (noticia) => {
-    axios.post(`http://localhost:5000/api/noticias/${noticia.id}/click`)
+    axios.post(`${API_BASE_URL}/api/noticias/${noticia.id}/click`)
       .catch(err => console.error('Error al registrar el clic:', err));
     navigate(`/noticia/${noticia.id}`);
   };

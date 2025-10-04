@@ -8,6 +8,9 @@ import NoticiasRelacionadas from "./NoticiasRelacionadas";
 import SidebarNoticia from "./SidebarNoticia";
 import "../styles/noticiaDetalle.css";
 
+// URL base de la API
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+
 function NoticiaDetalle() {
   const { id } = useParams();
   const [noticia, setNoticia] = useState(null);
@@ -26,7 +29,7 @@ function NoticiaDetalle() {
   useEffect(() => {
     const fetchNoticia = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/noticias");
+        const response = await axios.get(`${API_BASE_URL}/api/noticias`);
         const noticias = response.data;
         const noticiaEncontrada = noticias.find(
           (n) => n.id === parseInt(id)

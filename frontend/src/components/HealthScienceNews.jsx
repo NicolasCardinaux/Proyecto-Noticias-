@@ -3,6 +3,9 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import '../styles/HealthScienceNews.css';
 
+// URL base de la API
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+
 function HealthScienceNews() {
   const [posts, setPosts] = useState([]);
   const [error, setError] = useState(null);
@@ -12,7 +15,7 @@ function HealthScienceNews() {
   useEffect(() => {
     const fetchHealthScienceNews = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/noticias');
+        const response = await axios.get(`${API_BASE_URL}/api/noticias`);
         const allNews = response.data;
         
         const allFilteredNews = allNews.filter(

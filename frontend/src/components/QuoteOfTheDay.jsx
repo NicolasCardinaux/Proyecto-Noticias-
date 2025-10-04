@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "../styles/QuoteOfTheDay.css";
 
+// URL base de la API
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+
 function QuoteOfTheDay() {
   const [frase, setFrase] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -10,7 +13,7 @@ function QuoteOfTheDay() {
   useEffect(() => {
     const fetchQuote = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/frase-del-dia");
+        const response = await axios.get(`${API_BASE_URL}/api/frase-del-dia`);
         setFrase(response.data);
       } catch (err) {
         console.error(err);

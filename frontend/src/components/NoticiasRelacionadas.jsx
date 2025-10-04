@@ -4,7 +4,8 @@ import axios from 'axios';
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import '../styles/NoticiasRelacionadas.css';
 
-
+// URL base de la API
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 function NoticiasRelacionadas({ categoriaActual, noticiaActualId }) {
   const [noticiasRelacionadas, setNoticiasRelacionadas] = useState([]);
@@ -15,7 +16,7 @@ function NoticiasRelacionadas({ categoriaActual, noticiaActualId }) {
   useEffect(() => {
     const fetchNoticiasRelacionadas = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/noticias');
+        const response = await axios.get(`${API_BASE_URL}/api/noticias`);
         const todasNoticias = response.data;
         
         // Filtrar noticias de la misma categoría, excluyendo la actual

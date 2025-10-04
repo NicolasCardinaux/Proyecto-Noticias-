@@ -3,6 +3,9 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import '../styles/InterestPosts.css';
 
+// URL base de la API
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+
 function InterestPosts() {
   const [posts, setPosts] = useState([]);
   const [error, setError] = useState(null);
@@ -13,7 +16,7 @@ function InterestPosts() {
     const fetchRandomPosts = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('http://localhost:5000/api/random-posts');
+        const response = await axios.get(`${API_BASE_URL}/api/random-posts`);
         
         if (response.data && response.data.length > 0) {
           setPosts(response.data);
@@ -33,7 +36,7 @@ function InterestPosts() {
 
   const handlePostClick = (noticia) => {
     if (noticia && noticia.id) {
-      axios.post(`http://localhost:5000/api/noticias/${noticia.id}/click`)
+      axios.post(`${API_BASE_URL}/api/noticias/${noticia.id}/click`)
         .catch(err => console.error('Error al registrar el clic:', err));
       navigate(`/noticia/${noticia.id}`);
     }

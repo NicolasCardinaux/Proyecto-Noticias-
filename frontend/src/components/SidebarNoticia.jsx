@@ -4,6 +4,9 @@ import axios from 'axios';
 import { FiUser, FiHash, FiStar, FiTrendingUp, FiEye, FiCalendar } from 'react-icons/fi';
 import '../styles/SidebarNoticia.css';
 
+// URL base de la API
+const API_BASE_URL = "https://proyecto-noticias-api.onrender.com";
+
 function SidebarNoticia({ fuente, categoria, noticiaActualId }) {
   const [topPosts, setTopPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,7 +20,7 @@ function SidebarNoticia({ fuente, categoria, noticiaActualId }) {
       
       // OPTIMIZACIÓN: Usar parámetros en la query para filtrado en backend
       const response = await axios.get(
-        `http://localhost:5000/api/popular-posts?exclude=${noticiaActualId}&limit=4`
+        `${API_BASE_URL}/api/popular-posts?exclude=${noticiaActualId}&limit=4`
       );
       
       setTopPosts(response.data);
@@ -27,7 +30,7 @@ function SidebarNoticia({ fuente, categoria, noticiaActualId }) {
       
       // Fallback: intentar con el endpoint normal si falla
       try {
-        const fallbackResponse = await axios.get('http://localhost:5000/api/popular-posts');
+        const fallbackResponse = await axios.get(`${API_BASE_URL}/api/popular-posts`);
         const filteredPosts = fallbackResponse.data
           .filter(post => post.id !== noticiaActualId)
           .slice(0, 4);

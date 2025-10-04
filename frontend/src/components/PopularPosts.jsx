@@ -3,6 +3,9 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import '../styles/PopularPosts.css';
 
+// URL base de la API
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+
 function PopularPosts() {
   const [posts, setPosts] = useState([]);
   const [error, setError] = useState(null);
@@ -12,7 +15,7 @@ function PopularPosts() {
   useEffect(() => {
     const fetchPopularPosts = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/popular-posts');
+        const response = await axios.get(`${API_BASE_URL}/api/popular-posts`);
         setPosts(response.data);
       } catch (err) {
         setError('No se pudieron cargar los posts populares.');

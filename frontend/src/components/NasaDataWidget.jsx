@@ -3,6 +3,9 @@ import axios from 'axios';
 import '../styles/NasaDataWidget.css';
 import NasaFondo from '../imagenes/Nasa.jpg';
 
+// URL base de la API
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+
 const SECTIONS = ['Imagen Astronómica del Día', 'Últimas Fotos desde Marte', 'Asteroides Cercanos', 'Eventos Naturales en la Tierra'];
 const NASA_API_KEY = import.meta.env.VITE_NASA_API_KEY;
 
@@ -13,7 +16,7 @@ const translateApodWithCache = async (apodData) => {
     }
 
     try {
-        const response = await axios.post('http://localhost:5000/api/translate-apod', {
+        const response = await axios.post(`${API_BASE_URL}/api/translate-apod`, {
             title: apodData.title,
             explanation: apodData.explanation,
             date: apodData.date || new Date().toISOString().split('T')[0]
