@@ -119,9 +119,9 @@ function Header() {
           </select>
 
           {}
-          <a href="/contacto" className="text-lg font-extrabold">
+          <Link href="/contacto" className="text-lg font-extrabold">
             Contacto
-          </a>
+          </Link>
           <Link to="/quienes-somos" className="text-lg font-extrabold">
             Quiénes Somos
           </Link>
