@@ -1,4 +1,4 @@
-/* SidebarNoticia.css - Versión Completamente Estática */
+
 .sidebar-noticia-container {
   display: flex;
   flex-direction: column;
@@ -24,7 +24,7 @@
   overflow: visible;
 }
 
-/* ELIMINAR COMPLETAMENTE CUALQUIER COMPORTAMIENTO STICKY */
+
 .sidebar-noticia-container,
 .sidebar-right-container {
   position: static !important;
@@ -36,12 +36,12 @@
   will-change: auto !important;
 }
 
-/* Asegurar que no haya scroll interno */
+
 .sidebar-noticia-container::-webkit-scrollbar {
   display: none;
 }
 
-/* El resto del CSS se mantiene igual... */
+
 .sidebar-widget {
   background: linear-gradient(145deg, rgba(20, 20, 20, 0.95), rgba(35, 35, 35, 0.98));
   border: 1px solid rgba(179, 0, 12, 0.2);
@@ -84,7 +84,7 @@
   letter-spacing: 1px;
 }
 
-/* Widget de Fuente - CLICKEABLE */
+
 .fuente-card {
   display: flex;
   align-items: center;
@@ -168,7 +168,7 @@
   letter-spacing: 0.5px;
 }
 
-/* Widget de Categoría - CLICKEABLE */
+
 .categoria-content {
   text-align: center;
   transition: all 0.3s ease;
@@ -218,7 +218,7 @@
   transform: translateY(0);
 }
 
-/* Widget de Top Posts - CON IMÁGENES */
+
 .top-posts-list-with-images {
   display: flex;
   flex-direction: column;
@@ -244,7 +244,7 @@
   transform: translateX(2px);
 }
 
-/* Contenedor de imagen mini */
+
 .post-image-mini {
   position: relative;
   flex-shrink: 0;
@@ -275,7 +275,7 @@
   box-shadow: 0 2px 6px rgba(255, 215, 0, 0.4);
 }
 
-/* Contenido con imagen */
+
 .post-content-with-image {
   flex: 1;
   min-width: 0;
@@ -334,7 +334,6 @@
   font-size: 0.55rem;
 }
 
-/* Widget de estadísticas - Más compacto */
 .stats-grid-compact {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -371,7 +370,7 @@
   font-size: 0.8rem;
 }
 
-/* Estados de carga y vacío - Más compactos */
+
 .loading-posts {
   display: flex;
   justify-content: center;
@@ -407,7 +406,7 @@
   font-size: 0.75rem;
 }
 
-/* Animaciones */
+
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
@@ -433,7 +432,7 @@
 .sidebar-widget:nth-child(3) { animation-delay: 0.2s; }
 .sidebar-widget:nth-child(4) { animation-delay: 0.25s; }
 
-/* Responsive */
+
 @media (max-width: 768px) {
   .sidebar-noticia-container {
     padding: 1rem 0;

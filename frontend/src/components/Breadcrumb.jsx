@@ -10,7 +10,6 @@ const Breadcrumb = ({ categoria, titulo }) => {
   };
 
   const handleCategoriaClick = () => {
-    // Navega directamente a la categoría usando tu ruta existente
     navigate(`/category/${encodeURIComponent(categoria)}`);
   };
 

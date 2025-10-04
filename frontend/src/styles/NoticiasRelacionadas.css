@@ -1,4 +1,4 @@
-/* NoticiasRelacionadas.css - Versión Mejorada */
+
 .noticias-relacionadas-container {
   width: 100vw;
   margin-left: calc(-50vw + 50%);
@@ -59,7 +59,7 @@
   margin-bottom: 2rem;
 }
 
-/* Navegación */
+
 .noticias-relacionadas-navigation {
   display: flex;
   justify-content: center;
@@ -94,7 +94,7 @@
   transform: scale(1.05);
 }
 
-/* Contenedor scroll horizontal */
+
 .noticias-relacionadas-scroll-container {
   position: relative;
   overflow: hidden;
@@ -107,15 +107,15 @@
   overflow-x: auto;
   scroll-behavior: smooth;
   padding: 1rem 0.5rem;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; 
+  -ms-overflow-style: none;
 }
 
 .noticias-relacionadas-scroll::-webkit-scrollbar {
-  display: none; /* Chrome, Safari and Opera */
+  display: none; 
 }
 
-/* Tarjetas mejoradas */
+
 .noticia-relacionada-card {
   flex: 0 0 380px;
   background: linear-gradient(145deg, #1a1a1a, #2a2a2a);
@@ -238,7 +238,7 @@
   letter-spacing: 0.5px;
 }
 
-/* Efecto hover premium */
+
 .noticia-relacionada-hover-effect {
   position: absolute;
   top: 0;
@@ -266,7 +266,7 @@
   font-weight: 600;
 }
 
-/* Indicadores de scroll (opcional) */
+
 .scroll-indicator {
   position: absolute;
   bottom: 1rem;
@@ -290,7 +290,6 @@
   transform: scale(1.2);
 }
 
-/* Responsive */
 @media (max-width: 768px) {
   .noticias-relacionadas-container {
     padding: 3rem 0;
@@ -333,7 +332,7 @@
   }
 }
 
-/* Animaciones mejoradas */
+
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -361,7 +360,7 @@
   animation-delay: 0.3s;
 }
 
-/* Efecto de brillo en hover */
+
 .noticia-relacionada-card::before {
   content: '';
   position: absolute;
@@ -377,7 +376,7 @@
   border-radius: 20px;
 }
 
-/* Asegurar que el componente de noticias relacionadas sea clickeable */
+
 .noticias-relacionadas-container {
   position: relative;
   z-index: 20;

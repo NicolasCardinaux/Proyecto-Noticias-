@@ -34,7 +34,7 @@ function Contacto() {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Simular envío del formulario
+
     setTimeout(() => {
       setIsSubmitting(false);
       setSubmitMessage('¡Mensaje enviado correctamente! Te contactaremos pronto.');
@@ -46,7 +46,7 @@ function Contacto() {
         archivo: null
       });
       
-      // Limpiar mensaje después de 5 segundos
+
       setTimeout(() => {
         setSubmitMessage('');
       }, 5000);
@@ -62,7 +62,7 @@ function Contacto() {
       <ParticlesBackground />
       <div className="relative z-10 min-h-screen bg-transparent flex flex-col">
         <div className="contacto-container">
-          {/* Header de la sección */}
+          {}
           <div className="section-header">
             <h1 className="section-title">
               Contáctanos
@@ -74,7 +74,7 @@ function Contacto() {
           </div>
 
           <div className="contacto-content">
-            {/* Información de contacto */}
+            {}
             <div className="contacto-info">
               <h2 className="info-title">Información de Contacto</h2>
               
@@ -121,7 +121,7 @@ function Contacto() {
               </div>
             </div>
 
-            {/* Formulario de contacto */}
+            {}
             <div className="contacto-form-container">
               <form onSubmit={handleSubmit} className="contacto-form">
                 <div className="form-group">

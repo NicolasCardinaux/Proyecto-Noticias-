@@ -23,9 +23,9 @@ const ParticlesBackground = () => {
             enable: true,
             mode: 'repulse',
           },
-          // AÑADIR ESTO PARA PERMITIR CLICKS
+
           onClick: {
-            enable: false, // Deshabilitar interacción de clicks en partículas
+            enable: false,
           },
         },
         modes: {
@@ -77,7 +77,6 @@ const ParticlesBackground = () => {
     <Particles 
       id="tsparticles" 
       options={particleOptions}
-      // AÑADIR ESTOS PROPS CLAVE
       style={{
         position: 'fixed',
         top: 0,
@@ -85,7 +84,7 @@ const ParticlesBackground = () => {
         width: '100%',
         height: '100%',
         zIndex: 1,
-        pointerEvents: 'none' // ¡ESTO ES LO MÁS IMPORTANTE!
+        pointerEvents: 'none'
       }}
     />
   );

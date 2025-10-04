@@ -1,6 +1,4 @@
-/* src/styles/FootballDataWidget.css */
 
-/* --- Contenedor Principal --- */
 .football-widget-container {
   position: relative;
   width: 100vw;
@@ -12,7 +10,7 @@
   padding: 1rem 0;
 }
 
-/* --- Capa de Fondo Difuminada --- */
+
 .football-background {
   position: absolute;
   top: 20px; 
@@ -25,7 +23,7 @@
   z-index: 1;
 }
 
-/* --- Título Principal --- */
+
 .text-3d-football {
   font-size: 3rem; 
   text-shadow: 
@@ -36,7 +34,7 @@
      3px 3px 6px rgba(0,0,0,0.5);
 }
 
-/* --- Botones de Navegación --- */
+
 .football-nav-buttons {
   position: absolute;
   right: 1rem;
@@ -47,16 +45,16 @@
 }
 
 .football-nav-button {
-  background-color: rgba(46, 0, 3, 0.7); /* CAMBIO: Color de fondo */
+  background-color: rgba(46, 0, 3, 0.7); 
   color: white;
-  border: 1px solid #8a0009; /* CAMBIO: Color del borde */
+  border: 1px solid #8a0009; 
   border-radius: 8px;
-  width: 2.2rem; /* CAMBIO: Botones más pequeños */
-  height: 2.2rem; /* CAMBIO: Botones más pequeños */
+  width: 2.2rem; 
+  height: 2.2rem; 
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 1.2rem; /* CAMBIO: Iconos más pequeños */
+  font-size: 1.2rem;
   font-weight: bold;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -69,7 +67,7 @@
   transform: scale(1.1);
 }
 
-/* --- Título de la Liga Actual --- */
+
 .current-league-title {
   text-align: center;
   font-size: 1.75rem;
@@ -80,7 +78,7 @@
   transition: opacity 0.5s ease;
 }
 
-/* --- Carrusel --- */
+
 .widget-carousel-container {
   display: flex;
   overflow-x: auto;
@@ -101,7 +99,7 @@
   padding: 0.5rem 1rem 1rem 1rem;
 }
 
-/* --- Tarjetas --- */
+
 .widget-card {
   background-color: rgba(40, 44, 52, 0.85);
   border: 1px solid #4a505c;
@@ -148,7 +146,7 @@
 .list-item:last-child { border: none; }
 .list-item-empty { text-align: center; padding: 2rem; color: #888; }
 
-/* --- Nombres de equipos --- */
+
 .team-name {
   font-size: 1.1rem;
   font-weight: 600;
@@ -180,7 +178,7 @@
   font-size: 1.1rem; 
   font-weight: 700; }
 
-/* --- Contenedor específico para alinear equipos en Próximos Partidos --- */
+
 .match-teams-container {
   display: flex;
   justify-content: space-between;
@@ -188,7 +186,7 @@
   width: 100%;
 }
 
-/* --- Calendario --- */
+
 .calendar-item {
   justify-content: space-between;
   width: 100%;
@@ -198,7 +196,7 @@
   margin-right: 1rem;
 }
 
-/* --- Caja para Fechas --- */
+
 .item-details-box {
   background-color: rgba(0, 0, 0, 0.25);
   border: 1px solid #4a505c;
@@ -219,7 +217,7 @@
   flex-shrink: 0;
 }
 
-/* --- Responsive Design --- */
+
 @media (max-width: 768px) {
   .text-3d-football {
     font-size: 2.2rem;

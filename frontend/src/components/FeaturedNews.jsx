@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios'; // Usaremos axios para consistencia
+import axios from 'axios'; 
 import '../styles/FeaturedNews.css'; 
 
-// URL base de la API
+
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 function FeaturedNews() {
@@ -16,21 +16,19 @@ function FeaturedNews() {
   useEffect(() => {
     const fetchFeaturedNews = async () => {
       try {
-        // Apuntamos al backend de Flask
-        // ASUMIMOS que el endpoint /api/noticias devuelve todas las noticias
-        // ordenadas por fecha de forma descendente (más recientes primero).
+
         const response = await axios.get(`${API_BASE_URL}/api/noticias`);
         const newsData = response.data;
 
-        // Noticias de TECNOLOGÍA (las dos más recientes)
+
         const technology = newsData
           .filter(n => n.categoria?.toLowerCase() === 'tecnología')
           .slice(0, 2);
         
-        // Noticias de NEGOCIOS (las cinco más recientes para el carrusel)
+
         const business = newsData
           .filter(n => n.categoria?.toLowerCase() === 'negocios')
-          .slice(0, 5); // 👈 **CAMBIO CLAVE: Limitado a 5 noticias**
+          .slice(0, 5); 
 
         setTechNews(technology);
         setBusinessNews(business);
@@ -42,28 +40,26 @@ function FeaturedNews() {
       }
     };
 
-    // Esta llamada se realiza al montar el componente, por lo que cargará 
-    // las 5 noticias más recientes (según el orden del backend) cada vez que 
-    // el usuario acceda a esta página.
+
     fetchFeaturedNews();
   }, []);
 
-  // --- LÓGICA DE CLIC CORREGIDA ---
+
   const handleCardClick = async (noticia) => {
     if (!noticia || !noticia.id) return;
     try {
-      // Registramos el clic
+
       await axios.post(`${API_BASE_URL}/api/noticias/${noticia.id}/click`);
     } catch (err) {
       console.error("Error al registrar el clic:", err);
     }
-    // Navegamos usando el ID de la base de datos
+
     navigate(`/noticia/${noticia.id}`);
   };
 
   const handleNext = (e) => {
     e.stopPropagation();
-    // Verifica que haya noticias antes de calcular el índice
+
     if (businessNews.length > 0) {
       setCurrentBusinessIndex((prev) => (prev + 1) % businessNews.length);
     }
@@ -71,7 +67,7 @@ function FeaturedNews() {
 
   const handlePrev = (e) => {
     e.stopPropagation();
-    // Verifica que haya noticias antes de calcular el índice
+
     if (businessNews.length > 0) {
       setCurrentBusinessIndex((prev) => (prev - 1 + businessNews.length) % businessNews.length);
     }
@@ -83,7 +79,7 @@ function FeaturedNews() {
 
   return (
     <div className="featured-news-container">
-      {/* --- TARJETAS DE TECNOLOGÍA (VERTICALES) --- */}
+      {}
       {techNews.map((noticia) => (
         <div key={noticia.id} className="news-card static-card" onClick={() => handleCardClick(noticia)}>
           <img src={noticia.imagen} alt={noticia.titulo} className="card-image" />
@@ -94,7 +90,7 @@ function FeaturedNews() {
         </div>
       ))}
 
-      {/* --- CARRUSEL DE NEGOCIOS (Limitado a 5 noticias) --- */}
+      {}
       {businessNews.length > 0 && (
         <div className="news-card slider-card">
           <div className="slider-wrapper" style={{ transform: `translateX(-${currentBusinessIndex * 100}%)` }}>

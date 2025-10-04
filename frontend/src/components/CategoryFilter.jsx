@@ -2,19 +2,19 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/CategoryFilter.css';
 
-// Importamos las imágenes
+
 import negociosImg from '../imagenes/negocios.jpg';
 import entretenimientoImg from '../imagenes/entretenimiento.jpg';
 import saludImg from '../imagenes/salud.jpg';
 import cienciaImg from '../imagenes/ciencia.jpg';
 import deportesImg from '../imagenes/deportes.jpg';
 import tecnologiaImg from '../imagenes/tecnologia.jpg';
-import vertodoImg from '../imagenes/vertodo.jpg'; // Nueva imagen para Ver Todas
+import vertodoImg from '../imagenes/vertodo.jpg'; 
 
 const CategoryFilter = () => {
   const navigate = useNavigate();
 
-  // Lista de categorías en español, sin URLs en inglés
+
   const categories = [
     { value: 'Negocios', label: 'Negocios' },
     { value: 'Entretenimiento', label: 'Entretenimiento' },
@@ -24,7 +24,7 @@ const CategoryFilter = () => {
     { value: 'Tecnología', label: 'Tecnología' },
   ];
 
-  // Mapeo de imágenes usando los nombres en español
+
   const categoryImages = {
     Negocios: negociosImg,
     Entretenimiento: entretenimientoImg,
@@ -32,10 +32,10 @@ const CategoryFilter = () => {
     Ciencia: cienciaImg,
     Deportes: deportesImg,
     Tecnología: tecnologiaImg,
-    'Ver Todas': vertodoImg, // Nueva imagen para Ver Todas
+    'Ver Todas': vertodoImg, 
   };
 
-  // Navegamos usando la categoría en español, codificada para la URL
+
   const handleCategoryClick = (category) => {
     if (category === 'Ver Todas') {
       navigate('/all-news');
@@ -62,7 +62,7 @@ const CategoryFilter = () => {
         </div>
       ))}
       
-      {/* Nueva sección Ver Todas */}
+      {}
       <div
         className="category-item ver-todas-item"
         style={{ backgroundImage: `url(${vertodoImg})` }}

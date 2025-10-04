@@ -3,13 +3,13 @@ import axios from 'axios';
 import '../styles/NasaDataWidget.css';
 import NasaFondo from '../imagenes/Nasa.jpg';
 
-// URL base de la API
+
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 const SECTIONS = ['Imagen Astronómica del Día', 'Últimas Fotos desde Marte', 'Asteroides Cercanos', 'Eventos Naturales en la Tierra'];
 const NASA_API_KEY = import.meta.env.VITE_NASA_API_KEY;
 
-// Función para traducir APOD usando el nuevo endpoint con caché
+
 const translateApodWithCache = async (apodData) => {
     if (!apodData || !apodData.title || !apodData.explanation) {
         return apodData;
@@ -33,7 +33,7 @@ const translateApodWithCache = async (apodData) => {
         };
     } catch (error) {
         console.error('❌ Error traduciendo APOD:', error);
-        // En caso de error, devolver el original
+
         return apodData;
     }
 };
@@ -71,7 +71,7 @@ function NasaDataWidget() {
                 const nearEarthObjects = asteroidsRes.data.near_earth_objects;
                 const asteroidsList = Object.values(nearEarthObjects).flat().sort((a, b) => a.close_approach_data[0].epoch_date_close_approach - b.close_approach_data[0].epoch_date_close_approach);
 
-                // Primero establecer los datos originales
+
                 const originalData = {
                     apod: apodRes.data,
                     mars: marsRes.data.latest_photos.slice(0, 12),
@@ -81,7 +81,7 @@ function NasaDataWidget() {
 
                 setData(originalData);
 
-                // Luego traducir el APOD (solo si no está en caché)
+
                 if (apodRes.data) {
                     setIsTranslating(true);
                     const translatedApod = await translateApodWithCache(apodRes.data);
@@ -100,7 +100,7 @@ function NasaDataWidget() {
         fetchAllData();
     }, []);
 
-    // Resto del componente se mantiene igual...
+
     useEffect(() => {
         const handleScroll = () => {
             if (scrollRef.current) {
@@ -126,7 +126,7 @@ function NasaDataWidget() {
         }
     };
 
-    // Funciones para el modal de Marte
+
     const handleMarsPhotoClick = (index) => {
         setCurrentMarsIndex(index);
     };
@@ -151,7 +151,7 @@ function NasaDataWidget() {
         setCurrentMarsIndex(null);
     };
 
-    // Funciones para el modal de APOD (solo imagen)
+
     const handleApodImageClick = () => {
         setCurrentApodIndex(0);
     };
@@ -185,7 +185,7 @@ function NasaDataWidget() {
                 {!loading && !error && data.apod && (
                     <div className="nasa-carousel-container" ref={scrollRef}>
                         
-                        {/* --- SECCIÓN APOD --- */}
+                        {}
                         <div className="nasa-slide">
                             <div className="nasa-card apod-card">
                                 <img 
@@ -202,7 +202,7 @@ function NasaDataWidget() {
                             </div>
                         </div>
 
-                        {/* Resto de las secciones se mantienen igual */}
+                        {}
                         <div className="nasa-slide">
                             <div className="nasa-card">
                                 <h3 className="nasa-card-title">Rover Perseverance</h3>
@@ -260,7 +260,7 @@ function NasaDataWidget() {
                 )}
             </div>
 
-            {/* Modales se mantienen igual */}
+            {}
             {currentApodIndex !== null && (
                 <div className="apod-modal-overlay" onClick={closeApodModal}>
                     <div className="apod-modal-content" onClick={e => e.stopPropagation()}>

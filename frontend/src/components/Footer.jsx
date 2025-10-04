@@ -52,7 +52,7 @@ function Footer() {
     }
   };
 
-  // Función para Quiénes Somos
+
   const handleQuienesSomos = (e) => {
     e.preventDefault();
     navigate('/quienes-somos');
@@ -61,7 +61,7 @@ function Footer() {
     }, 100);
   };
 
-  // FUNCIÓN CORREGIDA para Contacto
+
   const handleContacto = (e) => {
     e.preventDefault();
     navigate('/contacto');
@@ -107,7 +107,7 @@ function Footer() {
       <div className="footer__overlay"></div>
       <div className="footer__main relative z-10">
         <div className="footer__container">
-          {/* Sección Logo y Descripción */}
+          {}
           <div className="footer__section footer__brand-section">
             <div className="footer__brand">
               <div className="footer__logo-container">
@@ -135,7 +135,7 @@ function Footer() {
             </div>
           </div>
 
-          {/* Sección Navegación Rápida */}
+          {}
           <div className="footer__section">
             <h3 className="footer__section-title">Navegación Rápida</h3>
             <div className="footer__quick-links">
@@ -151,7 +151,7 @@ function Footer() {
             </div>
           </div>
 
-          {/* Sección Categorías */}
+          {}
           <div className="footer__section">
             <h3 className="footer__section-title">
               Categorías
@@ -169,17 +169,17 @@ function Footer() {
             </div>
           </div>
 
-          {/* Sección Información */}
+          {}
           <div className="footer__section">
             <h3 className="footer__section-title">Información</h3>
             <div className="footer__info-links">
-              {/* Botón Quiénes Somos */}
+              {}
               <button onClick={handleQuienesSomos} className="footer__info-link">
                 <FontAwesomeIcon icon={faUsers} className="footer__info-icon" />
                 <span>Quiénes Somos</span>
               </button>
               
-              {/* BOTÓN CONTACTO CORREGIDO */}
+              {}
               <button onClick={handleContacto} className="footer__info-link">
                 <FontAwesomeIcon icon={faAddressBook} className="footer__info-icon" />
                 <span>Contacto</span>
@@ -191,7 +191,7 @@ function Footer() {
             </div>
           </div>
 
-          {/* Sección Redes Sociales */}
+          {}
           <div className="footer__section footer__social-section">
             <h3 className="footer__section-title">Síguenos</h3>
             <div className="footer__social-grid">
@@ -215,7 +215,7 @@ function Footer() {
           </div>
         </div>
 
-        {/* Newsletter */}
+        {}
         <div className="footer__newsletter-container">
           <div className="footer__newsletter">
             <div className="footer__newsletter-content">
@@ -236,10 +236,10 @@ function Footer() {
         </div>
       </div>
 
-      {/* Línea separadora */}
+      {}
       <div className="footer__divider relative z-10"></div>
 
-      {/* Footer inferior */}
+      {}
       <div className="footer__bottom relative z-10">
         <div className="footer__bottom-container">
           <div className="footer__copyright">

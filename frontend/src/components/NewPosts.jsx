@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import '../styles/NewPosts.css';
 
-// URL base de la API
+
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 function NewPosts() {
@@ -31,7 +31,7 @@ function NewPosts() {
     navigate(`/noticia/${noticia.id}`);
   };
 
-  // Función para ver todas las noticias (más recientes primero)
+
   const handleShowAll = () => {
     navigate('/?filter=latest');
   };
@@ -70,7 +70,7 @@ function NewPosts() {
                   e.target.src = 'https://via.placeholder.com/200x200/1a1a1a/ffffff?text=Sin+Imagen';
                 }}
               />
-              {/* Solo overlay, sin badge rojo */}
+              {}
               <div className="post-image-overlay"></div>
             </div>
             <div className="post-item-content">

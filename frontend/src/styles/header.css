@@ -1,6 +1,4 @@
-/* header.css - Con navegación rápida */
 
-/* Estilos generales para el header */
 .header {
   background: linear-gradient(to right, #000000, #2e0003);
   color: #ffffff;
@@ -12,7 +10,7 @@
   backdrop-filter: blur(10px);
 }
 
-/* Contenedor principal */
+
 .header .container {
   margin-left: 0;
   padding-left: 1rem;
@@ -22,7 +20,7 @@
   width: 100%;
 }
 
-/* Logo y elementos existentes */
+
 .logo-container {
   display: flex;
   align-items: center;
@@ -54,7 +52,7 @@
   text-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
 }
 
-/* Select de navegación rápida */
+
 .navigation-select {
   appearance: none;
   background-color: #2e0003;
@@ -101,7 +99,7 @@
   color: #ffffff;
 }
 
-/* Enlaces del menú */
+
 .header a {
   transition: color 0.3s ease, text-shadow 0.3s ease;
   text-decoration: none;
@@ -116,7 +114,7 @@
   text-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
 }
 
-/* Barra de búsqueda */
+
 .header input {
   background-color: #2e0003;
   color: #ffffff;
@@ -166,12 +164,12 @@
   width: 1.25rem;
 }
 
-/* Ajustes de layout */
+
 .header .space-x-8 > * + * {
   margin-left: 2rem;
 }
 
-/* Ajustes responsivos para pantallas pequeñas */
+
 @media (max-width: 1024px) {
   .navigation-select {
     min-width: 180px;

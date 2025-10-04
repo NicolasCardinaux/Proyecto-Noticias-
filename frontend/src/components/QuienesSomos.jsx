@@ -42,7 +42,7 @@ function QuienesSomos() {
       <ParticlesBackground />
       <div className="relative z-10 min-h-screen bg-transparent flex flex-col">
         
-        {/* Botón para volver al inicio */}
+        {}
         <div className="container mx-auto pt-24 px-4">
           <button 
             onClick={handleGoHome}
@@ -52,10 +52,10 @@ function QuienesSomos() {
           </button>
         </div>
 
-        {/* CONTENIDO PRINCIPAL - VERSIÓN PROFESIONAL */}
+        {}
         <div className="newspaper-container">
           
-          {/* CABECERA DEL PERIÓDICO - LIMPIA Y PROFESIONAL */}
+          {}
           <header className="newspaper-header">
             <div className="newspaper-masthead">
               <div className="masthead-decoration">
@@ -94,12 +94,12 @@ function QuienesSomos() {
             </div>
           </header>
 
-          {/* CUERPO DEL PERIÓDICO - ESTRUCTURA EQUILIBRADA */}
+          {}
           <div className="newspaper-body">
             
-            {/* PRIMERA COLUMNA */}
+            {}
             <div className="newspaper-column">
-              {/* Artículo Principal */}
+              {}
               <article className="news-article main-article breaking-news">
                 <div className="article-badge">EXCLUSIVO</div>
                 <h2 className="article-title">
@@ -149,7 +149,7 @@ function QuienesSomos() {
                 </div>
               </article>
 
-              {/* Sección de Proceso Editorial */}
+              {}
               <article className="news-article process-article">
                 <h2 className="article-title">
                   Proceso Editorial Riguroso
@@ -192,7 +192,7 @@ function QuienesSomos() {
                 </div>
               </article>
 
-              {/* Nueva Sección: Nuestro Equipo */}
+              {}
               <article className="news-article team-article">
                 <div className="article-badge">EQUIPO</div>
                 <h2 className="article-title">
@@ -231,9 +231,9 @@ function QuienesSomos() {
               </article>
             </div>
 
-            {/* SEGUNDA COLUMNA */}
+            {}
             <div className="newspaper-column">
-              {/* Qué Nos Hace Diferentes */}
+              {}
               <article className="news-article featured-article difference-article">
                 <div className="article-badge">INNOVACIÓN</div>
                 <h2 className="article-title">
@@ -261,7 +261,7 @@ function QuienesSomos() {
                 </div>
               </article>
 
-              {/* Filosofía y Cita */}
+              {}
               <article className="news-article quote-article philosophy-article">
                 <blockquote className="newspaper-quote">
                   "En un mundo saturado de información vacía, el verdadero lujo 
@@ -276,7 +276,7 @@ function QuienesSomos() {
                 </div>
               </article>
 
-              {/* Estadísticas Animadas */}
+              {}
               <div className="stats-box enhanced-stats">
                 <h3 className="stats-title">
                   IMPACTO EN CIFRAS
@@ -297,7 +297,7 @@ function QuienesSomos() {
                 </div>
               </div>
 
-              {/* Nueva Sección: Tecnología Avanzada */}
+              {}
               <article className="news-article tech-article">
                 <div className="article-badge">TECNOLOGÍA</div>
                 <h2 className="article-title">
@@ -327,9 +327,9 @@ function QuienesSomos() {
               </article>
             </div>
 
-            {/* TERCERA COLUMNA - EQUILIBRADA */}
+            {}
             <div className="newspaper-column">
-              {/* Valores Corporativos */}
+              {}
               <article className="news-article values-article corporate-article">
                 <h2 className="article-title">
                   Nuestro ADN Corporativo
@@ -356,7 +356,7 @@ function QuienesSomos() {
                 </div>
               </article>
 
-              {/* Compromiso Final */}
+              {}
               <article className="news-article final-article commitment-article">
                 <div className="article-badge">COMPROMISO</div>
                 <h2 className="article-title">
@@ -400,7 +400,7 @@ function QuienesSomos() {
                 </div>
               </article>
 
-              {/* Call to Action Mejorado */}
+              {}
               <div className="cta-box enhanced-cta">
                 <h3>¿LISTO PARA EXPERIMENTAR LA DIFERENCIA?</h3>
                 <p>Descubre la información sin ruido y sin humo</p>
@@ -417,7 +417,7 @@ function QuienesSomos() {
                 </div>
               </div>
 
-              {/* Nueva Sección: Testimonios */}
+              {}
               <article className="news-article testimonials-article">
                 <div className="article-badge">TESTIMONIOS</div>
                 <h2 className="article-title">
@@ -439,7 +439,7 @@ function QuienesSomos() {
             </div>
           </div>
 
-          {/* PIE DEL PERIÓDICO */}
+          {}
           <footer className="newspaper-footer">
             <div className="footer-divider">
               <div className="footer-ornament">🞻🞻🞻</div>

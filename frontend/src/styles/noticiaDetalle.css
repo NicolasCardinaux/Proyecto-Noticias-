@@ -1,4 +1,4 @@
-/* NoticiaDetalle.css - Actualizado con Sidebar Mejorado */
+
 .noticia-detalle-container {
   background: #000;
   color: #f1f1f1;
@@ -6,20 +6,20 @@
   min-height: 100vh;
 }
 
-/* Layout principal con sidebar mejorado */
+
 .relative.z-5.flex {
   align-items: flex-start;
   gap: 2rem;
   min-height: 70vh;
 }
 
-/* Contenedor principal (80%) */
+
 .w-full.md\:w-4\/5 {
   flex: 0 0 80%;
   max-width: 80%;
 }
 
-/* Sidebar (20%) - Mejorado */
+
 .sidebar-right-container {
   flex: 0 0 20%;
   max-width: 20%;
@@ -30,7 +30,7 @@
   max-height: calc(100vh - 4rem);
 }
 
-/* Título en blanco y un poco más chico */
+
 .noticia-titulo {
   font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
   font-weight: 800;
@@ -57,7 +57,7 @@
   border-radius: 2px;
 }
 
-/* Imagen mejorada - Se ve completa con bordes suaves */
+
 .imagen-container {
   position: relative;
   margin: 2.5rem 0;
@@ -85,7 +85,7 @@
   border-radius: 22px;
 }
 
-/* Metadatos más angostos verticalmente */
+
 .metadatos-container {
   background: linear-gradient(135deg, rgba(26, 26, 26, 0.95) 0%, rgba(40, 40, 40, 0.98) 100%);
   backdrop-filter: blur(20px);
@@ -142,7 +142,7 @@
   line-height: 1.3;
 }
 
-/* Contenido con apóstrofes */
+
 .contenido-noticia {
   font-size: 1.2rem;
   line-height: 1.8;
@@ -175,7 +175,7 @@
   z-index: 2;
 }
 
-/* Botones que ocupan el 100% del ancho de la pantalla */
+
 .botones-accion-container {
   width: 100vw;
   margin-left: calc(-50vw + 50%);
@@ -288,7 +288,7 @@
   transform: translateX(3px);
 }
 
-/* Efectos de partículas */
+
 .particles-overlay {
   position: absolute;
   top: 0;
@@ -299,7 +299,7 @@
   z-index: 1;
 }
 
-/* Responsive design mejorado para sidebar */
+
 @media (max-width: 768px) {
   .noticia-titulo {
     font-size: 2rem;
@@ -349,12 +349,11 @@
     padding: 1.1rem 2rem;
   }
 
-  /* Sidebar oculto en móviles */
   .sidebar-right-container {
     display: none;
   }
 
-  /* Contenedor principal ocupa 100% en móviles */
+
   .w-full.md\:w-4\/5 {
     flex: 0 0 100%;
     max-width: 100%;
@@ -376,7 +375,7 @@
   }
 }
 
-/* Animaciones suaves */
+
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -400,7 +399,7 @@
   animation: fadeInUp 1s ease-out 0.4s both;
 }
 
-/* Loading states */
+
 .cargando {
   display: flex;
   justify-content: center;
@@ -422,13 +421,12 @@
   margin-left: 10px;
 }
 
-/* Solución para problemas de interacción */
+
 .noticia-detalle-container {
   position: relative;
   z-index: 10;
 }
 
-/* Asegurar que todos los elementos interactivos tengan z-index alto */
 .botones-accion-container,
 .noticias-relacionadas-container,
 .imagen-container,
@@ -439,25 +437,23 @@
   z-index: 20;
 }
 
-/* Botones específicamente */
+
 .btn {
   position: relative;
   z-index: 30;
 }
 
-/* Tarjetas de noticias relacionadas */
 .noticia-relacionada-card {
   position: relative;
   z-index: 25;
 }
 
-/* Overlay de partículas - asegurar que no bloquee */
+
 .particles-overlay {
   z-index: 1;
   pointer-events: none;
 }
 
-/* Si persiste el problema, agregar esto */
 .noticia-detalle-container > *:not(.particles-background) {
   position: relative;
   z-index: 15;
@@ -468,18 +464,18 @@
   100% { transform: rotate(360deg); }
 }
 
-/* Mejoras específicas para la integración con sidebar mejorado */
+
 .container.mx-auto {
   padding-right: 0;
 }
 
-/* Asegurar que el contenido principal no se solape con el sidebar */
+
 @media (min-width: 768px) {
   .container.mx-auto {
     padding-right: 2rem;
   }
   
-  /* Asegurar que el sidebar no tenga scroll interno */
+
   .sidebar-right-container {
     overflow: visible;
   }
@@ -490,7 +486,7 @@
   }
 }
 
-/* Estados de error mejorados */
+
 .error-state {
   text-align: center;
   padding: 3rem 2rem;

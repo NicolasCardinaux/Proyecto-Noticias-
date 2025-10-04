@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 
-// Componentes de Estructura y UI
+
 import ParticlesBackground from './ParticlesBackground';
 import CategoryFilter from './CategoryFilter';
 import '../styles/noticiasList.css';
 
-// Componentes de Contenido
+
 import FeaturedNews from './FeaturedNews';
 import PopularPosts from './PopularPosts';
 import WeatherWidget from './WeatherWidget';
@@ -20,14 +20,14 @@ import NasaDataWidget from './NasaDataWidget';
 import EntertainmentSportsNews from './EntertainmentSportsNews';
 import QuoteOfTheDay from './QuoteOfTheDay';
 
-// URL base de la API
+
 const API_BASE_URL = "https://proyecto-noticias-api.onrender.com";
 
 function NoticiasList() {
   const [noticias, setNoticias] = useState([]);
   const [filteredNoticias, setFilteredNoticias] = useState([]);
   const [error, setError] = useState(null);
-  const [filtroActivo, setFiltroActivo] = useState('mas-recientes'); // NUEVO: Estado para el filtro
+  const [filtroActivo, setFiltroActivo] = useState('mas-recientes'); 
   const { category } = useParams();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -43,7 +43,7 @@ function NoticiasList() {
     if (noticias.length > 0) {
       aplicarFiltros();
     }
-  }, [noticias, category, searchQuery, filterLatest, filterType, filtroActivo]); // NUEVO: añadido filtroActivo
+  }, [noticias, category, searchQuery, filterLatest, filterType, filtroActivo]); 
 
   const fetchNoticias = async () => {
     try {
@@ -55,16 +55,16 @@ function NoticiasList() {
     }
   };
 
-  // NUEVA FUNCIÓN: Aplicar todos los filtros combinados
+
   const aplicarFiltros = () => {
     let filtered = [...noticias];
 
-    // Primero aplicar filtros de categoría/búsqueda
+
     if (filterLatest) {
-      // "Ver todas" - mantener todas las noticias
+
       filtered = filtered;
     }
-    // Búsqueda por texto general
+
     else if (searchQuery && filterType !== 'fuente') {
       const decodedQuery = decodeURIComponent(searchQuery).toLowerCase();
       filtered = filtered.filter(
@@ -72,7 +72,7 @@ function NoticiasList() {
           noticia.titulo && noticia.titulo.toLowerCase().includes(decodedQuery)
       );
     }
-    // Filtro por fuente
+
     else if (searchQuery && filterType === 'fuente') {
       const decodedQuery = decodeURIComponent(searchQuery).toLowerCase();
       filtered = filtered.filter(
@@ -81,7 +81,7 @@ function NoticiasList() {
           noticia.fuente.toLowerCase().includes(decodedQuery)
       );
     }
-    // Filtro por categoría
+
     else if (category && category !== 'general') {
       const decodedCategory = decodeURIComponent(category);
       filtered = filtered.filter(
@@ -90,12 +90,12 @@ function NoticiasList() {
           noticia.categoria.toLowerCase() === decodedCategory.toLowerCase()
       );
     }
-    // Vista general (sin filtros de categoría/búsqueda)
+
     else {
-      filtered = []; // En vista general no mostramos la lista completa
+      filtered = []; 
     }
 
-    // LUEGO aplicar el filtro de ordenamiento (NUEVO)
+
     if (filtered.length > 0) {
       switch (filtroActivo) {
         case 'mas-recientes':
@@ -119,7 +119,7 @@ function NoticiasList() {
       }
     }
 
-    // Manejar estados de error
+
     if (filtered.length === 0) {
       if (searchQuery) {
         if (filterType === 'fuente') {
@@ -151,7 +151,7 @@ function NoticiasList() {
     navigate('/');
   };
 
-  // NUEVA FUNCIÓN: Obtener texto del filtro activo
+
   const getFiltroText = () => {
     const textos = {
       'mas-recientes': 'Más recientes primero',
@@ -162,7 +162,7 @@ function NoticiasList() {
     return textos[filtroActivo] || 'Más recientes primero';
   };
 
-  // Función para obtener el título de la sección según el filtro
+
   const getSectionTitle = () => {
     if (filterLatest) {
       return 'Todas las Noticias';
@@ -173,14 +173,14 @@ function NoticiasList() {
         return `Resultados para: "${searchQuery}"`;
       }
     } else if (category && category !== 'general') {
-      // Convertir primera letra a mayúscula
+
       const categoryName = category.charAt(0).toUpperCase() + category.slice(1);
       return `Noticias de ${categoryName}`;
     }
     return '';
   };
 
-  // Función para obtener el subtítulo de la sección
+
   const getSectionSubtitle = () => {
     if (filteredNoticias.length > 0) {
       const countText = `${filteredNoticias.length} noticia${filteredNoticias.length !== 1 ? 's' : ''} encontrada${filteredNoticias.length !== 1 ? 's' : ''}`;
@@ -201,21 +201,21 @@ function NoticiasList() {
       <div className="relative z-10 min-h-screen bg-transparent flex flex-col">
         <CategoryFilter />
 
-        {/* --- SECCIÓN SUPERIOR (SOLO EN CATEGORÍA GENERAL, SIN BÚSQUEDA Y SIN FILTRO LATEST) --- */}
+        {}
         {(!category || category === 'general') && !searchQuery && !filterLatest && (
           <>
-            {/* Noticias Destacadas - Arriba de todo */}
+            {}
             <div id="noticias-destacadas">
               <FeaturedNews />
             </div>
             
-            {/* Noticias Populares */}
+            {}
             <div id="noticias-populares">
               <PopularPosts />
             </div>
             
             <div className="container mx-auto my-8 px-4">
-              {/* Clima Actual */}
+              {}
               <div id="clima-actual">
                 <div className="flex flex-col items-center mb-8">
                   <h2 className="relative z-10 text-4xl md:text-5xl font-bold text-[#b3000c] uppercase tracking-widest text-3d">
@@ -226,53 +226,53 @@ function NoticiasList() {
                 <WeatherWidget />
               </div>
               
-              {/* ÚLTIMAS NOTICIAS */}
+              {}
               <div id="ultimas-noticias">
                 <NewPosts />
               </div>
               
-              {/* Mundo Fútbol */}
+              {}
               <div id="mundo-futbol">
                 <FootballDataWidget />
               </div>
               
-              {/* Noticias de Interés */}
+              {}
               <div id="noticias-interes">
                 <InterestPosts />
               </div>
               
-              {/* Mundo Inversión */}
+              {}
               <div id="mundo-inversion">
                 <MundoInversion /> 
               </div>
               
-              {/* Salud y Ciencia */}
+              {}
               <div id="salud-ciencia">
                 <HealthScienceNews />
               </div>
               
-              {/* Ventana al Universo */}
+              {}
               <div id="ventana-universo">
                 <NasaDataWidget />
               </div>
               
-              {/* Entretenimiento y Deportes */}
+              {}
               <div id="entretenimiento-deportes">
                 <EntertainmentSportsNews />
               </div>
             </div>
             
-            {/* Frase del Día */}
+            {}
             <div id="frase-dia">
               <QuoteOfTheDay />
             </div>
           </>
         )}
 
-        {/* --- LISTA PRINCIPAL DE NOTICIAS (SE MUESTRA EN BÚSQUEDA, CATEGORÍAS ESPECÍFICAS O "VER TODAS") --- */}
+        {}
         {(searchQuery || (category && category !== 'general') || filterLatest) && (
           <div className="noticias-grid-container">
-            {/* FILTRO DE ORDENAMIENTO - AHORA DISPONIBLE EN TODAS LAS CATEGORÍAS */}
+            {}
             <div className="filtro-left-container">
               <div className="filtro-group">
                 <label htmlFor="orden-select" className="filtro-label">
@@ -309,7 +309,7 @@ function NoticiasList() {
                   </p>
                   <div className="section-divider"></div>
                   
-                  {/* Botón para volver a la vista general */}
+                  {}
                   {(searchQuery || category || filterLatest) && (
                     <button 
                       onClick={handleClearFilters}
@@ -390,7 +390,7 @@ function NoticiasList() {
           </div>
         )}
 
-        {/* Loading State */}
+        {}
         {!error && filteredNoticias.length === 0 && noticias.length === 0 && (
           <div className="loading-state">
             Cargando noticias...

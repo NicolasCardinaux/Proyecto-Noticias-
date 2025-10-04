@@ -8,7 +8,7 @@ import NoticiasRelacionadas from "./NoticiasRelacionadas";
 import SidebarNoticia from "./SidebarNoticia";
 import "../styles/noticiaDetalle.css";
 
-// URL base de la API
+
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 function NoticiaDetalle() {
@@ -17,14 +17,12 @@ function NoticiaDetalle() {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  // SOLUCIÓN: Forzar scroll al top cuando se carga el componente
+
   useEffect(() => {
-    // Scroll inmediato al top cuando se monta el componente
+
     window.scrollTo(0, 0);
-    
-    // Opcional: Scroll suave como alternativa
-    // window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [id]); // Se ejecuta cada vez que cambia el ID de la noticia
+
+  }, [id]); 
 
   useEffect(() => {
     const fetchNoticia = async () => {
@@ -49,10 +47,9 @@ function NoticiaDetalle() {
     fetchNoticia();
   }, [id]);
 
-  // También puedes agregar esto para manejar el caso de carga
+
   useEffect(() => {
     if (noticia) {
-      // Asegurar scroll al top cuando la noticia está cargada
       window.scrollTo(0, 0);
     }
   }, [noticia]);
@@ -87,17 +84,17 @@ function NoticiaDetalle() {
       <div className="particles-overlay"></div>
       
       <div className="relative z-5 flex justify-center p-4 md:p-8">
-        {/* Contenedor principal que ocupa el 80% */}
+        {}
         <div className="w-full md:w-4/5">
           <div className="container mx-auto">
             <Breadcrumb categoria={noticia.categoria} titulo={noticia.titulo} />
 
-            {/* Título */}
+            {}
             <h1 className="noticia-titulo">
               {noticia.titulo}
             </h1>
 
-            {/* Contenedor de imagen */}
+            {}
             <div className="imagen-container">
               <img
                 src={noticia.imagen}
@@ -109,7 +106,7 @@ function NoticiaDetalle() {
               />
             </div>
 
-            {/* Metadatos */}
+            {}
             <div className="metadatos-container">
               <div className="metadatos-grid">
                 <div className="metadato-item">
@@ -138,14 +135,14 @@ function NoticiaDetalle() {
               </div>
             </div>
 
-            {/* Contenido */}
+            {}
             <div className="contenido-noticia">
               <p>{noticia.resumen}</p>
             </div>
           </div>
         </div>
         
-        {/* Sidebar en el 20% derecho - Versión mejorada */}
+        {}
         <div className="hidden md:block md:w-1/5 sidebar-right-container">
           <SidebarNoticia 
             fuente={noticia.fuente}
@@ -155,13 +152,13 @@ function NoticiaDetalle() {
         </div>
       </div>
 
-      {/* Componente de Noticias Relacionadas - Ocupa 100% del ancho */}
+      {}
       <NoticiasRelacionadas 
         categoriaActual={noticia.categoria} 
         noticiaActualId={noticia.id} 
       />
 
-      {/* Botones de acción - Ocupan 100% del ancho con contenedor interno al 80% */}
+      {}
       <div className="botones-accion-container">
         <div className="botones-accion">
           <a

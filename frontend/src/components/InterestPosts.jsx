@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import '../styles/InterestPosts.css';
 
-// URL base de la API
+
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 function InterestPosts() {
@@ -56,7 +56,6 @@ function InterestPosts() {
     }
   };
 
-  // Mostrar loading
   if (loading) {
     return (
       <div className="interest-posts-container">
@@ -68,7 +67,7 @@ function InterestPosts() {
     );
   }
 
-  // No mostrar nada si hay error o no hay posts
+
   if (error || posts.length === 0) {
     return null;
   }

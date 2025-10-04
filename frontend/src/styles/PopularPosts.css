@@ -1,4 +1,4 @@
-/* PopularPosts.css - Versión Mejorada con Badge */
+
 .popular-posts-container {
   max-width: 1400px;
   margin: 0 auto;
@@ -63,12 +63,12 @@
   overflow-x: auto;
   padding: 1rem 0.5rem;
   scroll-behavior: smooth;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; 
+  -ms-overflow-style: none; 
 }
 
 .posts-carousel::-webkit-scrollbar {
-  display: none; /* Chrome, Safari and Opera */
+  display: none;
 }
 
 .post-card {
@@ -93,7 +93,7 @@
     0 0 30px rgba(179, 0, 12, 0.2);
 }
 
-/* Contenedor de imagen con badge */
+
 .post-image-container {
   position: relative;
   height: 180px;
@@ -111,7 +111,7 @@
   transform: scale(1.1);
 }
 
-/* Badge de categoría */
+
 .post-category-badge {
   position: absolute;
   top: 1rem;
@@ -128,7 +128,7 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-/* Overlay para la imagen */
+
 .post-image-overlay {
   position: absolute;
   top: 0;
@@ -197,7 +197,7 @@
   font-weight: 500;
 }
 
-/* Efectos premium adicionales */
+
 .post-card::before {
   content: '';
   position: absolute;
@@ -217,7 +217,7 @@
   opacity: 1;
 }
 
-/* Efecto de barrido en hover */
+
 .post-card::after {
   content: '';
   position: absolute;
@@ -238,7 +238,7 @@
   left: 100%;
 }
 
-/* Animaciones */
+
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -262,7 +262,7 @@
   animation-delay: 0.2s;
 }
 
-/* Responsive */
+
 @media (max-width: 768px) {
   .popular-posts-header {
     flex-direction: column;
@@ -307,7 +307,7 @@
   }
 }
 
-/* Efecto de carga */
+
 .popular-posts-loading {
   text-align: center;
   padding: 2rem;

@@ -1,4 +1,3 @@
-# procesar-y-guardar-db.py - VERSIÓN SIN NEWSPAPER3K
 import os
 import requests
 from dotenv import load_dotenv
@@ -8,8 +7,6 @@ from tqdm import tqdm
 from datetime import datetime
 import hashlib
 import re
-
-# Importar nuestro módulo de base de datos Supabase
 import db
 
 # --- Carga y configuración ---
@@ -41,9 +38,9 @@ def obtener_noticias_por_categoria(categoria, max_noticias=3, urls_existentes=No
     
     print(f"📡 Buscando {max_noticias} noticias NUEVAS de: '{CATEGORIAS.get(categoria, categoria)}'...")
     
-    # Intentar con diferentes queries para obtener noticias diferentes
+ 
     queries_alternativas = [
-        None,  # Sin query (noticias principales)
+        None,  
         "actualidad",
         "última hora",
         "hoy"
@@ -74,7 +71,6 @@ def obtener_noticias_por_categoria(categoria, max_noticias=3, urls_existentes=No
                     articulo.get("url") not in urls_encontradas and
                     articulo.get("title")):
                     
-                    # Verificar también por título (evitar mismos titulares con URLs diferentes)
                     titulo = articulo.get("title")
                     if not db.noticia_existe(titulo, articulo.get("url")):
                         articulo['categoria_asignada'] = CATEGORIAS.get(categoria, "General")
@@ -84,7 +80,7 @@ def obtener_noticias_por_categoria(categoria, max_noticias=3, urls_existentes=No
                         if len(noticias_nuevas) >= max_noticias:
                             break
             
-            sleep(1)  # Pausa entre requests a la API
+            sleep(1) 
             
         except requests.exceptions.RequestException as e:
             print(f"❌ Error al conectar con GNews para '{categoria}': {e}")
@@ -103,15 +99,14 @@ def scrapear_texto(url, fallback_description=None):
         response = requests.get(url, headers=headers, timeout=10)
         response.raise_for_status()
         
-        # Extraer texto básico usando regex (evita dependencias complejas)
         text = response.text
         
-        # Limpiar HTML tags básicos
+
         clean = re.compile('<.*?>')
         text = re.sub(clean, '', text)
         
-        # Limitar tamaño y limpiar espacios
-        text = ' '.join(text.split()[:500])  # Tomar solo 500 palabras máximo
+
+        text = ' '.join(text.split()[:500]) 
         
         if len(text) > 100:
             return text
@@ -128,7 +123,7 @@ def resumir_texto(texto):
     if not texto or len(texto.split()) < 30:
         return "Contenido insuficiente para generar un resumen."
 
-    # Limitar texto si es muy largo para evitar errores
+
     if len(texto) > 12000:
         texto = texto[:12000]
 
@@ -153,7 +148,7 @@ def resumir_texto(texto):
         return resp.text.strip()
     except Exception as e:
         print(f"⚠️  Error al generar resumen con Gemini: {repr(e)}")
-        # Fallback mejorado: tomar las primeras 3-4 oraciones del texto original
+
         sentences = texto.split('.')
         fallback = ". ".join(sentences[:4]) + "."
         return fallback if len(fallback) > 20 else "Resumen no disponible en este momento."
@@ -161,10 +156,10 @@ def resumir_texto(texto):
 # --- Procesar y guardar NOTICIAS NUEVAS ---
 def procesar_y_guardar_noticias():
     """Ejecuta el proceso completo de obtención, resumen y guardado de noticias NUEVAS."""
-    # Inicializar base de datos (compatibilidad)
+
     db.inicializar_db()
     
-    # Obtener URLs existentes para evitar duplicados
+
     urls_existentes = db.obtener_urls_existentes()
     print(f"📊 Noticias existentes en la base de datos: {len(urls_existentes)}")
     
@@ -176,7 +171,7 @@ def procesar_y_guardar_noticias():
             urls_existentes=urls_existentes
         )
         todas_las_noticias.extend(noticias_de_categoria)
-        sleep(1)  # Pausa para no saturar la API de GNews
+        sleep(1)  
 
     if not todas_las_noticias:
         print("❌ No se encontraron noticias NUEVAS para procesar. Todas las noticias ya están en la base de datos.")
@@ -186,14 +181,14 @@ def procesar_y_guardar_noticias():
     
     noticias_guardadas = 0
     for art in tqdm(todas_las_noticias, desc="Guardando noticias nuevas"):
-        # Usar la descripción como fallback principal (más confiable que scraping)
+
         texto_completo = art.get("description") or ""
         
-        # Solo hacer scraping si la descripción es muy corta
+
         if not texto_completo or len(texto_completo.split()) < 30:
             texto_completo = scrapear_texto(art.get("url"), art.get("description"))
         
-        # Si no hay suficiente texto, saltar esta noticia
+
         if not texto_completo or len(texto_completo.split()) < 25:
             continue
             
@@ -201,11 +196,11 @@ def procesar_y_guardar_noticias():
 
         if all([art.get("title"), art.get("url"), art.get("publishedAt")]):
             try:
-                # Intenta formatear la fecha correctamente
+
                 fecha_obj = datetime.strptime(art.get("publishedAt"), "%Y-%m-%dT%H:%M:%SZ")
                 fecha_formateada = fecha_obj.strftime("%Y-%m-%d")
             except (ValueError, TypeError):
-                # Si falla, guarda la fecha tal como viene
+
                 fecha_formateada = art.get("publishedAt", "Fecha no disponible")
 
             noticia = {
@@ -223,16 +218,16 @@ def procesar_y_guardar_noticias():
                 db.insert_noticia(noticia)
                 noticias_guardadas += 1
             except Exception as e:
-                # Ignora si la URL o el título ya existen
+
                 print(f"⚠️  Duplicado omitido: {art.get('title')[:50]}...")
                 continue
     
-    # Limpiar noticias antiguas (mantener sólo las de menos de 6 meses)
+
     db.delete_old_noticias(max_months=6)
     
     print(f"\n✅ ¡Proceso completado! Se guardaron {noticias_guardadas} NUEVAS noticias en Supabase")
     
-    # Mostrar estadísticas actualizadas
+
     stats = db.get_stats()
     print(f"📈 Total de noticias en la base de datos: {stats['total_noticias']}")
     

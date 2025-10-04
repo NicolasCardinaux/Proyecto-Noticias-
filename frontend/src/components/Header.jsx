@@ -43,7 +43,7 @@ function Header() {
   const handleSectionNavigate = (sectionId) => {
     setActiveSection(sectionId);
     
-    // Si ya estamos en el home, hacer scroll a la sección
+
     if (window.location.pathname === '/') {
       const element = document.getElementById(sectionId);
       if (element) {
@@ -55,9 +55,7 @@ function Header() {
         });
       }
     } else {
-      // Si no estamos en el home, redirigir al home y luego hacer scroll
       navigate('/');
-      // Esperar a que la página cargue y luego hacer scroll
       setTimeout(() => {
         const element = document.getElementById(sectionId);
         if (element) {
@@ -82,9 +80,9 @@ function Header() {
   return (
     <header className="header text-white p-4 shadow-lg fixed w-full z-50">
       <div className="container mx-auto flex items-center justify-between">
-        {/* Logo + menú */}
+        {}
         <div className="flex items-center space-x-8">
-          {/* Contenedor para el icono y el texto del logo */}
+          {}
           <div className="flex items-center logo-container">
             <img
               src={Icono}
@@ -100,7 +98,7 @@ function Header() {
             </h1>
           </div>
           
-          {/* Navegación rápida */}
+          {}
           <select
             value={activeSection}
             onChange={handleSectionChange}
@@ -120,7 +118,7 @@ function Header() {
             ))}
           </select>
 
-          {/* Enlaces */}
+          {}
           <a href="/contacto" className="text-lg font-extrabold">
             Contacto
           </a>
@@ -129,7 +127,7 @@ function Header() {
           </Link>
         </div>
 
-        {/* Barra de búsqueda */}
+        {}
         <div className="relative flex items-center">
           <input
             type="text"

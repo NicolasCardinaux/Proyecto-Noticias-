@@ -1,17 +1,17 @@
-/* Eleva el breadcrumb para quedarse justo debajo del header */
+
 .breadcrumb-wrapper {
-  margin-top: -1.0rem; /* Ajusta si es necesario para alinear con el header */
+  margin-top: -1.0rem; 
   position: relative;
-  z-index: 30; /* Para que quede por encima del fondo/partículas */
-  padding-left: -3rem; /* Mantiene alineado con el contenido */
+  z-index: 30; 
+  padding-left: -3rem; 
 }
 
-/* Estilos del breadcrumb */
+
 .breadcrumb {
   display: flex;
   align-items: center;
   font-size: 0.95rem;
-  margin-bottom: 1rem; /* Reducido según la sugerencia */
+  margin-bottom: 1rem; 
   flex-wrap: wrap;
 }
 

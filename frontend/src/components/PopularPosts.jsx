@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import '../styles/PopularPosts.css';
 
-// URL base de la API
+
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 function PopularPosts() {
@@ -75,7 +75,7 @@ function PopularPosts() {
                   e.target.src = 'https://via.placeholder.com/400x200.png?text=Sin+Imagen';
                 }}
               />
-              {/* Badge de categoría agregado */}
+              {}
               <div className="post-category-badge">
                 {post.categoria}
               </div>

@@ -4,7 +4,7 @@ import axios from 'axios';
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import '../styles/NoticiasRelacionadas.css';
 
-// URL base de la API
+
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 function NoticiasRelacionadas({ categoriaActual, noticiaActualId }) {
@@ -19,7 +19,7 @@ function NoticiasRelacionadas({ categoriaActual, noticiaActualId }) {
         const response = await axios.get(`${API_BASE_URL}/api/noticias`);
         const todasNoticias = response.data;
         
-        // Filtrar noticias de la misma categoría, excluyendo la actual
+
         const relacionadas = todasNoticias.filter(noticia => 
           noticia.categoria && 
           noticia.categoria.toLowerCase() === categoriaActual.toLowerCase() &&
@@ -77,7 +77,7 @@ function NoticiasRelacionadas({ categoriaActual, noticiaActualId }) {
           Más contenido de {categoriaActual}
         </div>
         
-        {/* Botones de navegación */}
+        {}
         <div className="noticias-relacionadas-navigation">
           <button 
             onClick={scrollLeft} 
@@ -96,7 +96,7 @@ function NoticiasRelacionadas({ categoriaActual, noticiaActualId }) {
         </div>
       </div>
       
-      {/* Contenedor horizontal scrollable */}
+      {}
       <div className="noticias-relacionadas-scroll-container">
         <div 
           className="noticias-relacionadas-scroll" 
@@ -151,7 +151,7 @@ function NoticiasRelacionadas({ categoriaActual, noticiaActualId }) {
         </div>
       </div>
     </div>
-  );
+  ); 
 }
 
 export default NoticiasRelacionadas;

@@ -1,4 +1,4 @@
-/* InterestPosts.css - Versión Mejorada */
+
 .interest-posts-container {
   max-width: 1400px;
   margin: 4rem auto 2rem;
@@ -49,7 +49,7 @@
     0 0 30px rgba(179, 0, 12, 0.2);
 }
 
-/* Contenedor de imagen - OCUPA TODA LA ALTURA */
+
 .interest-post-image-container {
   position: relative;
   width: 160px;
@@ -72,7 +72,7 @@
   transform: scale(1.1);
 }
 
-/* Overlay para la imagen */
+
 .interest-post-image-overlay {
   position: absolute;
   top: 0;
@@ -153,7 +153,7 @@
   border: 1px solid rgba(179, 0, 12, 0.3);
 }
 
-/* Efectos premium adicionales */
+
 .interest-post-card::before {
   content: '';
   position: absolute;
@@ -173,7 +173,7 @@
   opacity: 1;
 }
 
-/* Efecto de barrido en hover */
+
 .interest-post-card::after {
   content: '';
   position: absolute;
@@ -194,7 +194,7 @@
   left: 100%;
 }
 
-/* Animaciones */
+
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -222,7 +222,7 @@
   animation-delay: 0.3s;
 }
 
-/* Responsive */
+
 @media (max-width: 768px) {
   .interest-posts-grid {
     grid-template-columns: 1fr;
@@ -266,7 +266,7 @@
   }
 }
 
-/* Efecto de carga */
+
 .interest-posts-loading {
   text-align: center;
   padding: 2rem;

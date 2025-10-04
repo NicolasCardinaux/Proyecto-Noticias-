@@ -1,4 +1,4 @@
-/* Paleta de Colores Crimson Depths Mejorada */
+
 :root {
   --bright-red: #b3000c;
   --sangria: #8a0009;
@@ -13,7 +13,7 @@
   --hover-glow: rgba(179, 0, 12, 0.3);
 }
 
-/* Contenedor principal con Grid Layout - MÁS ANCHO */
+
 .weather-grid-container {
   display: grid;
   grid-template-columns: 2fr 1fr;
@@ -24,7 +24,7 @@
   padding: 1rem;
 }
 
-/* Estados de carga y error */
+
 .weather-loading, .weather-error {
   display: flex;
   flex-direction: column;
@@ -67,7 +67,7 @@
   background: var(--sangria);
 }
 
-/* --- TARJETA PRINCIPAL (IZQUIERDA) --- */
+
 .main-weather-card {
   background: var(--card-bg);
   color: var(--text-light);
@@ -105,9 +105,9 @@
 }
 
 .weather-icon {
-  width: 80px; /* MÁS GRANDE */
+  width: 80px; 
   height: 80px;
-  filter: drop-shadow(0 3px 8px rgba(0,0,0,0.4)) brightness(1.3) saturate(1.4) hue-rotate(-10deg); /* SOL MÁS AMARILLO */
+  filter: drop-shadow(0 3px 8px rgba(0,0,0,0.4)) brightness(1.3) saturate(1.4) hue-rotate(-10deg); 
   transition: transform 0.3s ease;
 }
 
@@ -116,7 +116,7 @@
 }
 
 .weather-icon-fallback {
-  font-size: 3rem; /* MÁS GRANDE */
+  font-size: 3rem; 
   filter: drop-shadow(0 3px 8px rgba(0,0,0,0.4));
 }
 
@@ -168,7 +168,7 @@
   font-weight: 500;
 }
 
-/* Grid de estadísticas - SOLO 2 ESTADÍSTICAS */
+
 .weather-stats-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -215,7 +215,7 @@
   letter-spacing: 0.5px;
 }
 
-/* Gráfico de fluctuación de temperatura */
+
 .hourly-forecast-graph {
   flex-grow: 1;
   padding: 1rem 0;
@@ -223,13 +223,13 @@
   margin-bottom: 1.5rem;
 }
 
-/* SOBREESCRIBIR ESTILOS DE NOTICIAS QUE AFECTAN AL CLIMA */
+
 .weather-grid-container .section-title,
 .main-weather-card .section-title,
 .static-cities-section .section-title,
 .hourly-forecast-graph .section-title,
 .weekly-forecast .section-title {
-  font-size: 1.2rem; /* Tamaño original que quieres */
+  font-size: 1.2rem; 
   font-weight: 600;
   text-transform: none;
   letter-spacing: normal;
@@ -237,10 +237,10 @@
   margin-bottom: 1rem;
   padding: 0;
   position: static;
-  text-align: center; /* <-- AGREGAR ESTA LÍNEA */
+  text-align: center; 
 }
 
-/* Eliminar el pseudo-elemento ::after que agrega la línea roja */
+
 .weather-grid-container .section-title::after,
 .main-weather-card .section-title::after,
 .static-cities-section .section-title::after {
@@ -295,7 +295,6 @@
   fill: var(--bright-red);
 }
 
-/* Pronóstico Semanal - MÁS ANCHO Y CON MÁS DÍAS */
 .weekly-forecast {
   margin-top: 0.5rem;
 }
@@ -337,13 +336,13 @@
 }
 
 .weather-icon-container.small .weather-icon {
-  width: 45px; /* MÁS GRANDE */
+  width: 45px; 
   height: 45px;
-  filter: brightness(1.3) saturate(1.4) hue-rotate(-10deg); /* SOL MÁS AMARILLO */
+  filter: brightness(1.3) saturate(1.4) hue-rotate(-10deg); 
 }
 
 .weather-icon-container.small .weather-icon-fallback {
-  font-size: 1.8rem; /* MÁS GRANDE */
+  font-size: 1.8rem; 
 }
 
 .temperature-range {
@@ -363,7 +362,7 @@
   color: var(--text-secondary);
 }
 
-/* --- GRID DE CIUDADES ESTÁTICAS (DERECHA) --- */
+
 .static-cities-section {
   display: flex;
   flex-direction: column;
@@ -387,7 +386,7 @@
   background-repeat: no-repeat;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  min-height: 180px; /* UN POCO MÁS ALTO */
+  min-height: 180px;
 }
 
 .static-city-card:hover {
@@ -429,9 +428,9 @@
 }
 
 .static-city-body .weather-icon {
-  width: 60px; /* MÁS GRANDE */
+  width: 60px; 
   height: 60px;
-  filter: brightness(1.3) saturate(1.4) hue-rotate(-10deg) drop-shadow(0 2px 4px rgba(0,0,0,0.4)); /* SOL MÁS AMARILLO */
+  filter: brightness(1.3) saturate(1.4) hue-rotate(-10deg) drop-shadow(0 2px 4px rgba(0,0,0,0.4)); 
 }
 
 .static-city-temp {
@@ -464,7 +463,6 @@
   text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
 }
 
-/* Responsividad */
 @media (max-width: 1200px) {
   .days-container {
     grid-template-columns: repeat(5, 1fr);

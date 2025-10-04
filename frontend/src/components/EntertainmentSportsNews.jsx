@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import '../styles/EntertainmentSportsNews.css';
 
-// URL base de la API
+
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 function EntertainmentSportsNews() {
@@ -83,7 +83,7 @@ function EntertainmentSportsNews() {
                   e.target.src = 'https://via.placeholder.com/400x200.png?text=Sin+Imagen';
                 }}
               />
-              {/* Badge de categoría agregado */}
+              {}
               <div className="entertainment-sports-category-badge">
                 {post.categoria}
               </div>

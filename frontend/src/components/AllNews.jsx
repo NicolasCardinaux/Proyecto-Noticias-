@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-// Componentes de Estructura y UI
+
 import ParticlesBackground from './ParticlesBackground';
 import CategoryFilter from './CategoryFilter';
 import '../styles/noticiasList.css';
 
-// URL base de la API
+
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 function AllNews() {
@@ -45,7 +45,6 @@ function AllNews() {
   const aplicarFiltros = () => {
     let noticiasFiltradas = [...noticias];
 
-    // Ordenar según el filtro activo
     switch (filtroActivo) {
       case 'mas-recientes':
         noticiasFiltradas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
@@ -101,7 +100,7 @@ function AllNews() {
         <CategoryFilter />
         
         <div className="noticias-grid-container">
-          {/* Filtro a la izquierda */}
+          {}
           <div className="filtro-left-container">
             <div className="filtro-group">
               <label htmlFor="orden-select" className="filtro-label">
@@ -121,7 +120,7 @@ function AllNews() {
             </div>
           </div>
 
-          {/* Header de la sección Todas las Noticias - CENTRADO COMO ANTES */}
+          {}
           <div className="section-header">
             <h1 className="section-title">
               Todas las Noticias
@@ -131,7 +130,7 @@ function AllNews() {
             </p>
             <div className="section-divider"></div>
             
-            {/* Botón para volver al inicio */}
+            {}
             <button 
               onClick={handleBackToHome}
               className="clear-filters-btn"
@@ -140,7 +139,7 @@ function AllNews() {
             </button>
           </div>
 
-          {/* Estados de carga y error */}
+          {}
           {loading && (
             <div className="loading-state">
               Cargando todas las noticias...
@@ -153,7 +152,7 @@ function AllNews() {
             </div>
           )}
 
-          {/* Grid de todas las noticias */}
+          {}
           {!loading && !error && filteredNoticias.length > 0 && (
             <div className="noticias-grid">
               {filteredNoticias.map((noticia) => (

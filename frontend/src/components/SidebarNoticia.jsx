@@ -4,7 +4,7 @@ import axios from 'axios';
 import { FiUser, FiHash, FiStar, FiTrendingUp, FiEye, FiCalendar } from 'react-icons/fi';
 import '../styles/SidebarNoticia.css';
 
-// URL base de la API
+
 const API_BASE_URL = "https://proyecto-noticias-api.onrender.com";
 
 function SidebarNoticia({ fuente, categoria, noticiaActualId }) {
@@ -18,7 +18,7 @@ function SidebarNoticia({ fuente, categoria, noticiaActualId }) {
       setLoading(true);
       setError(null);
       
-      // OPTIMIZACIÓN: Usar parámetros en la query para filtrado en backend
+
       const response = await axios.get(
         `${API_BASE_URL}/api/popular-posts?exclude=${noticiaActualId}&limit=4`
       );
@@ -28,7 +28,7 @@ function SidebarNoticia({ fuente, categoria, noticiaActualId }) {
       console.error("Error al cargar los top posts:", err);
       setError("No se pudieron cargar los posts populares");
       
-      // Fallback: intentar con el endpoint normal si falla
+
       try {
         const fallbackResponse = await axios.get(`${API_BASE_URL}/api/popular-posts`);
         const filteredPosts = fallbackResponse.data
@@ -44,7 +44,7 @@ function SidebarNoticia({ fuente, categoria, noticiaActualId }) {
   }, [noticiaActualId]);
 
   useEffect(() => {
-    // Carga diferida para no bloquear el render principal
+
     const timer = setTimeout(() => {
       fetchTopPosts();
     }, 300);
@@ -71,14 +71,14 @@ function SidebarNoticia({ fuente, categoria, noticiaActualId }) {
     });
   }, []);
 
-  // Función para obtener vistas/clics
+
   const getPostViews = useCallback((post) => {
     return post.clicks || post.clics || Math.floor(Math.random() * 500) + 100;
   }, []);
 
   return (
     <aside className="sidebar-noticia-container">
-      {/* Sección del Portal/Fuente - CLICKEABLE */}
+      {}
       <div className="sidebar-widget fuente-widget">
         <div className="widget-header">
           <FiUser className="widget-header-icon" />
@@ -102,7 +102,7 @@ function SidebarNoticia({ fuente, categoria, noticiaActualId }) {
         </div>
       </div>
 
-      {/* Sección de Categoría - CLICKEABLE */}
+      {}
       <div className="sidebar-widget categoria-widget">
         <div className="widget-header">
           <FiHash className="widget-header-icon" />
@@ -118,7 +118,7 @@ function SidebarNoticia({ fuente, categoria, noticiaActualId }) {
         </div>
       </div>
 
-      {/* Sección de Top Posts - CON IMÁGENES */}
+      {}
       <div className="sidebar-widget top-posts-widget">
         <div className="widget-header">
           <FiTrendingUp className="widget-header-icon" />
@@ -143,7 +143,7 @@ function SidebarNoticia({ fuente, categoria, noticiaActualId }) {
                 className="top-post-item-with-image"
                 onClick={() => handlePostClick(post.id)}
               >
-                {/* Imagen pequeña a la izquierda */}
+                {}
                 <div className="post-image-mini">
                   <img
                     src={post.imagen}
@@ -155,7 +155,7 @@ function SidebarNoticia({ fuente, categoria, noticiaActualId }) {
                   <div className="post-rank-mini">#{index + 1}</div>
                 </div>
                 
-                {/* Contenido a la derecha */}
+                {}
                 <div className="post-content-with-image">
                   <div className="post-header-with-image">
                     <span className="post-category-with-image">
@@ -187,7 +187,7 @@ function SidebarNoticia({ fuente, categoria, noticiaActualId }) {
         )}
       </div>
 
-      {/* Widget de estadísticas - Más compacto */}
+      {}
       <div className="sidebar-widget stats-widget">
         <div className="widget-header">
           <FiEye className="widget-header-icon" />

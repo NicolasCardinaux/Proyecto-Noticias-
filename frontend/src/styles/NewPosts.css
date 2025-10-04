@@ -1,4 +1,4 @@
-/* NewPosts.css - Versión Mejorada con Imagen Completa */
+
 .new-posts-container {
   max-width: 1400px;
   margin: 4rem auto 2rem;
@@ -56,7 +56,7 @@
 
 .post-item-card {
   display: flex;
-  align-items: stretch; /* Cambiado a stretch para que la imagen ocupe toda la altura */
+  align-items: stretch; 
   background: linear-gradient(145deg, #1a1a1a, #2a2a2a);
   border: 1px solid rgba(62, 68, 81, 0.3);
   border-radius: 16px;
@@ -66,7 +66,7 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   position: relative;
   transform: translateZ(0);
-  min-height: 140px; /* Altura mínima para consistencia */
+  min-height: 140px; 
 }
 
 .post-item-card:hover {
@@ -78,23 +78,21 @@
     0 0 30px rgba(179, 0, 12, 0.2);
 }
 
-/* Contenedor de imagen - OCUPA TODA LA ALTURA */
+
 .post-item-image-container {
   position: relative;
-  width: 160px; /* Un poco más ancho para mejor proporción */
+  width: 160px; 
   flex-shrink: 0;
   overflow: hidden;
-  /* Bordes redondeados solo en el lado izquierdo */
   border-top-left-radius: 16px;
   border-bottom-left-radius: 16px;
 }
 
 .post-item-image {
   width: 100%;
-  height: 100%; /* OCUPA EL 100% DE LA ALTURA */
-  object-fit: cover; /* Se corta para llenar el espacio */
+  height: 100%; 
+  object-fit: cover; 
   transition: transform 0.6s ease;
-  /* Asegurar que herede los bordes redondeados */
   border-top-left-radius: inherit;
   border-bottom-left-radius: inherit;
 }
@@ -103,7 +101,7 @@
   transform: scale(1.1);
 }
 
-/* Overlay para la imagen - ahora ocupa toda la altura */
+
 .post-image-overlay {
   position: absolute;
   top: 0;
@@ -129,7 +127,7 @@
   z-index: 2;
   display: flex;
   flex-direction: column;
-  justify-content: space-between; /* Distribuye el contenido verticalmente */
+  justify-content: space-between; 
 }
 
 .post-item-title {
@@ -155,7 +153,7 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
   min-height: 2.5em;
-  flex-grow: 1; /* Ocupa el espacio disponible */
+  flex-grow: 1; 
 }
 
 .post-meta {
@@ -165,7 +163,7 @@
   padding-top: 0.75rem;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   font-size: 0.75rem;
-  margin-top: auto; /* Empuja el meta hacia abajo */
+  margin-top: auto; 
 }
 
 .post-date {
@@ -184,7 +182,7 @@
   border: 1px solid rgba(179, 0, 12, 0.3);
 }
 
-/* Efectos premium adicionales */
+
 .post-item-card::before {
   content: '';
   position: absolute;
@@ -204,7 +202,7 @@
   opacity: 1;
 }
 
-/* Efecto de barrido en hover */
+
 .post-item-card::after {
   content: '';
   position: absolute;
@@ -225,7 +223,7 @@
   left: 100%;
 }
 
-/* Animaciones */
+
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -261,7 +259,7 @@
   animation-delay: 0.5s;
 }
 
-/* Responsive */
+
 @media (max-width: 768px) {
   .new-posts-grid {
     grid-template-columns: 1fr;
@@ -280,7 +278,7 @@
   
   .post-item-image-container {
     width: 100%;
-    height: 160px; /* Altura fija en móvil */
+    height: 160px; 
     border-radius: 0;
     border-top-left-radius: 16px;
     border-top-right-radius: 16px;
@@ -305,7 +303,7 @@
   }
 }
 
-/* Efecto de carga */
+
 .new-posts-loading {
   text-align: center;
   padding: 2rem;

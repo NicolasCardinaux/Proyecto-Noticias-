@@ -1,4 +1,4 @@
-# db.py - Conexión completa a Supabase con todas las optimizaciones
+
 import os
 from supabase import create_client, Client
 from dotenv import load_dotenv
@@ -9,14 +9,14 @@ import random
 
 load_dotenv()
 
-# Configuración de Supabase
+
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 
 if not SUPABASE_URL or not SUPABASE_KEY:
     raise ValueError("❌ Faltan SUPABASE_URL o SUPABASE_SERVICE_ROLE_KEY en .env")
 
-# Cliente de Supabase
+
 try:
     supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
     print("✅ Cliente Supabase 2.3.1 configurado correctamente")
@@ -59,12 +59,12 @@ def get_popular_posts(limit: int = 5, exclude_id: Optional[int] = None) -> List[
 def get_random_posts(limit: int = 4) -> List[Dict[str, Any]]:
     """Obtiene noticias aleatorias - VERSIÓN OPTIMIZADA."""
     try:
-        # Intentar usar RANDOM() de PostgreSQL si está disponible
+
         try:
             response = supabase.table("noticias").select("*").order("random()").limit(limit).execute()
             return _handle_response(response)
         except:
-            # Fallback: obtener sample y mezclar en Python
+
             sample_size = min(limit * 3, 50)
             response = supabase.table("noticias").select("*").order("fecha", desc=True).limit(sample_size).execute()
             noticias = _handle_response(response)
@@ -137,15 +137,15 @@ def get_sources() -> List[str]:
 def get_stats() -> Dict[str, Any]:
     """Obtiene estadísticas generales."""
     try:
-        # Total de noticias
+
         total_response = supabase.table("noticias").select("id", count="exact").execute()
         total_noticias = len(total_response.data)
         
-        # Total de clics
+
         clics_response = supabase.table("noticias").select("clics").execute()
         total_clics = sum(noticia.get("clics", 0) for noticia in clics_response.data)
         
-        # Noticias de hoy (usando fecha ISO para compatibilidad)
+
         hoy = datetime.now().date().isoformat()
         hoy_response = supabase.table("noticias").select("id").eq("fecha", hoy).execute()
         noticias_hoy = len(hoy_response.data)
@@ -209,13 +209,13 @@ def obtener_urls_existentes() -> set:
 def increment_clics(noticia_id: int) -> bool:
     """Incrementa el contador de clics de una noticia - VERSIÓN ATÓMICA."""
     try:
-        # Intentar usar función RPC si existe (más eficiente y atómica)
+
         try:
             response = supabase.rpc("increment_clics", {"nid": noticia_id}).execute()
             _handle_response(response)
             return True
         except:
-            # Fallback: actualización directa
+
             response = supabase.table("noticias").select("clics").eq("id", noticia_id).execute()
             if not response.data:
                 return False
@@ -233,12 +233,12 @@ def increment_clics(noticia_id: int) -> bool:
 def delete_old_noticias(max_months: int = 6) -> bool:
     """Elimina noticias más antiguas que X meses."""
     try:
-        # Usar fecha ISO para máxima compatibilidad
+
         fecha_limite = (datetime.now() - timedelta(days=30 * max_months)).date().isoformat()
         
         print(f"🗑️  Buscando noticias anteriores a: {fecha_limite} ({max_months} meses)")
         
-        # Contar noticias a eliminar
+
         count_response = supabase.table("noticias").select("id", count="exact").lt("fecha", fecha_limite).execute()
         total_a_eliminar = count_response.count or 0
         
@@ -248,7 +248,7 @@ def delete_old_noticias(max_months: int = 6) -> bool:
         
         stats_antes = get_stats()
         
-        # Eliminar
+
         delete_response = supabase.table("noticias").delete().lt("fecha", fecha_limite).execute()
         
         deleted_count = len(delete_response.data) if delete_response.data else 0
@@ -319,7 +319,7 @@ def analizar_antiguedad_noticias():
         
         for noticia in noticias:
             try:
-                # Usar fecha ISO para compatibilidad
+
                 fecha_noticia = datetime.strptime(noticia['fecha'], "%Y-%m-%d").date()
                 dias_diferencia = (hoy - fecha_noticia).days
                 meses_diferencia = dias_diferencia // 30
@@ -340,7 +340,7 @@ def analizar_antiguedad_noticias():
             except Exception as e:
                 categorias_antiguedad.append("Fecha inválida")
         
-        # Contar por categoría
+
         conteo = Counter(categorias_antiguedad)
         
         print("📊 DISTRIBUCIÓN POR ANTIGÜEDAD:")
@@ -396,7 +396,7 @@ def monitor_estado_base_datos():
     print("🔍 MONITOREO COMPLETO DE LA BASE DE DATOS")
     print("=" * 60)
     
-    # Estadísticas generales
+
     stats = get_stats()
     print(f"📈 ESTADÍSTICAS GENERALES:")
     print(f"   • Total noticias: {stats['total_noticias']}")
@@ -409,7 +409,7 @@ def monitor_estado_base_datos():
     print("\n🔔 NOTICIAS PRÓXIMAS A EXPIRAR:")
     get_noticias_proximas_a_expirar(dias_umbral=30)
     
-    # Últimas noticias agregadas
+
     ultimas = get_noticias(limit=3)
     if ultimas:
         print("\n🆕 ÚLTIMAS NOTICIAS AGREGADAS:")

@@ -1,13 +1,10 @@
-/* QuoteOfTheDay.css - Versión Profesional Mejorada */
 
-/* Sección principal */
 .quote-section {
   width: 100%;
   margin: 4rem 0;
   padding: 0 1rem;
 }
 
-/* Contenedor principal - Bordes difuminados mejorados */
 .quote-container {
   max-width: 1400px;
   margin: 0 auto;
@@ -16,22 +13,22 @@
     rgba(40, 44, 52, 0.92) 0%, 
     rgba(30, 34, 42, 0.96) 100%);
   border-radius: 1.2rem;
-  border: none; /* Eliminando el borde marcado */
+  border: none; 
   box-shadow: 
     0 20px 40px rgba(0, 0, 0, 0.7),
     inset 0 1px 0 rgba(255, 255, 255, 0.08),
     0 0 0 1px rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(30px) saturate(180%); /* Aumentando el desenfoque */
+  backdrop-filter: blur(30px) saturate(180%); 
   position: relative;
   overflow: hidden;
   isolation: isolate;
 }
 
-/* Efecto de desenfoque en los bordes */
+
 .quote-container::after {
   content: '';
   position: absolute;
-  top: -20px; /* Aumentando el área difuminada */
+  top: -20px; 
   left: -20px;
   right: -20px;
   bottom: -20px;
@@ -41,7 +38,7 @@
     rgba(179, 0, 12, 0.1) 100%);
   border-radius: 1.5rem;
   z-index: -1;
-  filter: blur(25px); /* Aumentando el desenfoque */
+  filter: blur(25px); 
   opacity: 0.7;
   animation: borderPulse 4s ease-in-out infinite;
 }
@@ -51,7 +48,7 @@
   50% { opacity: 0.8; transform: scale(1.02); }
 }
 
-/* Efecto de borde luminoso sutil */
+
 .quote-container::before {
   content: '';
   position: absolute;
@@ -73,7 +70,7 @@
   50% { opacity: 0.8; }
 }
 
-/* Contenedor del título mejorado */
+
 .quote-title-container {
   text-align: center;
   margin-bottom: 3.5rem;
@@ -90,7 +87,7 @@
   display: inline-block;
   padding: 0 3rem;
   
-  /* Degradado profesional mejorado */
+
   background: linear-gradient(135deg, 
     #ffffff 0%, 
     #ffd700 20%, 
@@ -103,13 +100,13 @@
   background-clip: text;
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
   
-  /* Efecto de texto 3D sutil */
+
   text-shadow: 
     0 2px 4px rgba(0, 0, 0, 0.3),
     0 4px 12px rgba(179, 0, 12, 0.4);
 }
 
-/* Subrayado animado mejorado */
+
 .title-underline {
   height: 3px;
   width: 120px;
@@ -145,7 +142,7 @@
   100% { left: 100%; }
 }
 
-/* Blockquote styling mejorado */
+
 .quote-blockquote {
   margin: 0;
   padding: 0;
@@ -157,7 +154,7 @@
   z-index: 2;
 }
 
-/* Contenedor del texto - Más profesional */
+
 .quote-text-container {
   background: linear-gradient(135deg, 
     rgba(255, 255, 255, 0.03) 0%,
@@ -175,7 +172,7 @@
   overflow: hidden;
 }
 
-/* Efecto de borde interior sutil */
+
 .quote-text-container::before {
   content: '';
   position: absolute;
@@ -188,7 +185,7 @@
   pointer-events: none;
 }
 
-/* Efecto de barrido mejorado */
+
 .quote-text-container::after {
   content: '';
   position: absolute;
@@ -210,7 +207,7 @@
   left: 150%;
 }
 
-/* Texto de la frase - Más elegante */
+
 .quote-text {
   font-family: 'Georgia', 'Times New Roman', serif;
   font-size: 2.3rem;
@@ -221,7 +218,7 @@
   letter-spacing: 0.8px;
   position: relative;
   
-  /* Degradado de texto refinado */
+
   background: linear-gradient(135deg, 
     #ffffff 0%, 
     #ffeaa7 25%, 
@@ -234,7 +231,7 @@
   filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.6));
 }
 
-/* Comillas más elegantes */
+
 .quote-text::before,
 .quote-text::after {
   content: '"';
@@ -260,7 +257,7 @@
   right: -2.5rem;
 }
 
-/* Autor de la frase - Más refinado */
+
 .quote-author {
   font-family: 'Roboto Mono', 'Courier New', monospace;
   font-size: 1.3rem;
@@ -276,7 +273,7 @@
   border: 1px solid rgba(255, 51, 65, 0.2);
   backdrop-filter: blur(15px);
   
-  /* Degradado en texto del autor */
+
   background: linear-gradient(135deg, #ff3341 0%, #ffd700 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -284,7 +281,7 @@
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
 }
 
-/* Elementos decorativos de fondo mejorados */
+
 .quote-decoration {
   position: absolute;
   top: 0;
@@ -340,7 +337,7 @@
   }
 }
 
-/* Estados de carga y error mejorados */
+
 .quote-container-loading,
 .quote-container-error {
   max-width: 1400px;
@@ -350,10 +347,10 @@
     rgba(40, 44, 52, 0.92) 0%, 
     rgba(30, 34, 42, 0.96) 100%);
   border-radius: 1.2rem;
-  border: none; /* Eliminando el borde marcado */
+  border: none; 
   text-align: center;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(30px); /* Aumentando el desenfoque */
+  backdrop-filter: blur(30px); 
 }
 
 .loading-text,
@@ -369,7 +366,7 @@
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
 }
 
-/* Efectos de hover más suaves */
+
 .quote-container:hover {
   box-shadow: 
     0 25px 60px rgba(179, 0, 12, 0.25),
@@ -385,7 +382,7 @@
     0 10px 50px rgba(0, 0, 0, 0.5);
 }
 
-/* Responsividad mejorada */
+
 @media (max-width: 1024px) {
   .quote-container {
     margin: 0 1.5rem;

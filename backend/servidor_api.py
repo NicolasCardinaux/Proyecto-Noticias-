@@ -7,7 +7,6 @@ import json
 import random
 import os
 
-# Importar nuestro módulo de base de datos Supabase
 import db
 from procesar_y_guardar_db import ejecutar_crawler
 
@@ -34,10 +33,10 @@ frase_cache = {
     "frase": None
 }
 
-# API externa de frases en español (sin token)
+
 EXTERNAL_QUOTES_API = "https://frasedeldia.azurewebsites.net/api/phrase"
 
-# Frases de respaldo en caso de que falle la API
+
 FRASES_RESPALDO = [
     {"texto": "La educación es el arma más poderosa para cambiar el mundo.", "autor": "Nelson Mandela"},
     {"texto": "El único modo de hacer un gran trabajo es amar lo que haces.", "autor": "Steve Jobs"},
@@ -150,7 +149,7 @@ def get_posts_by_source():
 def procesar_noticias_externo():
     """Endpoint para ejecutar el crawler de noticias desde externo."""
     
-    # Opcional: agregar seguridad con una clave secreta
+
     secret_key = request.headers.get('X-Secret-Key')
     expected_key = os.environ.get('CRON_SECRET')
     
@@ -160,14 +159,14 @@ def procesar_noticias_externo():
     try:
         print("🔄 Iniciando proceso de crawler desde endpoint externo...")
         
-        # Ejecutar el crawler
+
         resultado = ejecutar_crawler()
         
-        # Si hay error en el crawler
+
         if "error" in resultado:
             return jsonify({"error": f"Error en el crawler: {resultado['error']}"}), 500
         
-        # Éxito
+
         return jsonify({
             "mensaje": "Crawler ejecutado con éxito", 
             "data": resultado,
@@ -186,12 +185,12 @@ def frase_del_dia():
     """Devuelve una frase del día (la misma para todos durante ese día)."""
     today = datetime.date.today().isoformat()
 
-    # Si ya tenemos una frase guardada de hoy → la devolvemos
+
     if frase_cache["date"] == today and frase_cache["frase"]:
         print(f"✅ Devolviendo frase en caché para hoy: {today}")
         return jsonify(frase_cache["frase"])
 
-    # Si no, intentamos obtener una nueva de la API externa
+
     try:
         print("🔄 Intentando obtener frase de la API externa...")
         response = requests.get(EXTERNAL_QUOTES_API, timeout=10)
@@ -200,13 +199,12 @@ def frase_del_dia():
 
         print(f"📝 Respuesta de la API: {data}")
 
-        # Verificar la estructura de la respuesta
         if isinstance(data, dict):
-            # Si es un diccionario, usar las claves esperadas
+
             texto = data.get("phrase") or data.get("texto") or data.get("frase")
             autor = data.get("author") or data.get("autor")
         elif isinstance(data, str):
-            # Si es un string, usarlo como texto
+
             texto = data
             autor = "Anónimo"
         else:
@@ -219,10 +217,10 @@ def frase_del_dia():
                 "autor": autor or "Anónimo"
             }
         else:
-            # Si no podemos obtener datos válidos, usar respaldo
+
             raise ValueError("Estructura de respuesta no reconocida")
 
-        # Guardamos en caché
+
         frase_cache["date"] = today
         frase_cache["frase"] = nueva_frase
 
@@ -233,11 +231,11 @@ def frase_del_dia():
         print(f"❌ Error obteniendo frase externa: {str(e)}")
         print("🔄 Usando frase de respaldo...")
         
-        # Usar una frase de respaldo (seleccionada por el día para consistencia)
-        random.seed(today)  # Para que sea la misma para todos hoy
+
+        random.seed(today)  
         frase_respaldo = random.choice(FRASES_RESPALDO)
         
-        # Guardar en caché igualmente para hoy
+
         frase_cache["date"] = today
         frase_cache["frase"] = frase_respaldo
         
@@ -252,18 +250,18 @@ def translate_apod():
     data = request.json
     title = data.get("title")
     explanation = data.get("explanation")
-    apod_date = data.get("date")  # Fecha del APOD
+    apod_date = data.get("date") 
     
     if not title or not explanation or not apod_date:
         return jsonify({"error": "Faltan datos requeridos"}), 400
 
-    # Obtener IP del usuario
+
     user_ip = get_user_ip()
     
-    # Crear hash del contenido para verificar cambios
+
     content_hash = hashlib.md5(f"{title}{explanation}".encode()).hexdigest()
     
-    # Verificar si ya existe una traducción para este usuario y esta fecha
+
     cached_translation = db.get_cached_apod_translation(apod_date, user_ip)
     if cached_translation:
         print(f"✅ Devolviendo traducción en caché para IP: {user_ip}")
@@ -273,17 +271,17 @@ def translate_apod():
             "fromCache": True
         })
     
-    # Si no está en caché, traducir
+
     try:
-        # Traducir título y explicación
+
         url = "https://api.mymemory.translated.net/get"
         
-        # Traducir título
+
         title_response = requests.get(url, params={"q": title, "langpair": "en|es"})
         title_response.raise_for_status()
         translated_title = title_response.json()["responseData"]["translatedText"]
         
-        # Traducir explicación en chunks si es muy larga
+
         explanation_chunks = []
         chunk_size = 500
         for i in range(0, len(explanation), chunk_size):
@@ -294,7 +292,7 @@ def translate_apod():
         
         translated_explanation = " ".join(explanation_chunks)
         
-        # Guardar en caché
+
         db.save_apod_translation(
             apod_date, 
             content_hash, 
@@ -359,7 +357,7 @@ def search_noticias():
     """Busca noticias por término."""
     try:
         query = request.args.get('q', '')
-        tipo = request.args.get('type', 'titulo')  # titulo, fuente, categoria
+        tipo = request.args.get('type', 'titulo')  
         
         if not query:
             return jsonify({"error": "Parámetro 'q' requerido"}), 400
@@ -378,7 +376,7 @@ def search_noticias():
 def health_check():
     """Endpoint para verificar el estado del servidor."""
     try:
-        # Verificar conexión a Supabase
+
         db.get_noticias(limit=1)
         return jsonify({
             "status": "healthy",

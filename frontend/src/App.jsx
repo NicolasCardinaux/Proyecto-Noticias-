@@ -6,7 +6,7 @@ import NoticiasList from './components/NoticiasList';
 import NoticiaDetalle from './components/NoticiaDetalle';
 import QuienesSomos from './components/QuienesSomos';
 import AllNews from './components/AllNews';
-import Contacto from './components/Contacto'; // Asegúrate de importar el componente
+import Contacto from './components/Contacto'; 
 import './index.css';
 
 function App() {
@@ -22,7 +22,7 @@ function App() {
             <Route path="/search" element={<NoticiasList />} />
             <Route path="/quienes-somos" element={<QuienesSomos />} />
             <Route path="/all-news" element={<AllNews />} />
-            <Route path="/contacto" element={<Contacto />} /> {/* Ruta de contacto */}
+            <Route path="/contacto" element={<Contacto />} /> {}
           </Routes>
         </main>
         <Footer />

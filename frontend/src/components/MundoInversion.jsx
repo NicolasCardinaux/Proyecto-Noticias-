@@ -3,7 +3,7 @@ import axios from 'axios';
 import '../styles/MundoInversion.css';
 import InversionFondo from '../imagenes/inversion.jpg';
 
-// ... (Mapas y configuraciones no cambian) ...
+
 const STOCK_MAP = {
   '^GSPC': { name: 'S&P 500' },
   '^DJI': { name: 'Dow Jones Industrial Average' },
@@ -63,14 +63,13 @@ function MundoInversion() {
       setError(null);
 
       const CACHE_KEY = "investmentData";
-      const CACHE_DURATION = 2 * 60 * 60 * 1000; // 2 horas en milisegundos
+      const CACHE_DURATION = 2 * 60 * 60 * 1000; 
 
       const cachedData = localStorage.getItem(CACHE_KEY);
       if (cachedData) {
         const { data: cached, timestamp } = JSON.parse(cachedData);
         if (Date.now() - timestamp < CACHE_DURATION) {
           setData(cached);
-          // Restaurar la moneda local del caché
           setLocalCurrencyCode(cached.forex.base);
           const localRateFromCache = cached.forex.rates.find(r => r.code === cached.forex.base)?.rate || 1;
           setUsdToLocalRate(localRateFromCache);
@@ -146,7 +145,7 @@ function MundoInversion() {
     fetchAllData();
   }, []);
 
-  // ... (El resto del código no cambia) ...
+
   useEffect(() => {
     const handleScroll = () => {
       if (scrollRef.current) {
@@ -211,7 +210,7 @@ function MundoInversion() {
 
         {!loading && !error && (
           <div className="mi-carousel-container" ref={scrollRef}>
-            {/* --- SECCIÓN DIVISAS --- */}
+            {}
             <div className="mi-slide">
               <div className="mi-card">
                 <h3 className="mi-card-title">Tasas de Cambio de Referencia</h3>
@@ -231,7 +230,7 @@ function MundoInversion() {
               </div>
             </div>
 
-            {/* --- SECCIÓN ACCIONES --- */}
+            {}
             <div className="mi-slide">
               <div className="mi-card">
                 <h3 className="mi-card-title">Principales Índices y Acciones</h3>
@@ -259,7 +258,7 @@ function MundoInversion() {
               </div>
             </div>
 
-            {/* --- SECCIÓN CRIPTOMONEDAS --- */}
+            {}
             <div className="mi-slide">
               <div className="mi-card">
                 <h3 className="mi-card-title">Top Criptomonedas</h3>

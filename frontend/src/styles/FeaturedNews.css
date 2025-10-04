@@ -1,4 +1,4 @@
-/* ---- Contenedor Principal ---- */
+
 .featured-news-container {
     display: grid;
     grid-template-columns: 1fr; 
@@ -9,16 +9,15 @@
     margin: 0 auto;
 }
 
-/* En pantallas más grandes, ajustamos la distribución */
 @media (min-width: 1024px) {
     .featured-news-container {
         grid-template-columns: 1fr 1fr 2fr;
-        /* Forzar la misma altura */
+
         align-items: stretch;
     }
 }
 
-/* ---- Estilo Base para Todas las Tarjetas ---- */
+
 .news-card {
     position: relative;
     border-radius: 12px;
@@ -38,39 +37,39 @@
 }
 
 .static-card {
-    aspect-ratio: 3 / 4; /* Proporción para las dos primeras tarjetas */
+    aspect-ratio: 3 / 4; 
 }
 
 .news-card, 
 .slider-item {
   position: relative;
-  overflow: hidden;   /* 👈 evita que se vea lo que sobresale */
-  border-radius: 12px; /* opcional, si querés bordes redondeados */
+  overflow: hidden;   
+  border-radius: 12px; 
 }
 
-/* Asegurar que todas las imágenes ocupen el cuadro */
+
 .card-image {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;     /* Rellena sin deformarse */
-  object-position: center; /* Centrado siempre */
+  object-fit: cover;     
+  object-position: center;
   transition: transform 0.4s ease-out;
   z-index: 1;
 }
 
-/* Efecto hover desde el centro */
+
 .news-card:hover .card-image,
 .slider-item:hover .card-image {
-  transform: scale(1.08);    /* Un poquito más de zoom */
-  transform-origin: center;  /* Ahora crece desde el centro */
+  transform: scale(1.08);    
+  transform-origin: center; 
 }
 
 
 
-/* --- Overlay unificado (igual para carrusel y estáticas) --- */
+
 .text-overlay {
     position: relative;
     z-index: 2;
@@ -87,14 +86,14 @@
     overflow: hidden; 
 }
 
-/* Carrusel: mismo efecto pero fijo abajo */
+
 .slider-item .text-overlay {
     position: absolute;
-    bottom: 1rem;              /* un poco más arriba, como las estáticas */
+    bottom: 1rem;             
     left: 1rem;
     right: 1rem;
     margin: 0 auto;
-    border-radius: 12px;       /* mismo borde que las primeras */
+    border-radius: 12px;    
     padding: 1rem;
     background-color: rgba(25, 0, 1, 0.45);
     backdrop-filter: blur(12px);
@@ -103,7 +102,7 @@
     overflow: hidden;
 }
 
-/* --- Texto dentro del overlay --- */
+
 .text-overlay h3,
 .text-overlay p {
     overflow: hidden;
@@ -127,7 +126,7 @@
     -webkit-line-clamp: 2; 
 }
 
-/* Ajustamos texto en carrusel */
+
 .slider-item .text-overlay h3 {
     font-size: 1.2rem;
     font-weight: 700;
@@ -156,7 +155,7 @@
     transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-/* --- Botones del carrusel --- */
+
 .slider-control {
     position: absolute;
     top: 50%;
@@ -165,8 +164,8 @@
     background-color: rgba(0, 0, 0, 0.5);
     color: white;
     border: none;
-    border-radius: 12px; /* Esquinas suaves */
-    width: 48px; /* Más cuadrado */
+    border-radius: 12px; 
+    width: 48px; 
     height: 48px;
     font-size: 1.5rem;
     cursor: pointer;
@@ -184,7 +183,7 @@
 .slider-control.prev { left: 15px; }
 .slider-control.next { right: 15px; }
 
-/* Puntos indicadores */
+
 .slider-dots {
     position: absolute;
     bottom: 20px;

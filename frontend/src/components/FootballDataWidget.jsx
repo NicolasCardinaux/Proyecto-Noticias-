@@ -28,7 +28,7 @@ function FootballDataWidget() {
       setLoading(true);
       setError(null);
       const CACHE_KEY = "footballData";
-      const CACHE_DURATION = 2 * 60 * 60 * 1000; // 2 horas en milisegundos
+      const CACHE_DURATION = 2 * 60 * 60 * 1000; 
 
       const cachedData = localStorage.getItem(CACHE_KEY);
       if (cachedData) {
@@ -36,7 +36,7 @@ function FootballDataWidget() {
         if (Date.now() - timestamp < CACHE_DURATION) {
           setLeaguesData(cached);
           setLoading(false);
-          return; // Salir de la función para no llamar a la API
+          return; 
         }
       }
 
@@ -70,7 +70,7 @@ function FootballDataWidget() {
         }
 
         setLeaguesData(allData);
-        // Guardar los datos y el timestamp en el caché
+
         localStorage.setItem(CACHE_KEY, JSON.stringify({ data: allData, timestamp: Date.now() }));
 
       } catch (err) {
@@ -84,7 +84,7 @@ function FootballDataWidget() {
     fetchAllLeaguesDataSequentially();
   }, []);
 
-  // ... (El resto del código no cambia) ...
+
 
   useEffect(() => {
     const handleScroll = () => {

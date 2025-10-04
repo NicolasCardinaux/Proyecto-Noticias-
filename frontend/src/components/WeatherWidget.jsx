@@ -2,13 +2,12 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "../styles/WeatherWidget.css";
 
-// Importa las imágenes de fondo para las tarjetas estáticas
 import buenosAiresImg from '../imagenes/Buenos-Aires.jpg';
 import newYorkImg from '../imagenes/New-York.jpg';
 import londonImg from '../imagenes/London.jpg';
 import tokioImg from '../imagenes/tokio.jpg';
 
-// --- Componente para el Gráfico de Línea Fluctuante ---
+
 const HourlyForecastChart = ({ hourlyData }) => {
   if (!hourlyData || hourlyData.length === 0) return null;
 
@@ -80,7 +79,7 @@ const HourlyForecastChart = ({ hourlyData }) => {
   );
 };
 
-// --- Componente para las tarjetas de ciudades estáticas ---
+
 const StaticCityCard = ({ cityData, bgImage }) => {
   if (!cityData) return null;
 
@@ -127,7 +126,7 @@ const StaticCityCard = ({ cityData, bgImage }) => {
                 e.target.nextSibling.style.display = 'block';
               }}
               style={{ 
-                filter: 'brightness(1.3) saturate(1.4) hue-rotate(-10deg)' // Sol más amarillo y brillante
+                filter: 'brightness(1.3) saturate(1.4) hue-rotate(-10deg)' 
               }}
             />
             <div className="weather-icon-fallback" style={{display: 'none'}}>
@@ -157,7 +156,7 @@ const StaticCityCard = ({ cityData, bgImage }) => {
   );
 };
 
-// --- Componente Principal ---
+
 const WeatherWidget = () => {
   const [mainWeather, setMainWeather] = useState(null);
   const [hourlyForecast, setHourlyForecast] = useState([]);
@@ -175,7 +174,7 @@ const WeatherWidget = () => {
     { name: "Tokyo", image: tokioImg },
   ];
 
-  // Función para obtener el icono más frecuente
+
   const getMostFrequentIcon = (weatherArray) => {
     const iconCounts = {};
     weatherArray.forEach(w => {
@@ -186,7 +185,7 @@ const WeatherWidget = () => {
     );
   };
 
-  // Función para obtener ubicación automática sin pedir permiso
+
   const getCurrentLocation = () => {
     return new Promise((resolve, reject) => {
       if (!navigator.geolocation) {
@@ -194,7 +193,7 @@ const WeatherWidget = () => {
         return;
       }
 
-      // Usar getCurrentPosition sin opciones para comportamiento por defecto más rápido
+ 
       navigator.geolocation.getCurrentPosition(
         (position) => {
           resolve({
@@ -206,12 +205,12 @@ const WeatherWidget = () => {
           console.warn("Error obteniendo ubicación GPS:", error);
           reject(error);
         }
-        // Sin opciones para que sea más rápido y menos intrusivo
+
       );
     });
   };
 
-  // Función para obtener ciudad desde coordenadas (reverse geocoding)
+
   const getCityFromCoordinates = async (lat, lon) => {
     try {
       const response = await axios.get(
@@ -228,15 +227,13 @@ const WeatherWidget = () => {
     }
   };
 
-  // Función principal para obtener datos del clima
+
   const fetchAllData = async (lat, lon, cityName = "Ubicación Actual") => {
     setLoading(true);
     setError(null);
 
     const CACHE_KEY = "weatherData";
-    const CACHE_DURATION = 30 * 60 * 1000; // 30 minutos
-
-    // Verificar caché
+    const CACHE_DURATION = 30 * 60 * 1000; 
     const cachedData = localStorage.getItem(CACHE_KEY);
     if (cachedData) {
       try {
@@ -281,16 +278,15 @@ const WeatherWidget = () => {
         ...staticCitiesPromises
       ]);
 
-      // Procesar datos principales
+ 
       const newMainWeather = {
         ...weatherRes.data,
         name: cityName
       };
 
-      // Procesar pronóstico por hora
+
       const newHourlyForecast = forecastRes.data.list.slice(0, 8);
 
-      // Procesar pronóstico diario - MÁS DÍAS
       const dailyData = {};
       forecastRes.data.list.forEach(reading => {
         const date = new Date(reading.dt * 1000).toLocaleDateString('es-ES');
@@ -305,9 +301,9 @@ const WeatherWidget = () => {
         dailyData[date].weather.push(reading.weather[0]);
       });
 
-      // Tomar hasta 10 días si están disponibles
+
       const processedDaily = Object.values(dailyData)
-        .slice(0, 5) // Hasta 10 días
+        .slice(0, 5) 
         .map(day => {
           const mostFrequentIcon = getMostFrequentIcon(day.weather);
           return {
@@ -318,7 +314,7 @@ const WeatherWidget = () => {
           };
         });
 
-      // Procesar ciudades estáticas
+
       const newStaticCities = staticCitiesRes
         .filter(res => res !== null && res.data)
         .map(res => res.data);
@@ -335,7 +331,7 @@ const WeatherWidget = () => {
       setDailyForecast(processedDaily);
       setStaticCities(newStaticCities);
 
-      // Guardar en caché
+
       localStorage.setItem(CACHE_KEY, JSON.stringify({ 
         data: newData, 
         timestamp: Date.now(),
@@ -355,7 +351,7 @@ const WeatherWidget = () => {
       try {
         setLoading(true);
         
-        // Intentar obtener ubicación por GPS primero (sin pedir permiso explícitamente)
+
         try {
           const location = await getCurrentLocation();
           const cityName = await getCityFromCoordinates(location.latitude, location.longitude);
@@ -365,7 +361,7 @@ const WeatherWidget = () => {
           console.warn("GPS falló, intentando por IP:", gpsError);
         }
 
-        // Fallback: geolocalización por IP
+
         try {
           const ipRes = await axios.get("https://ipapi.co/json/", { timeout: 5000 });
           const { latitude, longitude, city } = ipRes.data;
@@ -379,7 +375,7 @@ const WeatherWidget = () => {
           console.warn("Geolocalización por IP falló:", ipError);
         }
 
-        // Fallback final: Buenos Aires
+
         console.log("Usando ubicación por defecto: Buenos Aires");
         await fetchAllData(-34.61, -58.38, "Buenos Aires");
 
@@ -387,7 +383,7 @@ const WeatherWidget = () => {
         console.error("Error inicializando clima:", error);
         setError("No se pudo determinar tu ubicación. Mostrando clima de Buenos Aires.");
         
-        // Fallback final con manejo de error
+
         try {
           await fetchAllData(-34.61, -58.38, "Buenos Aires");
         } catch (finalError) {
@@ -440,7 +436,7 @@ const WeatherWidget = () => {
 
   return (
     <div className="weather-grid-container">
-      {/* Columna Izquierda: Clima del Usuario */}
+      {}
       <div className="main-weather-card">
         <div className="main-header">
           <div className="main-header-left">
@@ -454,7 +450,7 @@ const WeatherWidget = () => {
                   e.target.nextSibling.style.display = 'block';
                 }}
                 style={{ 
-                  filter: 'brightness(1.3) saturate(1.4) hue-rotate(-10deg)' // Sol más amarillo y brillante
+                  filter: 'brightness(1.3) saturate(1.4) hue-rotate(-10deg)'
                 }}
               />
               <div className="weather-icon-fallback" style={{display: 'none'}}>
@@ -492,7 +488,7 @@ const WeatherWidget = () => {
           </div>
         </div>
 
-        {/* SOLO 2 ESTADÍSTICAS */}
+        {}
         <div className="weather-stats-grid">
           <div className="weather-stat-card">
             <span className="stat-icon">💧</span>
@@ -533,7 +529,7 @@ const WeatherWidget = () => {
                       e.target.nextSibling.style.display = 'block';
                     }}
                     style={{ 
-                      filter: 'brightness(1.3) saturate(1.4) hue-rotate(-10deg)' // Sol más amarillo y brillante
+                      filter: 'brightness(1.3) saturate(1.4) hue-rotate(-10deg)' 
                     }}
                   />
                   <div className="weather-icon-fallback" style={{display: 'none'}}>
@@ -550,7 +546,7 @@ const WeatherWidget = () => {
         </div>
       </div>
 
-      {/* Columna Derecha: Ciudades Estáticas */}
+      {}
       <div className="static-cities-section">
         <h3 className="section-title">Ciudades del Mundo</h3>
         <div className="static-cities-grid">
