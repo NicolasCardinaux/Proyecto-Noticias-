@@ -423,4 +423,4 @@ if __name__ == "__main__":
     print("   - POST /api/noticias/<id>/click")
     print("   - GET  /api/health")
     print("   - GET  /procesar - Ejecuta el crawler de noticias")
-    app.run(debug=True, port=5000)
+    app.run()
