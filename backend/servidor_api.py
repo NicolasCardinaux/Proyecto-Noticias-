@@ -16,71 +16,32 @@ import db
 from procesar_y_guardar_db import ejecutar_crawler
 from chatbot_service import chatbot_service
 
-
 app = Flask(__name__)
 
-# ==================== CONFIGURACIÓN CORS CORREGIDA ====================
+# ==================== CONFIGURACIÓN CORS SIMPLIFICADA ====================
+# ELIMINAR configuraciones duplicadas de CORS
+allowed_origins = [
+    "https://antihumonews.vercel.app",
+    "https://www.antihumonews.vercel.app", 
+    "http://localhost:5173",
+    "http://localhost:3000"
+]
+
 CORS(app, 
-     origins=[
-         "https://antihumonews.vercel.app",
-         "https://www.antihumonews.vercel.app", 
-         "http://localhost:5173",
-         "http://localhost:3000"
-     ],
+     origins=allowed_origins,
      methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
      allow_headers=["Content-Type", "Authorization", "X-Secret-Key", "X-Requested-With"],
      supports_credentials=True,
      max_age=600)
 
-# Middleware adicional para asegurar CORS
-@app.after_request
-def after_request(response):
-    """Agregar headers CORS manualmente"""
-    origin = request.headers.get('Origin')
-    allowed_origins = [
-        "https://antihumonews.vercel.app",
-        "https://www.antihumonews.vercel.app",
-        "http://localhost:5173",
-        "http://localhost:3000"
-    ]
-    
-    if origin in allowed_origins:
-        response.headers.add('Access-Control-Allow-Origin', origin)
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Secret-Key, X-Requested-With')
-    response.headers.add('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
-    response.headers.add('Access-Control-Allow-Credentials', 'true')
-    return response
+# ELIMINAR @app.after_request y @app.before_request que manejan CORS
 
-@app.before_request
-def handle_preflight():
-    if request.method == 'OPTIONS':
-        response = jsonify({'status': 'preflight'})
-        origin = request.headers.get('Origin')
-        allowed_origins = [
-            "https://antihumonews.vercel.app",
-            "https://www.antihumonews.vercel.app", 
-            "http://localhost:5173",
-            "http://localhost:3000"
-        ]
-        
-        if origin in allowed_origins:
-            response.headers.add('Access-Control-Allow-Origin', origin)
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Secret-Key, X-Requested-With')
-        response.headers.add('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
-        response.headers.add('Access-Control-Allow-Credentials', 'true')
-        return response
-    
 @app.route("/api/cors-test", methods=["GET", "OPTIONS"])
 def cors_test():
     """Endpoint para probar CORS"""
     return jsonify({
         "message": "✅ CORS está funcionando correctamente",
-        "allowed_origins": [
-            "https://antihumonews.vercel.app",
-            "https://www.antihumonews.vercel.app",
-            "http://localhost:5173", 
-            "http://localhost:3000"
-        ],
+        "allowed_origins": allowed_origins,
         "timestamp": datetime.datetime.now().isoformat()
     })
 
@@ -126,7 +87,6 @@ def desactivar_anti_sleep():
     if APP_STATE["anti_sleep_activo"]:
         APP_STATE["anti_sleep_activo"] = False
         
-        # Cancelar timer explícitamente para limpieza de recursos
         if APP_STATE["anti_sleep_timer"]:
             APP_STATE["anti_sleep_timer"].cancel()
             APP_STATE["anti_sleep_timer"] = None
@@ -137,11 +97,9 @@ def mantener_servidor_activo():
     """Hace ping cada 2 minutos durante el período activo."""
     if APP_STATE["anti_sleep_activo"] and os.getenv('ENVIRONMENT') == 'production':
         try:
-            # Programar siguiente ejecución en 2 minutos (120 segundos)
             APP_STATE["anti_sleep_timer"] = threading.Timer(120, mantener_servidor_activo)
             APP_STATE["anti_sleep_timer"].start()
             
-            # URL de tu propio servidor en Render
             render_url = os.getenv('RENDER_URL')
             if render_url:
                 health_url = f"{render_url}/api/health"
@@ -159,25 +117,19 @@ def mantener_servidor_activo():
 # ---------------------------
 
 def actualizar_frase_del_dia():
-    """Obtiene la frase del día de la API externa o usa respaldo y la guarda en APP_STATE.
-    
-    Esta función se ejecuta en segundo plano vía APScheduler.
-    """
+    """Obtiene la frase del día de la API externa o usa respaldo."""
     today = datetime.date.today().isoformat()
     
-    # Si ya se actualizó hoy (p. ej., por una ejecución manual), no hace nada.
     if APP_STATE["frase_cache"]["date"] == today:
         print(f"📝 Frase del día ya actualizada para {today}. Saltando la tarea.")
         return
 
     try:
         print("🔄 Scheduler: Intentando obtener frase de la API externa...")
-        # Usamos un timeout corto, ya que es una tarea de fondo no crítica
         response = requests.get(EXTERNAL_QUOTES_API, timeout=5) 
         response.raise_for_status()
         data = response.json()
 
-        # Lógica de parseo robusta (mantenemos la lógica de tu ruta original)
         if isinstance(data, dict):
             texto = data.get("phrase") or data.get("texto") or data.get("frase")
             autor = data.get("author") or data.get("autor")
@@ -203,7 +155,6 @@ def actualizar_frase_del_dia():
         print(f"❌ Scheduler: Error obteniendo frase externa: {str(e)}")
         print("🔄 Usando frase de respaldo aleatoria...")
         
-        # Uso de seed para asegurar que todos los procesos/workers obtengan la misma
         random.seed(today)  
         frase_respaldo = random.choice(FRASES_RESPALDO)
         
@@ -212,79 +163,46 @@ def actualizar_frase_del_dia():
         print(f"✅ Frase de respaldo cargada: {frase_respaldo['texto'][:30]}...")
 
 # ---------------------------
-#   CONFIGURACIÓN SCHEDULER CON 4 EJECUCIONES DIARIAS + FRASE DEL DÍA
+#   CONFIGURACIÓN SCHEDULER
 # ---------------------------
 
 def iniciar_scheduler():
-    """Inicia el scheduler para ejecutar el crawler 4 veces al día (redundancia) y actualizar la frase."""
+    """Inicia el scheduler para ejecutar el crawler 4 veces al día y actualizar la frase."""
     scheduler = BackgroundScheduler()
     
-    # Configurar zona horaria Argentina
     tz_argentina = pytz.timezone('America/Argentina/Buenos_Aires')
     
-    # ==================== PRIMER PAR: 12:00 PM ====================
-    scheduler.add_job(
-        activar_anti_sleep,
-        trigger=CronTrigger(hour=11, minute=55, timezone=tz_argentina),
-        id='activar_anti_sleep_mediodia'
-    )
+    # Ejecuciones del crawler
+    horarios_crawler = [
+        (11, 55, 12, 0, 'mediodia'),
+        (23, 55, 0, 0, 'medianoche'), 
+        (5, 55, 6, 0, 'manana_temprano'),
+        (17, 55, 18, 0, 'tarde')
+    ]
     
-    scheduler.add_job(
-        ejecutar_crawler_desde_scheduler,
-        trigger=CronTrigger(hour=12, minute=0, timezone=tz_argentina),
-        id='crawler_mediodia'
-    )
+    for hora_activar, minuto_activar, hora_crawler, minuto_crawler, nombre in horarios_crawler:
+        scheduler.add_job(
+            activar_anti_sleep,
+            trigger=CronTrigger(hour=hora_activar, minute=minuto_activar, timezone=tz_argentina),
+            id=f'activar_anti_sleep_{nombre}'
+        )
+        
+        scheduler.add_job(
+            ejecutar_crawler_desde_scheduler,
+            trigger=CronTrigger(hour=hora_crawler, minute=minuto_crawler, timezone=tz_argentina),
+            id=f'crawler_{nombre}'
+        )
     
-    # ==================== SEGUNDO PAR: 12:00 AM ====================
-    scheduler.add_job(
-        activar_anti_sleep,
-        trigger=CronTrigger(hour=23, minute=55, timezone=tz_argentina),
-        id='activar_anti_sleep_medianoche'
-    )
-    
-    scheduler.add_job(
-        ejecutar_crawler_desde_scheduler,
-        trigger=CronTrigger(hour=0, minute=0, timezone=tz_argentina),
-        id='crawler_medianoche'
-    )
-    
-    # ==================== TERCER PAR: 6:00 AM (REDUNDANCIA) ====================
-    scheduler.add_job(
-        activar_anti_sleep,
-        trigger=CronTrigger(hour=5, minute=55, timezone=tz_argentina),
-        id='activar_anti_sleep_manana_temprano'
-    )
-    
-    scheduler.add_job(
-        ejecutar_crawler_desde_scheduler,
-        trigger=CronTrigger(hour=6, minute=0, timezone=tz_argentina),
-        id='crawler_manana_temprano'
-    )
-    
-    # ==================== CUARTO PAR: 6:00 PM (REDUNDANCIA) ====================
-    scheduler.add_job(
-        activar_anti_sleep,
-        trigger=CronTrigger(hour=17, minute=55, timezone=tz_argentina),
-        id='activar_anti_sleep_tarde'
-    )
-    
-    scheduler.add_job(
-        ejecutar_crawler_desde_scheduler,
-        trigger=CronTrigger(hour=18, minute=0, timezone=tz_argentina),
-        id='crawler_tarde'
-    )
-    
-    # ==================== TAREA DIARIA: ACTUALIZAR FRASE DEL DÍA ====================
+    # Frase del día a las 00:05 AM
     scheduler.add_job(
         actualizar_frase_del_dia,
-        # Se ejecuta 5 minutos después de medianoche (hora Argentina).
-        trigger=CronTrigger(hour=0, minute=5, timezone=tz_argentina), 
+        trigger=CronTrigger(hour=0, minute=5, timezone=tz_argentina),
         id='actualizar_frase_diaria'
     )
     
     scheduler.start()
     APP_STATE["scheduler"] = scheduler
-    print("✅ Scheduler iniciado - 4 ejecuciones diarias con redundancia + Frase diaria.")
+    print("✅ Scheduler iniciado - 4 ejecuciones diarias + Frase diaria.")
     return scheduler
 
 def ejecutar_crawler_desde_scheduler():
@@ -302,7 +220,6 @@ def ejecutar_crawler_desde_scheduler():
         print(f"📊 Resultado: {resultado}")
         print("="*60 + "\n")
         
-        # Desactivar anti-sleep 10 minutos después del crawler
         threading.Timer(600, desactivar_anti_sleep).start()
         print("⏰ Anti-sleep se desactivará automáticamente en 10 minutos")
         
@@ -310,7 +227,6 @@ def ejecutar_crawler_desde_scheduler():
         
     except Exception as e:
         print(f"❌ ERROR en crawler automático: {e}")
-        # Desactivar anti-sleep incluso si hay error
         threading.Timer(600, desactivar_anti_sleep).start()
         return {"error": str(e)}
 
@@ -323,16 +239,12 @@ scheduler = iniciar_scheduler()
 
 def get_user_ip():
     """Obtiene la IP real del usuario de forma concisa."""
-    # Render suele usar X-Real-IP o X-Forwarded-For
     ip = request.headers.get('X-Real-IP')
     if not ip:
-        # X-Forwarded-For puede contener múltiples IPs, toma la primera
         ip = request.headers.get('X-Forwarded-For', '').split(',')[0].strip()
-    
-    # Fallback a la IP local si no hay headers HTTP
     return ip or request.remote_addr
 
-# ==================== RUTAS CHATBOT ====================
+# ==================== RUTAS CHATBOT MEJORADAS ====================
 
 @app.route("/api/chat", methods=["POST"])
 def chat_con_noticia():
@@ -349,7 +261,6 @@ def chat_con_noticia():
         pregunta = data.get("pregunta")
         noticia_id = data.get("noticia_id")
         
-        # Obtener IP real del usuario
         user_ip = get_user_ip()
         
         print(f"🤖 Pregunta recibida de IP {user_ip}: {pregunta[:50]}...")
@@ -358,7 +269,6 @@ def chat_con_noticia():
         if not pregunta or not pregunta.strip():
             return jsonify({"error": "La pregunta es requerida"}), 400
         
-        # Validar noticia_id si se proporciona
         noticia_id_int = None
         if noticia_id is not None:
             try:
@@ -366,7 +276,6 @@ def chat_con_noticia():
             except (ValueError, TypeError):
                 return jsonify({"error": "noticia_id debe ser un número válido"}), 400
         
-        # Generar respuesta usando el servicio CON IP
         resultado = chatbot_service.generar_respuesta(pregunta.strip(), noticia_id_int, user_ip)
         
         print(f"✅ Respuesta generada - Tipo: {resultado['tipo_contexto']}")
@@ -387,16 +296,56 @@ def chat_con_noticia():
             "modelo": "error"
         }), 500
 
+@app.route("/api/chat/debug", methods=["GET"])
+def chat_debug():
+    """Endpoint de diagnóstico para el chatbot"""
+    try:
+        # Test del servicio completo
+        test_result = chatbot_service.generar_respuesta("Hola, ¿estás funcionando?", None, "127.0.0.1")
+        
+        return jsonify({
+            "status": "diagnostic_complete",
+            "timestamp": datetime.datetime.now().isoformat(),
+            "chatbot_service": {
+                "initialized": True,
+                "model": chatbot_service.modelo_actual,
+                "rate_limit_cache_size": len(chatbot_service.rate_limit_cache)
+            },
+            "gemini_api": {
+                "status": "tested",
+                "api_key_configured": bool(os.getenv("GEMINI_API_KEY_01")),
+                "model_available": chatbot_service.modelo_actual is not None
+            },
+            "test_result": {
+                "success": test_result["exito"],
+                "response_preview": test_result["respuesta"][:100] if test_result["respuesta"] else "No response",
+                "context_type": test_result["tipo_contexto"]
+            },
+            "environment": {
+                "supabase_configured": bool(os.getenv("SUPABASE_URL")),
+                "environment": os.getenv("ENVIRONMENT", "development"),
+                "render": bool(os.getenv("RENDER"))
+            }
+        })
+        
+    except Exception as e:
+        return jsonify({
+            "status": "diagnostic_failed",
+            "error": str(e),
+            "timestamp": datetime.datetime.now().isoformat()
+        }), 500
+
 @app.route("/api/chat/health", methods=["GET"])
 def chat_health_check():
     """Health check específico para el chatbot."""
     try:
-        test_response = chatbot_service.generar_respuesta("Hola, ¿estás funcionando?", None)
+        test_response = chatbot_service.generar_respuesta("Hola, ¿estás funcionando?", None, "127.0.0.1")
         
         return jsonify({
-            "status": "healthy",
+            "status": "healthy" if test_response["exito"] else "degraded",
             "chatbot": "operational",
             "model": chatbot_service.modelo_actual,
+            "test_successful": test_response["exito"],
             "timestamp": datetime.datetime.now().isoformat()
         })
     except Exception as e:
@@ -504,7 +453,7 @@ def get_posts_by_source():
         return jsonify({"error": "Error interno del servidor"}), 500
 
 # ---------------------------
-#   NUEVO ENDPOINT PARA PROCESAR NOTICIAS (MANUAL)
+#   ENDPOINT PARA PROCESAR NOTICIAS (MANUAL)
 # ---------------------------
 
 @app.route('/procesar', methods=['GET'])
@@ -520,12 +469,8 @@ def procesar_noticias_externo():
     try:
         print("🔄 Iniciando proceso de crawler desde endpoint externo...")
         
-        # Activar anti-sleep para ejecución manual
         activar_anti_sleep()
-        
         resultado = ejecutar_crawler()
-        
-        # Desactivar anti-sleep después de 10 minutos
         threading.Timer(600, desactivar_anti_sleep).start()
         
         if "error" in resultado:
@@ -539,12 +484,11 @@ def procesar_noticias_externo():
         
     except Exception as e:
         print(f"❌ Error ejecutando crawler: {str(e)}")
-        # Desactivar anti-sleep incluso si hay error
         threading.Timer(600, desactivar_anti_sleep).start()
         return jsonify({"error": f"Error al ejecutar el crawler: {str(e)}"}), 500
 
 # ---------------------------
-#   RUTA FRASE DEL DÍA OPTIMIZADA (INSTANTÁNEA)
+#   RUTA FRASE DEL DÍA OPTIMIZADA
 # ---------------------------
 
 @app.route("/api/frase-del-dia", methods=["GET"])
@@ -552,20 +496,16 @@ def frase_del_dia():
     """Devuelve la frase del día pre-cargada desde el scheduler."""
     today = datetime.date.today().isoformat()
 
-    # Si la caché está vacía o es de ayer (lo cual no debería pasar si el scheduler funciona), 
-    # se intenta cargar de forma síncrona como fallback.
     if APP_STATE["frase_cache"]["date"] != today or not APP_STATE["frase_cache"]["frase"]:
         print(f"⚠️ Caché de frase vacía o desactualizada. Forzando actualización síncrona.")
-        actualizar_frase_del_dia() # Llama a la función de forma síncrona como FALLBACK
+        actualizar_frase_del_dia()
 
-    # Se devuelve el contenido de la caché.
     frase = APP_STATE["frase_cache"]["frase"]
     
     if frase:
         print(f"✅ Devolviendo frase en caché para hoy: {today}")
         return jsonify(frase)
     else:
-        # Esto solo pasaría si el fallback síncrono también falla.
         return jsonify({"error": "No se pudo obtener la frase del día"}), 500
 
 # ---------------------------
@@ -639,7 +579,7 @@ def translate_apod():
         }), 500
 
 # ---------------------------
-#   RUTAS ADICIONALES PARA MEJOR FUNCIONALIDAD
+#   RUTAS ADICIONALES
 # ---------------------------
 
 @app.route("/api/categories", methods=["GET"])
@@ -696,24 +636,17 @@ def search_noticias():
 def health_check():
     """Endpoint para verificar el estado del servidor."""
     try:
-        # Verificar base de datos
         db.get_noticias(limit=1)
         
-        # Verificar chatbot
         chat_status = "operational"
         try:
-            test_chat = chatbot_service.generar_respuesta("Test de salud", None)
+            test_chat = chatbot_service.generar_respuesta("Test de salud", None, "127.0.0.1")
             chat_status = "operational" if test_chat["exito"] else "degraded"
         except Exception as e:
             chat_status = f"error: {str(e)}"
         
-        # Verificar scheduler
         scheduler_status = "running" if scheduler and scheduler.running else "stopped"
-        
-        # Verificar anti-sleep
         anti_sleep_status = "active" if APP_STATE["anti_sleep_activo"] else "inactive"
-        
-        # Verificar frase del día
         frase_status = "cached" if APP_STATE["frase_cache"]["frase"] else "empty"
         
         return jsonify({
@@ -725,6 +658,7 @@ def health_check():
             "anti_sleep": anti_sleep_status,
             "frase_cache": frase_status,
             "ultimo_ping": APP_STATE["ultimo_ping"].isoformat() if APP_STATE["ultimo_ping"] else None,
+            "environment": os.getenv("ENVIRONMENT", "development"),
             "endpoints": {
                 "noticias": "active",
                 "chat": "active", 
@@ -760,6 +694,7 @@ def home():
             "random_posts": "/api/random-posts",
             "related_posts": "/api/related-posts",
             "chat": "/api/chat (POST)",
+            "chat_debug": "/api/chat/debug (GET) - Diagnóstico",
             "frase_del_dia": "/api/frase-del-dia",
             "stats": "/api/stats",
             "health": "/api/health",
@@ -773,7 +708,7 @@ def home():
         }
     })
 
-# Manejar cierre graceful del scheduler
+
 import atexit
 atexit.register(lambda: scheduler.shutdown() if scheduler else None)
 
@@ -811,4 +746,11 @@ if __name__ == "__main__":
     print("   - 00:05 AM → Actualizar Frase del Día (automático)")
     print("   - +10 min  → Desactivar Anti-Sleep después de cada ejecución")
     
-    app.run(debug=True)
+ 
+    port = int(os.environ.get("PORT", 5000))
+    debug_mode = os.environ.get("ENVIRONMENT") != "production"
+    
+    print(f"🔧 Puerto: {port}, Debug: {debug_mode}")
+    
+    app.run(host='0.0.0.0', port=port, debug=debug_mode)
+

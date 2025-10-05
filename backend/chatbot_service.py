@@ -7,19 +7,28 @@ from datetime import datetime, timedelta
 import random
 import google.generativeai as genai
 import time
+import logging
 
+# Configurar logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
-
+# Configuración de Supabase
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
-supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
+try:
+    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+    logger.info("✅ Supabase cliente inicializado correctamente")
+except Exception as e:
+    logger.error(f"❌ Error inicializando Supabase: {e}")
+    supabase = None
 
+# Configuración de Gemini
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY_01")
-GEMINI_MODEL = "gemini-2.5-flash"
-
+GEMINI_MODEL = "gemini-1.5-flash"  # Modelo más estable
 
 MAX_REQUESTS_PER_DAY = 30
 
@@ -28,20 +37,29 @@ print(f"✅ Límite: {MAX_REQUESTS_PER_DAY} preguntas por día por IP")
 print(f"✅ GEMINI_API_KEY_01 cargada: {bool(GEMINI_API_KEY)}")
 print(f"✅ Supabase configurado: {bool(SUPABASE_URL)}")
 
-
+# Configuración robusta de Gemini
+gemini_model = None
 try:
     if GEMINI_API_KEY:
         genai.configure(api_key=GEMINI_API_KEY)
-        gemini_model = genai.GenerativeModel("gemini-2.5-flash")
-        print(f"✅ Gemini configurado correctamente - Modelo: {GEMINI_MODEL}")
+        # Prueba con modelo más estable
+        gemini_model = genai.GenerativeModel(GEMINI_MODEL)
+        
+        # Test rápido de conexión
+        test_response = gemini_model.generate_content("Responde solo 'CONECTADO'")
+        if test_response and test_response.text:
+            print(f"✅ Gemini {GEMINI_MODEL} configurado correctamente - Test: {test_response.text}")
+        else:
+            print("❌ Gemini respondió pero sin texto")
+            gemini_model = None
     else:
-        print("❌ GEMINI_API_KEY_01 no encontrada")
+        print("❌ ERROR: GEMINI_API_KEY_01 no encontrada en variables de entorno")
         gemini_model = None
 except Exception as e:
     print(f"❌ Error configurando Gemini: {e}")
     gemini_model = None
 
-
+# Contexto mejorado para el bot
 CONTEXTO_BASE_WEB = """
 Eres AntiBot, el asistente inteligente de AntiHumo News. Tu propósito es ayudar a los usuarios con información sobre noticias y contenido del sitio.
 
@@ -78,6 +96,8 @@ NO PUEDES:
 ❌ "¿Cuánto es 2+2?" → RECHAZAS educadamente
 
 Responde de forma útil, veraz y siempre basado en hechos reales cuando haya noticias de referencia.
+
+Si estás funcionando correctamente, responde de manera natural y útil a las preguntas sobre noticias.
 """
 
 class ChatBotService:
@@ -85,6 +105,7 @@ class ChatBotService:
         self.contexto_base = CONTEXTO_BASE_WEB
         self.modelo_actual = GEMINI_MODEL
         self.rate_limit_cache = {}
+        logger.info("🤖 ChatBotService inicializado")
     
     def verificar_rate_limit(self, user_ip: str) -> Dict[str, Any]:
         """Verifica si el usuario ha excedido el límite de 30 preguntas por día."""
@@ -120,6 +141,7 @@ class ChatBotService:
                         "preguntas_restantes": preguntas_restantes
                     }
             else:
+                # Nueva día, resetear contador
                 self.rate_limit_cache[user_ip] = {
                     'fecha': fecha_actual,
                     'contador': 1
@@ -132,6 +154,7 @@ class ChatBotService:
                     "preguntas_restantes": MAX_REQUESTS_PER_DAY - 1
                 }
         else:
+            # Nueva IP
             self.rate_limit_cache[user_ip] = {
                 'fecha': fecha_actual,
                 'contador': 1
@@ -157,24 +180,28 @@ class ChatBotService:
             del self.rate_limit_cache[ip]
             
         if ips_a_eliminar:
-            print(f"🧹 Limpiadas {len(ips_a_eliminar)} IPs antiguas del cache")
+            logger.info(f"🧹 Limpiadas {len(ips_a_eliminar)} IPs antiguas del cache")
     
     def obtener_contexto_noticia(self, noticia_id: int) -> Optional[Dict[str, Any]]:
         """Obtiene TODOS los datos de una noticia desde Supabase."""
         try:
+            if not supabase:
+                logger.error("❌ Supabase no está inicializado")
+                return None
+                
             response = supabase.table("noticias").select("*").eq("id", noticia_id).execute()
             
             if not response.data:
-                print(f"❌ Noticia {noticia_id} no encontrada en Supabase")
+                logger.warning(f"❌ Noticia {noticia_id} no encontrada en Supabase")
                 return None
             
             noticia = response.data[0]
-            print(f"✅ Noticia {noticia_id} encontrada: {noticia['titulo'][:50]}...")
+            logger.info(f"✅ Noticia {noticia_id} encontrada: {noticia['titulo'][:50]}...")
             
             return noticia
             
         except Exception as e:
-            print(f"❌ Error obteniendo noticia {noticia_id}: {e}")
+            logger.error(f"❌ Error obteniendo noticia {noticia_id}: {e}")
             return None
     
     def construir_contexto_noticia(self, noticia: Dict[str, Any]) -> str:
@@ -210,17 +237,17 @@ Si pregunta "¿Por qué es importante?" → Analiza el impacto basado en el cont
     def llamar_gemini_api(self, prompt: str) -> str:
         """Llama a la API de Gemini para obtener respuestas de IA."""
         try:
-            if not GEMINI_API_KEY or not gemini_model:
-                print("❌ Gemini no configurado correctamente")
-                return self.get_fallback_response(prompt)
+            if not gemini_model:
+                logger.error("❌ Gemini no está configurado correctamente")
+                return self.get_fallback_response("")
             
-            print("🔄 Enviando pregunta a Gemini API...")
+            logger.info("🔄 Enviando pregunta a Gemini API...")
             
             generation_config = {
                 "temperature": 0.3,
                 "top_p": 0.9,
                 "top_k": 40,
-                "max_output_tokens": 350,
+                "max_output_tokens": 500,  # Un poco más de tokens para respuestas completas
             }
             
             response = gemini_model.generate_content(
@@ -230,19 +257,26 @@ Si pregunta "¿Por qué es importante?" → Analiza el impacto basado en el cont
             
             if response.text:
                 respuesta = response.text.strip()
-                print("✅ Respuesta recibida de Gemini")
+                logger.info("✅ Respuesta recibida de Gemini")
                 return respuesta
             else:
-                print("❌ Gemini no devolvió texto")
+                logger.warning("❌ Gemini no devolvió texto en la respuesta")
                 return self.get_fallback_response(prompt)
                 
         except Exception as e:
-            print(f"❌ Error llamando a Gemini: {e}")
+            logger.error(f"❌ Error llamando a Gemini: {e}")
             return self.get_fallback_response(prompt)
     
     def get_fallback_response(self, prompt: str) -> str:
-        """Respuestas de fallback mejoradas."""
+        """Respuestas de fallback mejoradas y más inteligentes."""
         
+        # Si Gemini no está disponible, respuestas más contextuales
+        if not gemini_model:
+            return "🤖 Hola! Soy AntiBot de AntiHumo News. Actualmente estoy en modo de respuestas básicas. Puedo ayudarte a navegar el sitio y sus categorías. ¿En qué necesitas ayuda?"
+        
+        prompt_lower = prompt.lower()
+        
+        # Respuestas contextuales mejoradas
         fallback_responses = {
             "hola": "¡Hola! 🤖 Soy AntiBot de AntiHumo News. Puedo ayudarte a entender noticias específicas o explicarte sobre nuestro sitio. ¿En qué necesitas ayuda?",
             "holaa": "¡Hola! 👋 Soy AntiBot. Puedo analizar noticias específicas o ayudarte a navegar AntiHumo News. ¿Sobre qué noticia quieres hablar?",
@@ -251,12 +285,12 @@ Si pregunta "¿Por qué es importante?" → Analiza el impacto basado en el cont
             "clima": "🌤️ En AntiHumo News tenemos una sección de clima con pronósticos actualizados. Puedes consultarla en nuestro sitio para información meteorológica.",
             "deportes": "⚽ Tenemos una sección dedicada a deportes con las últimas noticias. ¡Navega por la categoría Deportes en AntiHumo News para ver lo último!",
             "tecnología": "💻 En nuestra sección de Tecnología encontrarás las últimas novedades en innovación. Visita AntiHumo News para ver el contenido actualizado.",
-            "ayuda": "🤖 Puedo ayudarte a entender noticias específicas, explicar categorías del sitio y guiarte en AntiHumo News. ¿Sobre qué noticia necesitas información?"
+            "ayuda": "🤖 Puedo ayudarte a entender noticias específicas, explicar categorías del sitio y guiarte en AntiHumo News. ¿Sobre qué noticia necesitas información?",
+            "nasa": "🚀 Tenemos contenido de la NASA incluyendo la Astronomy Picture of the Day (APOD). ¡Es una de nuestras secciones más populares!",
+            "mercados": "📈 En AntiHumo News cubrimos noticias de mercados financieros y económicas. Revisa nuestra sección de Economía para estar actualizado."
         }
         
-        prompt_lower = prompt.lower()
-        
-        # PALABRAS que SÍ deben bloquearse (temas completamente fuera de contexto)
+        # Palabras bloqueadas - temas fuera de contexto
         palabras_fuera_contexto = [
             "calcula", "resuelve", "ecuación", "matemática pura", 
             "consejo médico", "consejo legal", "qué droga", "ilegal",
@@ -268,19 +302,22 @@ Si pregunta "¿Por qué es importante?" → Analiza el impacto basado en el cont
             if palabra in prompt_lower:
                 return "🚫 Lo siento, no puedo ayudarte con ese tipo de consultas. Mi especialidad es noticias y contenido de AntiHumo News."
         
-        # Si no es un tema bloqueado, permite la conversación
+        # Buscar respuestas contextuales
         for keyword, response in fallback_responses.items():
             if keyword in prompt_lower:
                 return response
         
-        return "🤖 Soy AntiBot de AntiHumo News. Puedo ayudarte a entender noticias específicas o explicarte sobre nuestro sitio. ¿Tienes alguna noticia en mente?"
+        # Respuesta por defecto más útil
+        return "🤖 ¡Hola! Soy AntiBot de AntiHumo News. Puedo ayudarte a entender noticias específicas publicadas en nuestro sitio. ¿Tienes alguna noticia en mente sobre la que quieras hablar? También puedo explicarte las categorías y funcionalidades disponibles."
     
     def generar_respuesta(self, pregunta: str, noticia_id: Optional[int] = None, user_ip: str = "desconocida") -> Dict[str, Any]:
         """Genera una respuesta contextual basada en la noticia o contexto general."""
         try:
+            # Verificar rate limit
             rate_limit_check = self.verificar_rate_limit(user_ip)
             
             if not rate_limit_check["permitido"]:
+                logger.warning(f"🚫 Rate limit excedido para IP: {user_ip}")
                 return {
                     "respuesta": rate_limit_check["mensaje"],
                     "tipo_contexto": "rate_limit",
@@ -292,9 +329,11 @@ Si pregunta "¿Por qué es importante?" → Analiza el impacto basado en el cont
                     "rate_limit_info": rate_limit_check
                 }
             
+            # Limpieza periódica del cache (10% de probabilidad)
             if random.random() < 0.1:
                 self.limpiar_cache_antiguo()
             
+            # Obtener contexto según si hay noticia_id
             if noticia_id:
                 noticia_data = self.obtener_contexto_noticia(noticia_id)
                 if noticia_data:
@@ -313,13 +352,17 @@ Si pregunta "¿Por qué es importante?" → Analiza el impacto basado en el cont
                 noticia_info = "sin_noticia"
                 titulo_noticia = None
             
+            # Construir prompt final
             prompt_final = f"""{contexto}
 
 **PREGUNTA DEL USUARIO:** {pregunta}
 
-**RESPONDE AHORA** (en español, breve y objetivo):"""
+**RESPONDE AHORA** (en español, de forma natural y útil):"""
             
+            # Obtener respuesta de Gemini
             respuesta = self.llamar_gemini_api(prompt_final)
+            
+            logger.info(f"✅ Respuesta generada - Tipo: {tipo_contexto}, Longitud: {len(respuesta)}")
             
             return {
                 "respuesta": respuesta,
@@ -333,7 +376,7 @@ Si pregunta "¿Por qué es importante?" → Analiza el impacto basado en el cont
             }
             
         except Exception as e:
-            print(f"❌ Error generando respuesta: {e}")
+            logger.error(f"❌ Error generando respuesta: {e}")
             return {
                 "respuesta": "❌ Lo siento, ocurrió un error inesperado. Por favor, intenta nuevamente. ⚠️",
                 "tipo_contexto": "error",
@@ -346,5 +389,16 @@ Si pregunta "¿Por qué es importante?" → Analiza el impacto basado en el cont
             }
 
 
+# Inicializar el servicio
 chatbot_service = ChatBotService()
-print("✅ ChatBot Service con Gemini 2.5 Flash (30 preguntas/día) inicializado correctamente")
+print("✅ ChatBot Service con Gemini 1.5 Flash (30 preguntas/día) inicializado correctamente")
+
+# Test de funcionamiento al importar
+try:
+    test_result = chatbot_service.generar_respuesta("Hola, ¿estás funcionando?", None, "test_init")
+    if test_result["exito"]:
+        print(f"✅ Test inicial exitoso: {test_result['respuesta'][:50]}...")
+    else:
+        print(f"⚠️ Test inicial con problemas: {test_result['respuesta']}")
+except Exception as e:
+    print(f"❌ Error en test inicial: {e}")
