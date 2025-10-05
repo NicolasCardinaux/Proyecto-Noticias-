@@ -4,7 +4,9 @@ from supabase import create_client
 from typing import Optional, Dict, Any
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
-import random  # ✅ AGREGADO
+import random
+import google.generativeai as genai
+import time
 
 # Cargar variables de entorno
 load_dotenv()
@@ -14,17 +16,30 @@ SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-# Configuración de Groq
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
+# Configuración de Gemini - NUEVA API KEY
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY_01")  # ✅ NUEVA KEY
+GEMINI_MODEL = "gemini-2.5-flash"  # ✅ MODELO ACTUALIZADO
 
 # Configuración de Rate Limiting
-MAX_REQUESTS_PER_DAY = 20  # ✅ 20 preguntas por día por IP
+MAX_REQUESTS_PER_DAY = 30  # ✅ LIMITADO A 30 PREGUNTAS POR DÍA
 
-print("🔧 Inicializando ChatBot Service con Rate Limiting...")
+print("🔧 Inicializando ChatBot Service con Gemini...")
 print(f"✅ Límite: {MAX_REQUESTS_PER_DAY} preguntas por día por IP")
-print(f"✅ GROQ_API_KEY cargada: {bool(GROQ_API_KEY)}")
+print(f"✅ GEMINI_API_KEY_01 cargada: {bool(GEMINI_API_KEY)}")
 print(f"✅ Supabase configurado: {bool(SUPABASE_URL)}")
+
+# Configurar Gemini
+try:
+    if GEMINI_API_KEY:
+        genai.configure(api_key=GEMINI_API_KEY)
+        gemini_model = genai.GenerativeModel("gemini-2.5-flash")  # ✅ MODELO ACTUALIZADO
+        print(f"✅ Gemini configurado correctamente - Modelo: {GEMINI_MODEL}")
+    else:
+        print("❌ GEMINI_API_KEY_01 no encontrada")
+        gemini_model = None
+except Exception as e:
+    print(f"❌ Error configurando Gemini: {e}")
+    gemini_model = None
 
 # Contexto base mejorado
 CONTEXTO_BASE_WEB = """
@@ -50,12 +65,11 @@ Responde de forma útil y veraz.
 class ChatBotService:
     def __init__(self):
         self.contexto_base = CONTEXTO_BASE_WEB
-        self.modelo_actual = "llama3-8b-8192"
-        # Cache en memoria para rate limiting
+        self.modelo_actual = GEMINI_MODEL
         self.rate_limit_cache = {}
     
     def verificar_rate_limit(self, user_ip: str) -> Dict[str, Any]:
-        """Verifica si el usuario ha excedido el límite de 20 preguntas por día."""
+        """Verifica si el usuario ha excedido el límite de 30 preguntas por día."""
         ahora = datetime.now()
         fecha_actual = ahora.date()
         
@@ -179,58 +193,69 @@ class ChatBotService:
 """
         return contexto
     
-    def llamar_groq_api(self, prompt: str) -> str:
-        """Llama a la API de Groq para obtener respuestas de IA."""
+    def llamar_gemini_api(self, prompt: str) -> str:
+        """Llama a la API de Gemini para obtener respuestas de IA."""
         try:
-            if not GROQ_API_KEY:
-                return "🔧 Configuración pendiente: GROQ_API_KEY no configurada."
+            if not GEMINI_API_KEY or not gemini_model:
+                print("❌ Gemini no configurado correctamente")
+                return self.get_fallback_response(prompt)
             
-            headers = {
-                "Authorization": f"Bearer {GROQ_API_KEY}",
-                "Content-Type": "application/json"
-            }
+            print("🔄 Enviando pregunta a Gemini API...")
             
-            payload = {
-                "model": self.modelo_actual,
-                "messages": [
-                    {
-                        "role": "system",
-                        "content": "Eres AntiBot, un asistente especializado en noticias veraces y objetivas. Responde siempre en español de forma clara, concisa y útil."
-                    },
-                    {
-                        "role": "user", 
-                        "content": prompt
-                    }
-                ],
+            # Configurar la generación
+            generation_config = {
                 "temperature": 0.3,
-                "max_tokens": 350,
                 "top_p": 0.9,
-                "stream": False
+                "top_k": 40,
+                "max_output_tokens": 350,
             }
             
-            print("🔄 Enviando pregunta a Groq API...")
-            response = requests.post(GROQ_API_URL, json=payload, headers=headers, timeout=30)
+            # Enviar prompt a Gemini
+            response = gemini_model.generate_content(
+                prompt,
+                generation_config=generation_config
+            )
             
-            if response.status_code == 200:
-                data = response.json()
-                respuesta = data["choices"][0]["message"]["content"].strip()
-                print("✅ Respuesta recibida de Groq")
+            if response.text:
+                respuesta = response.text.strip()
+                print("✅ Respuesta recibida de Gemini")
                 return respuesta
-            elif response.status_code == 429:
-                return "⏰ Límite de uso excedido temporalmente. Por favor, intenta en unos minutos. 🕒"
-            elif response.status_code == 401:
-                return "🔑 Error de autenticación con el servicio de IA. ⚠️"
             else:
-                print(f"❌ Error Groq API: {response.status_code} - {response.text}")
-                return "⚠️ Error temporal con el servicio de IA. Intenta nuevamente. 🔄"
+                print("❌ Gemini no devolvió texto")
+                return self.get_fallback_response(prompt)
                 
-        except requests.exceptions.Timeout:
-            return "⏰ El servicio está tardando demasiado. Intenta nuevamente. 🕒"
-        except requests.exceptions.ConnectionError:
-            return "🔌 Error de conexión. Verifica tu internet. 🌐"
         except Exception as e:
-            print(f"❌ Error inesperado llamando a Groq: {e}")
-            return "❌ Error inesperado. Por favor, intenta más tarde. ⚠️"
+            print(f"❌ Error llamando a Gemini: {e}")
+            return self.get_fallback_response(prompt)
+    
+    def get_fallback_response(self, prompt: str) -> str:
+        """Respuestas de fallback cuando Gemini no funciona."""
+        fallback_responses = {
+            "hola": "¡Hola! 🤖 Soy AntiBot de AntiHumo News. Estoy aquí para ayudarte con información sobre noticias y el sitio. ¿En qué puedo asistirte?",
+            "holaa": "¡Hola! 👋 Soy AntiBot, tu asistente de AntiHumo News. Puedo ayudarte a encontrar noticias e información veraz. ¿Qué te gustaría saber?",
+            "qué puedes hacer": "Puedo: 📰 Responder sobre noticias específicas, 🔍 Ayudarte a navegar el sitio, 📊 Dar información general sobre AntiHumo News. ¿En qué te puedo ayudar?",
+            "noticias": "📰 En AntiHumo News encontrarás noticias actualizadas de Argentina y el mundo, resumidas con IA para eliminar el amarillismo. ¡Explora las diferentes categorías!",
+            "clima": "🌤️ Para información del clima en tiempo real, te sugiero consultar servicios especializados como el Servicio Meteorológico Nacional. En AntiHumo nos enfocamos en noticias veraces.",
+            "deportes": "⚽ Tenemos una sección dedicada a deportes con las últimas noticias de fútbol, tenis, y más. ¡Navega por la categoría Deportes para ver lo último!",
+            "tecnología": "💻 En nuestra sección de Tecnología encontrarás las últimas novedades en IA, gadgets, startups y innovación. ¡Échale un vistazo!",
+            "ayuda": "🤖 Puedo ayudarte con: información sobre noticias específicas, navegación del sitio, categorías disponibles, y temas generales de AntiHumo News. ¿Qué necesitas?"
+        }
+        
+        # Buscar palabras clave en el prompt
+        prompt_lower = prompt.lower()
+        
+        for keyword, response in fallback_responses.items():
+            if keyword in prompt_lower:
+                return response
+        
+        # Respuesta por defecto
+        default_responses = [
+            "🤖 ¡Hola! Soy AntiBot. Puedo ayudarte con información sobre noticias y navegación del sitio. ¿En qué puedo asistirte específicamente?",
+            "📰 Hola, soy AntiBot. Estoy aquí para ayudarte a encontrar información veraz en AntiHumo News. ¿Qué te gustaría saber?",
+            "🔍 ¡Hola! Como AntiBot, puedo ayudarte con noticias y contenido del sitio. ¿En qué tema necesitas ayuda?"
+        ]
+        
+        return random.choice(default_responses)
     
     def generar_respuesta(self, pregunta: str, noticia_id: Optional[int] = None, user_ip: str = "desconocida") -> Dict[str, Any]:
         """Genera una respuesta contextual basada en la noticia o contexto general."""
@@ -251,7 +276,7 @@ class ChatBotService:
                 }
             
             # Limpiar cache antiguo periódicamente (10% de probabilidad)
-            if random.random() < 0.1:  # ✅ CORREGIDO
+            if random.random() < 0.1:
                 self.limpiar_cache_antiguo()
             
             # Determinar el contexto a usar
@@ -281,7 +306,7 @@ class ChatBotService:
 **RESPONDE AHORA** (en español, breve y directo):"""
             
             # Obtener respuesta del modelo
-            respuesta = self.llamar_groq_api(prompt_final)
+            respuesta = self.llamar_gemini_api(prompt_final)
             
             return {
                 "respuesta": respuesta,
@@ -309,4 +334,4 @@ class ChatBotService:
 
 # Instancia global del servicio
 chatbot_service = ChatBotService()
-print("✅ ChatBot Service con Rate Limiting (20/día) inicializado correctamente")
+print("✅ ChatBot Service con Gemini 2.5 Flash (30 preguntas/día) inicializado correctamente")
