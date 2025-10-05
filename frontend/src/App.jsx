@@ -27,7 +27,7 @@ function App() {
           </Routes>
         </main>
         <Footer />
-        <ChatBot /> {/* ✅ CHATBOT SIEMPRE VISIBLE - ESQUINA INFERIOR DERECHA */}
+        <ChatBot /> {}
       </div>
     </Router>
   );
