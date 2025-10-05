@@ -16,8 +16,73 @@ import db
 from procesar_y_guardar_db import ejecutar_crawler
 from chatbot_service import chatbot_service
 
+
 app = Flask(__name__)
-CORS(app)
+
+# ==================== CONFIGURACIÓN CORS CORREGIDA ====================
+CORS(app, 
+     origins=[
+         "https://antihumonews.vercel.app",
+         "https://www.antihumonews.vercel.app", 
+         "http://localhost:5173",
+         "http://localhost:3000"
+     ],
+     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+     allow_headers=["Content-Type", "Authorization", "X-Secret-Key", "X-Requested-With"],
+     supports_credentials=True,
+     max_age=600)
+
+# Middleware adicional para asegurar CORS
+@app.after_request
+def after_request(response):
+    """Agregar headers CORS manualmente"""
+    origin = request.headers.get('Origin')
+    allowed_origins = [
+        "https://antihumonews.vercel.app",
+        "https://www.antihumonews.vercel.app",
+        "http://localhost:5173",
+        "http://localhost:3000"
+    ]
+    
+    if origin in allowed_origins:
+        response.headers.add('Access-Control-Allow-Origin', origin)
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Secret-Key, X-Requested-With')
+    response.headers.add('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+    response.headers.add('Access-Control-Allow-Credentials', 'true')
+    return response
+
+@app.before_request
+def handle_preflight():
+    if request.method == 'OPTIONS':
+        response = jsonify({'status': 'preflight'})
+        origin = request.headers.get('Origin')
+        allowed_origins = [
+            "https://antihumonews.vercel.app",
+            "https://www.antihumonews.vercel.app", 
+            "http://localhost:5173",
+            "http://localhost:3000"
+        ]
+        
+        if origin in allowed_origins:
+            response.headers.add('Access-Control-Allow-Origin', origin)
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Secret-Key, X-Requested-With')
+        response.headers.add('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+        response.headers.add('Access-Control-Allow-Credentials', 'true')
+        return response
+    
+@app.route("/api/cors-test", methods=["GET", "OPTIONS"])
+def cors_test():
+    """Endpoint para probar CORS"""
+    return jsonify({
+        "message": "✅ CORS está funcionando correctamente",
+        "allowed_origins": [
+            "https://antihumonews.vercel.app",
+            "https://www.antihumonews.vercel.app",
+            "http://localhost:5173", 
+            "http://localhost:3000"
+        ],
+        "timestamp": datetime.datetime.now().isoformat()
+    })
 
 # ---------------------------
 #   ESTADO GLOBAL ORGANIZADO
