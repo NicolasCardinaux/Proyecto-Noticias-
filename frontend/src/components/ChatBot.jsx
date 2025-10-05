@@ -10,8 +10,26 @@ const ChatBot = () => {
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [rateLimitInfo, setRateLimitInfo] = useState(null);
+  const [showWelcomePopup, setShowWelcomePopup] = useState(false);
   const messagesEndRef = useRef(null);
   const location = useLocation();
+
+  // ✅ Efecto para mostrar mensaje de bienvenida al cargar la página
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowWelcomePopup(true);
+      
+      // Ocultar después de 5 segundos
+      const hideTimer = setTimeout(() => {
+        setShowWelcomePopup(false);
+      }, 5000);
+      
+      return () => clearTimeout(hideTimer);
+    }, 2000); // Mostrar después de 2 segundos de cargar la página
+
+    return () => clearTimeout(timer);
+  }, []);
 
   // Obtener noticia_id actual de la URL si estamos en una noticia
   const getCurrentNoticiaId = () => {
@@ -74,6 +92,11 @@ const ChatBot = () => {
 
       console.log('📥 Respuesta recibida:', response.data);
 
+      // ✅ Actualizar información de rate limit
+      if (response.data.rate_limit_info) {
+        setRateLimitInfo(response.data.rate_limit_info);
+      }
+
       const botMessage = {
         id: Date.now() + 1,
         text: response.data.respuesta,
@@ -81,7 +104,8 @@ const ChatBot = () => {
         timestamp: new Date(),
         contextType: response.data.tipo_contexto,
         noticiaId: response.data.noticia_id,
-        success: response.data.exito
+        success: response.data.exito,
+        rateLimitInfo: response.data.rate_limit_info
       };
 
       setMessages(prev => [...prev, botMessage]);
@@ -111,6 +135,7 @@ const ChatBot = () => {
 
   const clearChat = () => {
     setMessages([]);
+    setRateLimitInfo(null);
   };
 
   const getContextBadge = () => {
@@ -121,8 +146,25 @@ const ChatBot = () => {
     return '🌐 Modo General';
   };
 
+  const getRateLimitDisplay = () => {
+    if (rateLimitInfo) {
+      return ` (${rateLimitInfo.contador_actual}/${rateLimitInfo.limite})`;
+    }
+    return '';
+  };
+
   return (
     <div className="chatbot-container">
+      {/* ✅ Mensaje de bienvenida temporal */}
+      {showWelcomePopup && !isOpen && (
+        <div className="welcome-popup">
+          <div className="welcome-message">
+            <span className="welcome-icon">🤖</span>
+            <span>¡Hola! Estoy aquí para ayudarte en lo que necesites</span>
+          </div>
+        </div>
+      )}
+
       {/* Botón flotante - ESQUINA INFERIOR DERECHA */}
       {!isOpen && (
         <button 
@@ -146,6 +188,7 @@ const ChatBot = () => {
                 <h3>AntiBot Assistant</h3>
                 <span className="context-badge">
                   {getContextBadge()}
+                  {rateLimitInfo && ` | ${rateLimitInfo.contador_actual}/${rateLimitInfo.limite}`}
                 </span>
               </div>
             </div>
@@ -184,6 +227,11 @@ const ChatBot = () => {
                   {message.contextType === 'general' && !message.isError && (
                     <div className="context-indicator general">
                       🌐 Respondiendo en modo general
+                    </div>
+                  )}
+                  {message.rateLimitInfo && !message.isError && (
+                    <div className="rate-limit-indicator">
+                      📊 Preguntas hoy: {message.rateLimitInfo.contador_actual}/{message.rateLimitInfo.limite}
                     </div>
                   )}
                 </div>
@@ -243,6 +291,11 @@ const ChatBot = () => {
                 ? "💡 Pregunta sobre el contenido de esta noticia" 
                 : "💡 Pregunta general sobre noticias, clima, deportes, etc."
               }
+              {rateLimitInfo && (
+                <div className="rate-limit-hint">
+                  📊 {rateLimitInfo.preguntas_restantes} preguntas restantes hoy
+                </div>
+              )}
             </div>
           </div>
         </div>

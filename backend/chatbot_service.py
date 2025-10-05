@@ -3,6 +3,8 @@ import requests
 from supabase import create_client
 from typing import Optional, Dict, Any
 from dotenv import load_dotenv
+from datetime import datetime, timedelta
+import random  # ✅ AGREGADO
 
 # Cargar variables de entorno
 load_dotenv()
@@ -16,8 +18,11 @@ supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 
-# Verificar configuración
-print("🔧 Inicializando ChatBot Service...")
+# Configuración de Rate Limiting
+MAX_REQUESTS_PER_DAY = 20  # ✅ 20 preguntas por día por IP
+
+print("🔧 Inicializando ChatBot Service con Rate Limiting...")
+print(f"✅ Límite: {MAX_REQUESTS_PER_DAY} preguntas por día por IP")
 print(f"✅ GROQ_API_KEY cargada: {bool(GROQ_API_KEY)}")
 print(f"✅ Supabase configurado: {bool(SUPABASE_URL)}")
 
@@ -45,7 +50,87 @@ Responde de forma útil y veraz.
 class ChatBotService:
     def __init__(self):
         self.contexto_base = CONTEXTO_BASE_WEB
-        self.modelo_actual = "llama3-8b-8192"  # Modelo rápido de Groq
+        self.modelo_actual = "llama3-8b-8192"
+        # Cache en memoria para rate limiting
+        self.rate_limit_cache = {}
+    
+    def verificar_rate_limit(self, user_ip: str) -> Dict[str, Any]:
+        """Verifica si el usuario ha excedido el límite de 20 preguntas por día."""
+        ahora = datetime.now()
+        fecha_actual = ahora.date()
+        
+        if user_ip in self.rate_limit_cache:
+            cache_data = self.rate_limit_cache[user_ip]
+            
+            # Si es el mismo día, verificar contador
+            if cache_data['fecha'] == fecha_actual:
+                if cache_data['contador'] >= MAX_REQUESTS_PER_DAY:
+                    # Calcular tiempo hasta mañana
+                    manana = ahora + timedelta(days=1)
+                    manana_medianoche = manana.replace(hour=0, minute=0, second=0, microsecond=0)
+                    segundos_restantes = (manana_medianoche - ahora).seconds
+                    horas_restantes = segundos_restantes // 3600
+                    minutos_restantes = (segundos_restantes % 3600) // 60
+                    
+                    return {
+                        "permitido": False,
+                        "mensaje": f"⏰ Has alcanzado el límite de {MAX_REQUESTS_PER_DAY} preguntas por día. Podrás hacer más preguntas en {horas_restantes}h {minutos_restantes}m.",
+                        "contador_actual": cache_data['contador'],
+                        "limite": MAX_REQUESTS_PER_DAY,
+                        "reset_time": manana_medianoche.isoformat()
+                    }
+                else:
+                    # Incrementar contador
+                    cache_data['contador'] += 1
+                    preguntas_restantes = MAX_REQUESTS_PER_DAY - cache_data['contador']
+                    return {
+                        "permitido": True,
+                        "mensaje": f"📊 Usadas: {cache_data['contador']}/{MAX_REQUESTS_PER_DAY} | Restantes: {preguntas_restantes}",
+                        "contador_actual": cache_data['contador'],
+                        "limite": MAX_REQUESTS_PER_DAY,
+                        "preguntas_restantes": preguntas_restantes
+                    }
+            else:
+                # Nuevo día, resetear contador
+                self.rate_limit_cache[user_ip] = {
+                    'fecha': fecha_actual,
+                    'contador': 1
+                }
+                return {
+                    "permitido": True,
+                    "mensaje": f"📊 Usadas: 1/{MAX_REQUESTS_PER_DAY} | Restantes: {MAX_REQUESTS_PER_DAY - 1}",
+                    "contador_actual": 1,
+                    "limite": MAX_REQUESTS_PER_DAY,
+                    "preguntas_restantes": MAX_REQUESTS_PER_DAY - 1
+                }
+        else:
+            # Primera pregunta de esta IP
+            self.rate_limit_cache[user_ip] = {
+                'fecha': fecha_actual,
+                'contador': 1
+            }
+            return {
+                "permitido": True,
+                "mensaje": f"📊 Usadas: 1/{MAX_REQUESTS_PER_DAY} | Restantes: {MAX_REQUESTS_PER_DAY - 1}",
+                "contador_actual": 1,
+                "limite": MAX_REQUESTS_PER_DAY,
+                "preguntas_restantes": MAX_REQUESTS_PER_DAY - 1
+            }
+    
+    def limpiar_cache_antiguo(self):
+        """Limpia entradas de cache más antiguas de 2 días."""
+        fecha_actual = datetime.now().date()
+        ips_a_eliminar = []
+        
+        for ip, data in self.rate_limit_cache.items():
+            if (fecha_actual - data['fecha']).days > 2:
+                ips_a_eliminar.append(ip)
+        
+        for ip in ips_a_eliminar:
+            del self.rate_limit_cache[ip]
+            
+        if ips_a_eliminar:
+            print(f"🧹 Limpiadas {len(ips_a_eliminar)} IPs antiguas del cache")
     
     def obtener_contexto_noticia(self, noticia_id: int) -> Optional[Dict[str, Any]]:
         """Obtiene TODOS los datos de una noticia desde Supabase."""
@@ -147,9 +232,28 @@ class ChatBotService:
             print(f"❌ Error inesperado llamando a Groq: {e}")
             return "❌ Error inesperado. Por favor, intenta más tarde. ⚠️"
     
-    def generar_respuesta(self, pregunta: str, noticia_id: Optional[int] = None) -> Dict[str, Any]:
+    def generar_respuesta(self, pregunta: str, noticia_id: Optional[int] = None, user_ip: str = "desconocida") -> Dict[str, Any]:
         """Genera una respuesta contextual basada en la noticia o contexto general."""
         try:
+            # ✅ PRIMERO verificar rate limiting
+            rate_limit_check = self.verificar_rate_limit(user_ip)
+            
+            if not rate_limit_check["permitido"]:
+                return {
+                    "respuesta": rate_limit_check["mensaje"],
+                    "tipo_contexto": "rate_limit",
+                    "noticia_id": noticia_id,
+                    "noticia_info": "limite_excedido",
+                    "titulo_noticia": None,
+                    "exito": False,
+                    "modelo": "rate_limit",
+                    "rate_limit_info": rate_limit_check
+                }
+            
+            # Limpiar cache antiguo periódicamente (10% de probabilidad)
+            if random.random() < 0.1:  # ✅ CORREGIDO
+                self.limpiar_cache_antiguo()
+            
             # Determinar el contexto a usar
             if noticia_id:
                 noticia_data = self.obtener_contexto_noticia(noticia_id)
@@ -186,7 +290,8 @@ class ChatBotService:
                 "noticia_info": noticia_info,
                 "titulo_noticia": titulo_noticia,
                 "exito": True,
-                "modelo": self.modelo_actual
+                "modelo": self.modelo_actual,
+                "rate_limit_info": rate_limit_check
             }
             
         except Exception as e:
@@ -198,9 +303,10 @@ class ChatBotService:
                 "noticia_info": "error",
                 "titulo_noticia": None,
                 "exito": False,
-                "modelo": "error"
+                "modelo": "error",
+                "rate_limit_info": None
             }
 
 # Instancia global del servicio
 chatbot_service = ChatBotService()
-print("✅ ChatBot Service inicializado correctamente")
+print("✅ ChatBot Service con Rate Limiting (20/día) inicializado correctamente")

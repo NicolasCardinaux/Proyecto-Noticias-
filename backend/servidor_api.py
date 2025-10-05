@@ -9,7 +9,7 @@ import os
 
 import db
 from procesar_y_guardar_db import ejecutar_crawler
-from chatbot_service import chatbot_service  # ✅ NUEVO IMPORT
+from chatbot_service import chatbot_service
 
 app = Flask(__name__)
 CORS(app)
@@ -62,7 +62,10 @@ def chat_con_noticia():
         pregunta = data.get("pregunta")
         noticia_id = data.get("noticia_id")
         
-        print(f"🤖 Pregunta recibida: {pregunta[:50]}...")
+        # ✅ Obtener IP real del usuario
+        user_ip = get_user_ip()
+        
+        print(f"🤖 Pregunta recibida de IP {user_ip}: {pregunta[:50]}...")
         print(f"📰 Noticia ID: {noticia_id}")
         
         if not pregunta or not pregunta.strip():
@@ -76,10 +79,12 @@ def chat_con_noticia():
             except (ValueError, TypeError):
                 return jsonify({"error": "noticia_id debe ser un número válido"}), 400
         
-        # Generar respuesta usando el servicio
-        resultado = chatbot_service.generar_respuesta(pregunta.strip(), noticia_id_int)
+        # ✅ Generar respuesta usando el servicio CON IP
+        resultado = chatbot_service.generar_respuesta(pregunta.strip(), noticia_id_int, user_ip)
         
         print(f"✅ Respuesta generada - Tipo: {resultado['tipo_contexto']}")
+        if resultado.get('rate_limit_info'):
+            print(f"📊 Rate Limit: {resultado['rate_limit_info']['contador_actual']}/{resultado['rate_limit_info']['limite']}")
         
         return jsonify(resultado)
         
