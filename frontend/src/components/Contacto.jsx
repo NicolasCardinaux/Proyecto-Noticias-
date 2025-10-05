@@ -15,16 +15,16 @@ function Contacto() {
   const [submitMessage, setSubmitMessage] = useState('');
   const navigate = useNavigate();
 
-  // 🔥 SCROLL AUTOMÁTICO AL PRINCIPIO CUANDO SE CARGA EL COMPONENTE
+
   useEffect(() => {
-    // Scroll inmediato al principio de la página
+
     window.scrollTo({
       top: 0,
       left: 0,
       behavior: 'smooth'
     });
 
-    // Scroll adicional después de un pequeño delay para asegurar
+
     const scrollTimer = setTimeout(() => {
       window.scrollTo(0, 0);
     }, 100);
@@ -51,7 +51,7 @@ function Contacto() {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Scroll al principio cuando se envía el formulario
+
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
     setTimeout(() => {
@@ -72,14 +72,14 @@ function Contacto() {
   };
 
   const handleBackToHome = () => {
-    // Scroll al principio antes de navegar
+
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setTimeout(() => {
       navigate('/');
     }, 300);
   };
 
-  // 🔥 FUNCIÓN PARA SCROLL AL PRINCIPIO MANUAL
+
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
@@ -92,7 +92,7 @@ function Contacto() {
       <ParticlesBackground />
       <div className="relative z-10 min-h-screen bg-transparent flex flex-col">
         
-        {/* 🔥 BOTÓN FLOTANTE PARA SCROLL AL PRINCIPIO */}
+        {}
         <button 
           onClick={scrollToTop}
           className="fixed bottom-6 right-6 z-50 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
@@ -105,7 +105,7 @@ function Contacto() {
 
         <div className="contacto-container">
           
-          {/* 🔥 ANCLA PARA SCROLL AUTOMÁTICO */}
+          {}
           <div id="contacto-top" className="absolute -top-20"></div>
           
           <div className="section-header">
