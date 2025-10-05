@@ -43,37 +43,41 @@ except Exception as e:
 
 
 CONTEXTO_BASE_WEB = """
-Eres AntiBot, el asistente inteligente de AntiHumo News. Tu propósito es ayudar a los usuarios a encontrar información veraz y objetiva.
+Eres AntiBot, el asistente inteligente de AntiHumo News. Tu propósito es ayudar a los usuarios con información sobre noticias y contenido del sitio.
 
-# ⚠️ LÍMITES ESTRICTOS DE TU ROL:
-SOLO puedes responder preguntas sobre:
-• Noticias específicas de AntiHumo News
-• Categorías de noticias en el sitio
-• Navegación y funcionalidades de AntiHumo News
-• Información sobre el propósito y características de AntiHumo News
-
-# 🚫 LO QUE NO PUEDES HACER:
-• Responder preguntas generales de historia, ciencia, deportes, etc.
-• Dar información fuera del contexto de AntiHumo News
-• Responder sobre eventos históricos, fechas, personajes famosos
-• Hacer cálculos, predicciones, o análisis fuera del ámbito noticioso
+# 🎯 TU ROL PRINCIPAL:
+Eres un **especialista en noticias** que puede:
+• Analizar y explicar noticias ESPECÍFICAS de AntiHumo News
+• Responder preguntas sobre el contenido de noticias publicadas
+• Ayudar a navegar categorías y funcionalidades del sitio
+• Contextualizar información basada en noticias reales
 
 # 📰 SOBRE ANTIHUMO NEWS:
 • Agregador de noticias argentinas y globales
 • Resúmenes con IA que eliminan amarillismo y sesgos
 • Información verificada y sin "humo" informativo
 • Secciones: Noticias, Clima, Deportes, Mercados, NASA, Tecnología
-• Objetivo: Proporcionar información objetiva y confiable
 
-# 🎯 INSTRUCCIONES ESPECÍFICAS:
-1. Responde ÚNICAMENTE en español
-2. Sé breve y directo (2-3 oraciones máximo)
-3. Si la pregunta NO está relacionada con AntiHumo News, responde: "Soy AntiBot y solo puedo ayudarte con preguntas sobre noticias y contenido de AntiHumo News. ¿En qué puedo asistirte relacionado con nuestro sitio?"
-4. Mantén tono profesional pero amigable
-5. Usa emojis moderadamente (🚀📰🔍)
-6. Enfócate en hechos verificados, no en especulaciones
+# 💬 CÓMO RESPONDER:
+1. **Cuando hay una noticia específica**: Analiza y responde basado EN EL CONTENIDO de esa noticia
+2. **Cuando es sobre el sitio**: Explica funcionalidades y categorías
+3. **Cuando es pregunta general sobre noticias**: Responde brevemente si está relacionado con temas noticiosos actuales
+4. **Cuando NO puedes responder**: Di amablemente tu límite
 
-Responde de forma útil y veraz, pero solo dentro de tu ámbito de acción.
+# 🚫 LÍMITES CLAROS:
+NO PUEDES:
+• Crear noticias ficticias o inventar información
+• Dar consejos médicos, legales o financieros
+• Hacer predicciones futuras no basadas en hechos
+• Responder sobre temas completamente ajenos a noticias (como matemáticas puras, ficción, etc.)
+
+# 🌟 EJEMPLOS DE USO CORRECTO:
+✅ "¿Qué pasó con Felipe Chávez según esta noticia?" → ANALIZAS la noticia
+✅ "¿Qué categorías hay en AntiHumo News?" → EXPLICAS el sitio
+✅ "¿Hay noticias sobre tecnología hoy?" → DIRIGES al sitio
+❌ "¿Cuánto es 2+2?" → RECHAZAS educadamente
+
+Responde de forma útil, veraz y siempre basado en hechos reales cuando haya noticias de referencia.
 """
 
 class ChatBotService:
@@ -174,10 +178,10 @@ class ChatBotService:
             return None
     
     def construir_contexto_noticia(self, noticia: Dict[str, Any]) -> str:
-        """Construye un contexto rico con todos los datos de la noticia."""
+        """Construye un contexto más efectivo para noticias."""
         
         contexto = f"""
-📰 CONTEXTO COMPLETO DE LA NOTICIA:
+📰 **CONTEXTO DE NOTICIA PARA ANÁLISIS:**
 
 **TITULAR:** {noticia['titulo']}
 
@@ -185,20 +189,21 @@ class ChatBotService:
 {noticia['resumen']}
 
 **INFORMACIÓN ADICIONAL:**
-• 🏷️ Categoría: {noticia.get('categoria', 'No especificada')}
-• 📢 Fuente: {noticia.get('fuente', 'No especificada')}
-• 📅 Fecha: {noticia.get('fecha', 'No especificada')}
-• 🔗 Enlace original: {noticia.get('url', 'No disponible')}
-• 👁️ Vistas: {noticia.get('clics', 0)} clics
+• Categoría: {noticia.get('categoria', 'No especificada')}
+• Fuente: {noticia.get('fuente', 'No especificada')}
+• Fecha: {noticia.get('fecha', 'No especificada')}
 
-**INSTRUCCIONES ESPECÍFICAS:**
-1. Responde ÚNICAMENTE basado en la información de esta noticia
-2. Si la pregunta no puede responderse con esta noticia, di: "No tengo esa información específica en esta noticia. Te sugiero leer la noticia completa en el enlace proporcionado."
-3. Sé objetivo y enfócate en los hechos del resumen
-4. Destaca los puntos clave de lo que sí está en la noticia
-5. Máximo 3 oraciones por respuesta
+**INSTRUCCIONES PARA TI:**
+Eres un analista de noticias. El usuario te hará preguntas SOBRE ESTA NOTICIA ESPECÍFICA.
+• Responde basado ÚNICAMENTE en la información proporcionada arriba
+• Si algo no está claro en la noticia, reconócelo amablemente
+• Sé objetivo y enfócate en los hechos presentados
+• Puedes explicar el contexto y significado de lo que SÍ está en la noticia
 
-**IMPORTANTE:** Tu valor está en resumir y aclarar lo que SÍ está en la noticia, no en adivinar lo que no está.
+**EJEMPLO:**
+Si el usuario pregunta "¿Qué pasó con [persona]?" → Explica lo que la noticia dice sobre esa persona
+Si pregunta "¿Cuándo ocurrió?" → Usa las fechas de la noticia
+Si pregunta "¿Por qué es importante?" → Analiza el impacto basado en el contenido
 """
         return contexto
     
@@ -236,38 +241,39 @@ class ChatBotService:
             return self.get_fallback_response(prompt)
     
     def get_fallback_response(self, prompt: str) -> str:
-        """Respuestas de fallback cuando Gemini no funciona."""
-
+        """Respuestas de fallback mejoradas."""
+        
         fallback_responses = {
-            "hola": "¡Hola! 🤖 Soy AntiBot de AntiHumo News. Solo puedo ayudarte con preguntas sobre noticias y contenido de nuestro sitio. ¿En qué puedo asistirte?",
-            "holaa": "¡Hola! 👋 Soy AntiBot. Mi función es ayudarte con información sobre noticias en AntiHumo News. ¿Qué te gustaría saber sobre nuestro contenido?",
-            "qué puedes hacer": "Puedo ayudarte con: 📰 Información sobre noticias específicas, 🔍 Navegación del sitio, 📊 Categorías disponibles en AntiHumo News. Solo respondo preguntas relacionadas con nuestro sitio.",
+            "hola": "¡Hola! 🤖 Soy AntiBot de AntiHumo News. Puedo ayudarte a entender noticias específicas o explicarte sobre nuestro sitio. ¿En qué necesitas ayuda?",
+            "holaa": "¡Hola! 👋 Soy AntiBot. Puedo analizar noticias específicas o ayudarte a navegar AntiHumo News. ¿Sobre qué noticia quieres hablar?",
+            "qué puedes hacer": "Puedo: 📰 Analizar noticias específicas publicadas, 🔍 Explicar categorías del sitio, 📊 Ayudarte a navegar AntiHumo News. ¿Sobre qué noticia quieres hablar?",
             "noticias": "📰 En AntiHumo News encontrarás noticias actualizadas de Argentina y el mundo, resumidas con IA para eliminar el amarillismo. ¡Explora las diferentes categorías!",
             "clima": "🌤️ En AntiHumo News tenemos una sección de clima con pronósticos actualizados. Puedes consultarla en nuestro sitio para información meteorológica.",
             "deportes": "⚽ Tenemos una sección dedicada a deportes con las últimas noticias. ¡Navega por la categoría Deportes en AntiHumo News para ver lo último!",
             "tecnología": "💻 En nuestra sección de Tecnología encontrarás las últimas novedades en innovación. Visita AntiHumo News para ver el contenido actualizado.",
-            "ayuda": "🤖 Puedo ayudarte con información sobre noticias específicas, navegación del sitio y categorías disponibles en AntiHumo News. ¿En qué necesitas ayuda relacionada con nuestro contenido?"
+            "ayuda": "🤖 Puedo ayudarte a entender noticias específicas, explicar categorías del sitio y guiarte en AntiHumo News. ¿Sobre qué noticia necesitas información?"
         }
         
         prompt_lower = prompt.lower()
         
-
+        # PALABRAS que SÍ deben bloquearse (temas completamente fuera de contexto)
         palabras_fuera_contexto = [
-            "guerra mundial", "historia", "fecha", "año", "cuándo", 
-            "quién inventó", "biografía", "ciencia", "matemática",
-            "calcula", "qué es", "definición", "significado"
+            "calcula", "resuelve", "ecuación", "matemática pura", 
+            "consejo médico", "consejo legal", "qué droga", "ilegal",
+            "futuro predicción", "horóscopo", "magia", "hechizo",
+            "fórmula química", "teorema", "álgebra", "trigonometría"
         ]
         
         for palabra in palabras_fuera_contexto:
             if palabra in prompt_lower:
-                return "🚫 Soy AntiBot y solo puedo ayudarte con preguntas sobre noticias y contenido de AntiHumo News. ¿En qué puedo asistirte relacionado con nuestro sitio?"
+                return "🚫 Lo siento, no puedo ayudarte con ese tipo de consultas. Mi especialidad es noticias y contenido de AntiHumo News."
         
+        # Si no es un tema bloqueado, permite la conversación
         for keyword, response in fallback_responses.items():
             if keyword in prompt_lower:
                 return response
         
-
-        return "🤖 Soy AntiBot de AntiHumo News. Solo puedo responder preguntas relacionadas con noticias y contenido de nuestro sitio. ¿En qué puedo ayudarte específicamente sobre AntiHumo News?"
+        return "🤖 Soy AntiBot de AntiHumo News. Puedo ayudarte a entender noticias específicas o explicarte sobre nuestro sitio. ¿Tienes alguna noticia en mente?"
     
     def generar_respuesta(self, pregunta: str, noticia_id: Optional[int] = None, user_ip: str = "desconocida") -> Dict[str, Any]:
         """Genera una respuesta contextual basada en la noticia o contexto general."""
@@ -311,7 +317,7 @@ class ChatBotService:
 
 **PREGUNTA DEL USUARIO:** {pregunta}
 
-**RESPONDE AHORA** (en español, breve y directo, SOLO si es sobre AntiHumo News):"""
+**RESPONDE AHORA** (en español, breve y objetivo):"""
             
             respuesta = self.llamar_gemini_api(prompt_final)
             
