@@ -8,31 +8,31 @@ import random
 import google.generativeai as genai
 import time
 
-# Cargar variables de entorno
+
 load_dotenv()
 
-# Configuración de Supabase
+
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-# Configuración de Gemini - NUEVA API KEY
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY_01")  # ✅ NUEVA KEY
-GEMINI_MODEL = "gemini-2.5-flash"  # ✅ MODELO ACTUALIZADO
 
-# Configuración de Rate Limiting
-MAX_REQUESTS_PER_DAY = 30  # ✅ LIMITADO A 30 PREGUNTAS POR DÍA
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY_01")
+GEMINI_MODEL = "gemini-2.5-flash"
+
+
+MAX_REQUESTS_PER_DAY = 30
 
 print("🔧 Inicializando ChatBot Service con Gemini...")
 print(f"✅ Límite: {MAX_REQUESTS_PER_DAY} preguntas por día por IP")
 print(f"✅ GEMINI_API_KEY_01 cargada: {bool(GEMINI_API_KEY)}")
 print(f"✅ Supabase configurado: {bool(SUPABASE_URL)}")
 
-# Configurar Gemini
+
 try:
     if GEMINI_API_KEY:
         genai.configure(api_key=GEMINI_API_KEY)
-        gemini_model = genai.GenerativeModel("gemini-2.5-flash")  # ✅ MODELO ACTUALIZADO
+        gemini_model = genai.GenerativeModel("gemini-2.5-flash")
         print(f"✅ Gemini configurado correctamente - Modelo: {GEMINI_MODEL}")
     else:
         print("❌ GEMINI_API_KEY_01 no encontrada")
@@ -41,25 +41,39 @@ except Exception as e:
     print(f"❌ Error configurando Gemini: {e}")
     gemini_model = None
 
-# Contexto base mejorado
+
 CONTEXTO_BASE_WEB = """
 Eres AntiBot, el asistente inteligente de AntiHumo News. Tu propósito es ayudar a los usuarios a encontrar información veraz y objetiva.
 
-SOBRE ANTIHUMO NEWS:
+# ⚠️ LÍMITES ESTRICTOS DE TU ROL:
+SOLO puedes responder preguntas sobre:
+• Noticias específicas de AntiHumo News
+• Categorías de noticias en el sitio
+• Navegación y funcionalidades de AntiHumo News
+• Información sobre el propósito y características de AntiHumo News
+
+# 🚫 LO QUE NO PUEDES HACER:
+• Responder preguntas generales de historia, ciencia, deportes, etc.
+• Dar información fuera del contexto de AntiHumo News
+• Responder sobre eventos históricos, fechas, personajes famosos
+• Hacer cálculos, predicciones, o análisis fuera del ámbito noticioso
+
+# 📰 SOBRE ANTIHUMO NEWS:
 • Agregador de noticias argentinas y globales
-• Resúmenes con IA que eliminan amarillismo
+• Resúmenes con IA que eliminan amarillismo y sesgos
 • Información verificada y sin "humo" informativo
 • Secciones: Noticias, Clima, Deportes, Mercados, NASA, Tecnología
+• Objetivo: Proporcionar información objetiva y confiable
 
-INSTRUCCIONES:
-• Responde SIEMPRE en español
-• Sé breve y directo (2-3 oraciones máximo)
-• Mantén tono profesional pero amigable
-• Si no sabes algo, admítelo amablemente
-• Usa emojis moderadamente (🚀📰🔍)
-• Evita inventar información
+# 🎯 INSTRUCCIONES ESPECÍFICAS:
+1. Responde ÚNICAMENTE en español
+2. Sé breve y directo (2-3 oraciones máximo)
+3. Si la pregunta NO está relacionada con AntiHumo News, responde: "Soy AntiBot y solo puedo ayudarte con preguntas sobre noticias y contenido de AntiHumo News. ¿En qué puedo asistirte relacionado con nuestro sitio?"
+4. Mantén tono profesional pero amigable
+5. Usa emojis moderadamente (🚀📰🔍)
+6. Enfócate en hechos verificados, no en especulaciones
 
-Responde de forma útil y veraz.
+Responde de forma útil y veraz, pero solo dentro de tu ámbito de acción.
 """
 
 class ChatBotService:
@@ -76,10 +90,8 @@ class ChatBotService:
         if user_ip in self.rate_limit_cache:
             cache_data = self.rate_limit_cache[user_ip]
             
-            # Si es el mismo día, verificar contador
             if cache_data['fecha'] == fecha_actual:
                 if cache_data['contador'] >= MAX_REQUESTS_PER_DAY:
-                    # Calcular tiempo hasta mañana
                     manana = ahora + timedelta(days=1)
                     manana_medianoche = manana.replace(hour=0, minute=0, second=0, microsecond=0)
                     segundos_restantes = (manana_medianoche - ahora).seconds
@@ -94,7 +106,6 @@ class ChatBotService:
                         "reset_time": manana_medianoche.isoformat()
                     }
                 else:
-                    # Incrementar contador
                     cache_data['contador'] += 1
                     preguntas_restantes = MAX_REQUESTS_PER_DAY - cache_data['contador']
                     return {
@@ -105,7 +116,6 @@ class ChatBotService:
                         "preguntas_restantes": preguntas_restantes
                     }
             else:
-                # Nuevo día, resetear contador
                 self.rate_limit_cache[user_ip] = {
                     'fecha': fecha_actual,
                     'contador': 1
@@ -118,7 +128,6 @@ class ChatBotService:
                     "preguntas_restantes": MAX_REQUESTS_PER_DAY - 1
                 }
         else:
-            # Primera pregunta de esta IP
             self.rate_limit_cache[user_ip] = {
                 'fecha': fecha_actual,
                 'contador': 1
@@ -202,7 +211,6 @@ class ChatBotService:
             
             print("🔄 Enviando pregunta a Gemini API...")
             
-            # Configurar la generación
             generation_config = {
                 "temperature": 0.3,
                 "top_p": 0.9,
@@ -210,7 +218,6 @@ class ChatBotService:
                 "max_output_tokens": 350,
             }
             
-            # Enviar prompt a Gemini
             response = gemini_model.generate_content(
                 prompt,
                 generation_config=generation_config
@@ -230,37 +237,41 @@ class ChatBotService:
     
     def get_fallback_response(self, prompt: str) -> str:
         """Respuestas de fallback cuando Gemini no funciona."""
+
         fallback_responses = {
-            "hola": "¡Hola! 🤖 Soy AntiBot de AntiHumo News. Estoy aquí para ayudarte con información sobre noticias y el sitio. ¿En qué puedo asistirte?",
-            "holaa": "¡Hola! 👋 Soy AntiBot, tu asistente de AntiHumo News. Puedo ayudarte a encontrar noticias e información veraz. ¿Qué te gustaría saber?",
-            "qué puedes hacer": "Puedo: 📰 Responder sobre noticias específicas, 🔍 Ayudarte a navegar el sitio, 📊 Dar información general sobre AntiHumo News. ¿En qué te puedo ayudar?",
+            "hola": "¡Hola! 🤖 Soy AntiBot de AntiHumo News. Solo puedo ayudarte con preguntas sobre noticias y contenido de nuestro sitio. ¿En qué puedo asistirte?",
+            "holaa": "¡Hola! 👋 Soy AntiBot. Mi función es ayudarte con información sobre noticias en AntiHumo News. ¿Qué te gustaría saber sobre nuestro contenido?",
+            "qué puedes hacer": "Puedo ayudarte con: 📰 Información sobre noticias específicas, 🔍 Navegación del sitio, 📊 Categorías disponibles en AntiHumo News. Solo respondo preguntas relacionadas con nuestro sitio.",
             "noticias": "📰 En AntiHumo News encontrarás noticias actualizadas de Argentina y el mundo, resumidas con IA para eliminar el amarillismo. ¡Explora las diferentes categorías!",
-            "clima": "🌤️ Para información del clima en tiempo real, te sugiero consultar servicios especializados como el Servicio Meteorológico Nacional. En AntiHumo nos enfocamos en noticias veraces.",
-            "deportes": "⚽ Tenemos una sección dedicada a deportes con las últimas noticias de fútbol, tenis, y más. ¡Navega por la categoría Deportes para ver lo último!",
-            "tecnología": "💻 En nuestra sección de Tecnología encontrarás las últimas novedades en IA, gadgets, startups y innovación. ¡Échale un vistazo!",
-            "ayuda": "🤖 Puedo ayudarte con: información sobre noticias específicas, navegación del sitio, categorías disponibles, y temas generales de AntiHumo News. ¿Qué necesitas?"
+            "clima": "🌤️ En AntiHumo News tenemos una sección de clima con pronósticos actualizados. Puedes consultarla en nuestro sitio para información meteorológica.",
+            "deportes": "⚽ Tenemos una sección dedicada a deportes con las últimas noticias. ¡Navega por la categoría Deportes en AntiHumo News para ver lo último!",
+            "tecnología": "💻 En nuestra sección de Tecnología encontrarás las últimas novedades en innovación. Visita AntiHumo News para ver el contenido actualizado.",
+            "ayuda": "🤖 Puedo ayudarte con información sobre noticias específicas, navegación del sitio y categorías disponibles en AntiHumo News. ¿En qué necesitas ayuda relacionada con nuestro contenido?"
         }
         
-        # Buscar palabras clave en el prompt
         prompt_lower = prompt.lower()
+        
+
+        palabras_fuera_contexto = [
+            "guerra mundial", "historia", "fecha", "año", "cuándo", 
+            "quién inventó", "biografía", "ciencia", "matemática",
+            "calcula", "qué es", "definición", "significado"
+        ]
+        
+        for palabra in palabras_fuera_contexto:
+            if palabra in prompt_lower:
+                return "🚫 Soy AntiBot y solo puedo ayudarte con preguntas sobre noticias y contenido de AntiHumo News. ¿En qué puedo asistirte relacionado con nuestro sitio?"
         
         for keyword, response in fallback_responses.items():
             if keyword in prompt_lower:
                 return response
         
-        # Respuesta por defecto
-        default_responses = [
-            "🤖 ¡Hola! Soy AntiBot. Puedo ayudarte con información sobre noticias y navegación del sitio. ¿En qué puedo asistirte específicamente?",
-            "📰 Hola, soy AntiBot. Estoy aquí para ayudarte a encontrar información veraz en AntiHumo News. ¿Qué te gustaría saber?",
-            "🔍 ¡Hola! Como AntiBot, puedo ayudarte con noticias y contenido del sitio. ¿En qué tema necesitas ayuda?"
-        ]
-        
-        return random.choice(default_responses)
+
+        return "🤖 Soy AntiBot de AntiHumo News. Solo puedo responder preguntas relacionadas con noticias y contenido de nuestro sitio. ¿En qué puedo ayudarte específicamente sobre AntiHumo News?"
     
     def generar_respuesta(self, pregunta: str, noticia_id: Optional[int] = None, user_ip: str = "desconocida") -> Dict[str, Any]:
         """Genera una respuesta contextual basada en la noticia o contexto general."""
         try:
-            # ✅ PRIMERO verificar rate limiting
             rate_limit_check = self.verificar_rate_limit(user_ip)
             
             if not rate_limit_check["permitido"]:
@@ -275,11 +286,9 @@ class ChatBotService:
                     "rate_limit_info": rate_limit_check
                 }
             
-            # Limpiar cache antiguo periódicamente (10% de probabilidad)
             if random.random() < 0.1:
                 self.limpiar_cache_antiguo()
             
-            # Determinar el contexto a usar
             if noticia_id:
                 noticia_data = self.obtener_contexto_noticia(noticia_id)
                 if noticia_data:
@@ -298,14 +307,12 @@ class ChatBotService:
                 noticia_info = "sin_noticia"
                 titulo_noticia = None
             
-            # Construir prompt final optimizado
             prompt_final = f"""{contexto}
 
 **PREGUNTA DEL USUARIO:** {pregunta}
 
-**RESPONDE AHORA** (en español, breve y directo):"""
+**RESPONDE AHORA** (en español, breve y directo, SOLO si es sobre AntiHumo News):"""
             
-            # Obtener respuesta del modelo
             respuesta = self.llamar_gemini_api(prompt_final)
             
             return {
@@ -332,6 +339,6 @@ class ChatBotService:
                 "rate_limit_info": None
             }
 
-# Instancia global del servicio
+
 chatbot_service = ChatBotService()
 print("✅ ChatBot Service con Gemini 2.5 Flash (30 preguntas/día) inicializado correctamente")

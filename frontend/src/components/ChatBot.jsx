@@ -15,23 +15,22 @@ const ChatBot = () => {
   const messagesEndRef = useRef(null);
   const location = useLocation();
 
-  // ✅ Efecto para mostrar mensaje de bienvenida al cargar la página
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowWelcomePopup(true);
       
-      // Ocultar después de 5 segundos
       const hideTimer = setTimeout(() => {
         setShowWelcomePopup(false);
       }, 5000);
       
       return () => clearTimeout(hideTimer);
-    }, 2000); // Mostrar después de 2 segundos de cargar la página
+    }, 2000);
 
     return () => clearTimeout(timer);
   }, []);
 
-  // Obtener noticia_id actual de la URL si estamos en una noticia
+
   const getCurrentNoticiaId = () => {
     if (location.pathname.startsWith('/noticia/')) {
       const match = location.pathname.match(/\/noticia\/(\d+)/);
@@ -48,13 +47,13 @@ const ChatBot = () => {
     scrollToBottom();
   }, [messages]);
 
-  // Mensaje de bienvenida cuando se abre el chat
+
   useEffect(() => {
     if (isOpen && messages.length === 0) {
       const noticiaId = getCurrentNoticiaId();
       const welcomeMessage = noticiaId 
         ? "¡Hola! 🤖 Soy AntiBot, tu asistente de AntiHumo News. Puedo responder preguntas sobre **esta noticia específica** usando la información del resumen. ¿En qué puedo ayudarte? 📰"
-        : "¡Hola! 🤖 Soy AntiBot, tu asistente de AntiHumo News. Puedo ayudarte a navegar por el sitio y encontrar información veraz. ¿En qué puedo asistirte? 🌐";
+        : "¡Hola! 🤖 Soy AntiBot, tu asistente de AntiHumo News. Puedo ayudarte a navegar por el sitio y encontrar información veraz sobre noticias. ¿En qué puedo asistirte? 🌐";
       
       setMessages([{
         id: 1,
@@ -92,7 +91,6 @@ const ChatBot = () => {
 
       console.log('📥 Respuesta recibida:', response.data);
 
-      // ✅ Actualizar información de rate limit
       if (response.data.rate_limit_info) {
         setRateLimitInfo(response.data.rate_limit_info);
       }
@@ -146,26 +144,21 @@ const ChatBot = () => {
     return '🌐 Modo General';
   };
 
-  const getRateLimitDisplay = () => {
-    if (rateLimitInfo) {
-      return ` (${rateLimitInfo.contador_actual}/${rateLimitInfo.limite})`;
-    }
-    return '';
-  };
-
   return (
     <div className="chatbot-container">
-      {/* ✅ Mensaje de bienvenida temporal */}
+      {}
       {showWelcomePopup && !isOpen && (
         <div className="welcome-popup">
           <div className="welcome-message">
             <span className="welcome-icon">🤖</span>
-            <span>¡Hola! Estoy aquí para ayudarte en lo que necesites</span>
+            <span className="welcome-text">
+              ¡Hola! Estoy aquí para ayudarte en lo que necesites sobre noticias
+            </span>
           </div>
         </div>
       )}
 
-      {/* Botón flotante - ESQUINA INFERIOR DERECHA */}
+      {}
       {!isOpen && (
         <button 
           className="chatbot-toggle-btn"
@@ -177,10 +170,10 @@ const ChatBot = () => {
         </button>
       )}
 
-      {/* Ventana del chat */}
+      {}
       {isOpen && (
         <div className="chatbot-window">
-          {/* Header con colores de AntiHumo */}
+          {}
           <div className="chatbot-header">
             <div className="chatbot-title">
               <span className="bot-avatar">🤖</span>
@@ -210,7 +203,7 @@ const ChatBot = () => {
             </div>
           </div>
 
-          {/* Mensajes */}
+          {}
           <div className="chatbot-messages">
             {messages.map((message) => (
               <div
@@ -261,7 +254,7 @@ const ChatBot = () => {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Input area */}
+          {}
           <div className="chatbot-input-container">
             <div className="input-wrapper">
               <textarea
@@ -271,7 +264,7 @@ const ChatBot = () => {
                 placeholder={
                   getCurrentNoticiaId() 
                     ? "Pregunta sobre esta noticia específica..." 
-                    : "Escribe tu pregunta sobre AntiHumo News..."
+                    : "Escribe tu pregunta sobre noticias en AntiHumo News..."
                 }
                 disabled={isLoading}
                 rows="1"
@@ -289,7 +282,7 @@ const ChatBot = () => {
             <div className="input-hint">
               {getCurrentNoticiaId() 
                 ? "💡 Pregunta sobre el contenido de esta noticia" 
-                : "💡 Pregunta general sobre noticias, clima, deportes, etc."
+                : "💡 Pregunta sobre noticias, categorías o navegación del sitio"
               }
               {rateLimitInfo && (
                 <div className="rate-limit-hint">

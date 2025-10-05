@@ -1,4 +1,4 @@
-/* ===== CHATBOT STYLES - MISMOS COLORES QUE ANTIHUMO NEWS ===== */
+
 .chatbot-container {
   position: fixed;
   bottom: 20px;
@@ -7,11 +7,11 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
 }
 
-/* ✅ Mensaje de bienvenida temporal - DESPLIEGUE A LA IZQUIERDA */
+
 .welcome-popup {
   position: absolute;
   bottom: 10px;
-  right: 70px; /* Aparece a la izquierda del botón */
+  right: 70px;
   z-index: 10001;
   animation: slideInLeft 0.5s ease-out;
 }
@@ -19,35 +19,44 @@
 .welcome-message {
   background: linear-gradient(135deg, #b3000c, #8a0009);
   color: white;
-  padding: 10px 14px;
+  padding: 12px 16px;
   border-radius: 16px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   box-shadow: 0 4px 20px rgba(179, 0, 12, 0.4);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
-  max-width: 220px; /* Máximo 2 renglones */
-  line-height: 1.3;
+  max-width: 260px;
+  line-height: 1.4;
   border: 1px solid rgba(255, 255, 255, 0.2);
   text-align: left;
+  word-wrap: break-word;
+  word-break: normal;
+  white-space: normal;
 }
 
 .welcome-message::after {
   content: '';
   position: absolute;
-  bottom: 12px;
-  right: -8px; /* Triángulo a la derecha (apuntando al botón) */
+  bottom: 16px;
+  right: -8px;
   width: 0;
   height: 0;
   border-top: 6px solid transparent;
   border-bottom: 6px solid transparent;
-  border-left: 8px solid #b3000c; /* Triángulo apuntando al botón */
+  border-left: 8px solid #b3000c;
 }
 
 .welcome-icon {
-  font-size: 14px;
+  font-size: 16px;
   flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.welcome-text {
+  flex: 1;
+  min-width: 0;
 }
 
 @keyframes slideInLeft {
@@ -61,7 +70,7 @@
   }
 }
 
-/* Botón flotante - Mismos colores que las noticias */
+
 .chatbot-toggle-btn {
   position: relative;
   width: 60px;
@@ -112,7 +121,7 @@
   100% { transform: scale(0.8); opacity: 1; }
 }
 
-/* Ventana del chat - Mismos fondos que las noticias */
+
 .chatbot-window {
   width: 380px;
   height: 550px;
@@ -132,7 +141,7 @@
   to { transform: translateY(0); opacity: 1; }
 }
 
-/* Header - Mismo gradiente que los badges */
+
 .chatbot-header {
   background: linear-gradient(135deg, #b3000c, #8a0009);
   color: white;
@@ -201,7 +210,6 @@
   background: rgba(255, 255, 255, 0.1);
 }
 
-/* Mensajes - Mismos fondos que el contenido de noticias */
 .chatbot-messages {
   flex: 1;
   padding: 20px;
@@ -255,7 +263,6 @@
   position: relative;
 }
 
-/* Mensaje del usuario - Color principal */
 .message.user .message-content {
   background: linear-gradient(135deg, #b3000c, #8a0009);
   color: white;
@@ -263,7 +270,6 @@
   box-shadow: 0 2px 8px rgba(179, 0, 12, 0.3);
 }
 
-/* Mensaje del bot - Mismo fondo que las tarjetas */
 .message.bot .message-content {
   background: linear-gradient(145deg, #1a1a1a, #2a2a2a);
   color: #f5f5f5;
@@ -291,7 +297,6 @@
   text-align: left;
 }
 
-/* Indicadores de contexto */
 .context-indicator {
   font-size: 10px;
   color: #b3000c;
@@ -307,7 +312,6 @@
   color: #b3000c;
 }
 
-/* Rate limit indicator */
 .rate-limit-indicator {
   font-size: 10px;
   color: #4CAF50;
@@ -318,7 +322,6 @@
   gap: 4px;
 }
 
-/* Loading indicator */
 .message-content.loading {
   background: #2a2a2a !important;
   border: 1px solid #3e4451 !important;
@@ -354,7 +357,7 @@
   40% { transform: scale(1); opacity: 1; }
 }
 
-/* Input area - Mismos fondos */
+/* Input area */
 .chatbot-input-container {
   padding: 16px 20px;
   background: #1a1a1a;
@@ -446,7 +449,6 @@
   font-weight: 600;
 }
 
-/* RESPONSIVE CORREGIDO */
 @media (max-width: 768px) {
   .chatbot-container {
     bottom: 15px;
@@ -463,16 +465,19 @@
     right: 0;
   }
   
-  /* ✅ Mensaje a la izquierda en móvil */
   .welcome-popup {
     bottom: 10px;
     right: 65px;
   }
   
   .welcome-message {
-    max-width: 180px;
-    font-size: 12px;
-    padding: 8px 12px;
+    max-width: 220px;
+    font-size: 13px;
+    padding: 10px 14px;
+  }
+  
+  .welcome-icon {
+    font-size: 14px;
   }
   
   .chatbot-toggle-btn {
@@ -506,8 +511,13 @@
   }
   
   .welcome-message {
-    max-width: 160px;
-    font-size: 11px;
+    max-width: 200px;
+    font-size: 12px;
+    padding: 9px 12px;
+  }
+  
+  .welcome-icon {
+    font-size: 13px;
   }
   
   .chatbot-toggle-btn {
@@ -527,7 +537,6 @@
   }
 }
 
-/* Para pantallas muy pequeñas (ej: iPhone SE) */
 @media (max-width: 320px) {
   .chatbot-container {
     bottom: 5px;
@@ -540,9 +549,13 @@
   }
   
   .welcome-message {
-    max-width: 150px;
-    font-size: 10px;
-    padding: 6px 10px;
+    max-width: 180px;
+    font-size: 11px;
+    padding: 8px 10px;
+  }
+  
+  .welcome-icon {
+    font-size: 12px;
   }
   
   .welcome-popup {
@@ -550,7 +563,6 @@
   }
 }
 
-/* Dark mode optimizations */
 @media (prefers-color-scheme: dark) {
   .chatbot-window {
     background: linear-gradient(145deg, #1a1a1a, #2a2a2a);
