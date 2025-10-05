@@ -10,3 +10,6 @@ httpx
 httpcore
 apscheduler
 pytz
+beautifulsoup4
+trafilatura
+waitress
