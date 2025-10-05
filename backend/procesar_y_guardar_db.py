@@ -126,7 +126,7 @@ Eres un periodista senior especializado en crear resúmenes ejecutivos para medi
 ## FORMATO:
 - EXCLUSIVAMENTE un párrafo continuo
 - SIN saltos de línea, viñetas, números o encabezados
-- LONGITUD: 180-250 palabras (nunca exceder 300 palabras)
+- LONGITUD: 200-380 palabras (nunca exceder 400 palabras)
 
 ## CONTENIDO PERIODÍSTICO:
 Aplica la técnica de las **5W+H** de forma implícita:
