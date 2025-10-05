@@ -228,7 +228,7 @@ Si pregunta "¿Por qué es importante?" → Analiza el impacto basado en el cont
                 "temperature": 0.3,
                 "top_p": 0.9,
                 "top_k": 40,
-                "max_output_tokens": 800,
+                "max_output_tokens": 600,
             }
             
             safety_settings = [
