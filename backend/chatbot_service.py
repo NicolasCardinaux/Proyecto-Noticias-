@@ -9,13 +9,11 @@ import google.generativeai as genai
 import time
 import logging
 
-# Configurar logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 load_dotenv()
 
-# Configuración de Supabase
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 
@@ -26,78 +24,69 @@ except Exception as e:
     logger.error(f"❌ Error inicializando Supabase: {e}")
     supabase = None
 
-# Configuración de Gemini
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY_01")
-GEMINI_MODEL = "gemini-1.5-flash"  # Modelo más estable
-
+GEMINI_MODEL = "gemini-2.5-flash"
 MAX_REQUESTS_PER_DAY = 30
 
-print("🔧 Inicializando ChatBot Service con Gemini...")
+print("🔧 DIAGNÓSTICO GEMINI:")
+print(f"✅ GEMINI_API_KEY_01 existe: {bool(GEMINI_API_KEY)}")
+print(f"✅ Longitud API Key: {len(GEMINI_API_KEY or '')}")
+if GEMINI_API_KEY:
+    print(f"✅ Primeros 10 chars: {GEMINI_API_KEY[:10]}...")
+
+print(f"🔧 Inicializando ChatBot Service con Gemini 2.5 Flash...")
 print(f"✅ Límite: {MAX_REQUESTS_PER_DAY} preguntas por día por IP")
-print(f"✅ GEMINI_API_KEY_01 cargada: {bool(GEMINI_API_KEY)}")
 print(f"✅ Supabase configurado: {bool(SUPABASE_URL)}")
 
-# Configuración robusta de Gemini
 gemini_model = None
 try:
     if GEMINI_API_KEY:
         genai.configure(api_key=GEMINI_API_KEY)
-        # Prueba con modelo más estable
-        gemini_model = genai.GenerativeModel(GEMINI_MODEL)
+        gemini_model = genai.GenerativeModel("gemini-2.5-flash")
         
-        # Test rápido de conexión
+        print("🔄 Probando conexión con Gemini 2.5 Flash...")
         test_response = gemini_model.generate_content("Responde solo 'CONECTADO'")
         if test_response and test_response.text:
-            print(f"✅ Gemini {GEMINI_MODEL} configurado correctamente - Test: {test_response.text}")
+            print(f"✅ Gemini 2.5 Flash configurado correctamente - Test: {test_response.text}")
         else:
             print("❌ Gemini respondió pero sin texto")
             gemini_model = None
     else:
-        print("❌ ERROR: GEMINI_API_KEY_01 no encontrada en variables de entorno")
+        print("❌ ERROR CRÍTICO: GEMINI_API_KEY_01 no encontrada en variables de entorno")
         gemini_model = None
 except Exception as e:
-    print(f"❌ Error configurando Gemini: {e}")
+    print(f"❌ Error configurando Gemini 2.5 Flash: {e}")
     gemini_model = None
 
-# Contexto mejorado para el bot
 CONTEXTO_BASE_WEB = """
 Eres AntiBot, el asistente inteligente de AntiHumo News. Tu propósito es ayudar a los usuarios con información sobre noticias y contenido del sitio.
 
-# 🎯 TU ROL PRINCIPAL:
-Eres un **especialista en noticias** que puede:
+Eres un especialista en noticias que puede:
 • Analizar y explicar noticias ESPECÍFICAS de AntiHumo News
 • Responder preguntas sobre el contenido de noticias publicadas
 • Ayudar a navegar categorías y funcionalidades del sitio
 • Contextualizar información basada en noticias reales
 
-# 📰 SOBRE ANTIHUMO NEWS:
+SOBRE ANTIHUMO NEWS:
 • Agregador de noticias argentinas y globales
 • Resúmenes con IA que eliminan amarillismo y sesgos
 • Información verificada y sin "humo" informativo
 • Secciones: Noticias, Clima, Deportes, Mercados, NASA, Tecnología
 
-# 💬 CÓMO RESPONDER:
-1. **Cuando hay una noticia específica**: Analiza y responde basado EN EL CONTENIDO de esa noticia
-2. **Cuando es sobre el sitio**: Explica funcionalidades y categorías
-3. **Cuando es pregunta general sobre noticias**: Responde brevemente si está relacionado con temas noticiosos actuales
-4. **Cuando NO puedes responder**: Di amablemente tu límite
+CÓMO RESPONDER:
+1. Cuando hay una noticia específica: Analiza y responde basado EN EL CONTENIDO de esa noticia
+2. Cuando es sobre el sitio: Explica funcionalidades y categorías
+3. Cuando es pregunta general sobre noticias: Responde brevemente si está relacionado con temas noticiosos actuales
+4. Cuando NO puedes responder: Di amablemente tu límite
 
-# 🚫 LÍMITES CLAROS:
+LÍMITES CLAROS:
 NO PUEDES:
 • Crear noticias ficticias o inventar información
 • Dar consejos médicos, legales o financieros
 • Hacer predicciones futuras no basadas en hechos
-• Responder sobre temas completamente ajenos a noticias (como matemáticas puras, ficción, etc.)
-
-# 🌟 EJEMPLOS DE USO CORRECTO:
-✅ "¿Qué pasó con Felipe Chávez según esta noticia?" → ANALIZAS la noticia
-✅ "¿Qué categorías hay en AntiHumo News?" → EXPLICAS el sitio
-✅ "¿Hay noticias sobre tecnología hoy?" → DIRIGES al sitio
-❌ "¿Cuánto es 2+2?" → RECHAZAS educadamente
+• Responder sobre temas completamente ajenos a noticias
 
 Responde de forma útil, veraz y siempre basado en hechos reales cuando haya noticias de referencia.
-
-Si estás funcionando correctamente, responde de manera natural y útil a las preguntas sobre noticias.
 """
 
 class ChatBotService:
@@ -108,7 +97,6 @@ class ChatBotService:
         logger.info("🤖 ChatBotService inicializado")
     
     def verificar_rate_limit(self, user_ip: str) -> Dict[str, Any]:
-        """Verifica si el usuario ha excedido el límite de 30 preguntas por día."""
         ahora = datetime.now()
         fecha_actual = ahora.date()
         
@@ -141,7 +129,6 @@ class ChatBotService:
                         "preguntas_restantes": preguntas_restantes
                     }
             else:
-                # Nueva día, resetear contador
                 self.rate_limit_cache[user_ip] = {
                     'fecha': fecha_actual,
                     'contador': 1
@@ -154,7 +141,6 @@ class ChatBotService:
                     "preguntas_restantes": MAX_REQUESTS_PER_DAY - 1
                 }
         else:
-            # Nueva IP
             self.rate_limit_cache[user_ip] = {
                 'fecha': fecha_actual,
                 'contador': 1
@@ -168,7 +154,6 @@ class ChatBotService:
             }
     
     def limpiar_cache_antiguo(self):
-        """Limpia entradas de cache más antiguas de 2 días."""
         fecha_actual = datetime.now().date()
         ips_a_eliminar = []
         
@@ -183,7 +168,6 @@ class ChatBotService:
             logger.info(f"🧹 Limpiadas {len(ips_a_eliminar)} IPs antiguas del cache")
     
     def obtener_contexto_noticia(self, noticia_id: int) -> Optional[Dict[str, Any]]:
-        """Obtiene TODOS los datos de una noticia desde Supabase."""
         try:
             if not supabase:
                 logger.error("❌ Supabase no está inicializado")
@@ -205,29 +189,27 @@ class ChatBotService:
             return None
     
     def construir_contexto_noticia(self, noticia: Dict[str, Any]) -> str:
-        """Construye un contexto más efectivo para noticias."""
-        
         contexto = f"""
-📰 **CONTEXTO DE NOTICIA PARA ANÁLISIS:**
+📰 CONTEXTO DE NOTICIA PARA ANÁLISIS:
 
-**TITULAR:** {noticia['titulo']}
+TITULAR: {noticia['titulo']}
 
-**RESUMEN COMPLETO:** 
+RESUMEN COMPLETO: 
 {noticia['resumen']}
 
-**INFORMACIÓN ADICIONAL:**
+INFORMACIÓN ADICIONAL:
 • Categoría: {noticia.get('categoria', 'No especificada')}
 • Fuente: {noticia.get('fuente', 'No especificada')}
 • Fecha: {noticia.get('fecha', 'No especificada')}
 
-**INSTRUCCIONES PARA TI:**
+INSTRUCCIONES PARA TI:
 Eres un analista de noticias. El usuario te hará preguntas SOBRE ESTA NOTICIA ESPECÍFICA.
 • Responde basado ÚNICAMENTE en la información proporcionada arriba
 • Si algo no está claro en la noticia, reconócelo amablemente
 • Sé objetivo y enfócate en los hechos presentados
 • Puedes explicar el contexto y significado de lo que SÍ está en la noticia
 
-**EJEMPLO:**
+EJEMPLO:
 Si el usuario pregunta "¿Qué pasó con [persona]?" → Explica lo que la noticia dice sobre esa persona
 Si pregunta "¿Cuándo ocurrió?" → Usa las fechas de la noticia
 Si pregunta "¿Por qué es importante?" → Analiza el impacto basado en el contenido
@@ -235,29 +217,36 @@ Si pregunta "¿Por qué es importante?" → Analiza el impacto basado en el cont
         return contexto
     
     def llamar_gemini_api(self, prompt: str) -> str:
-        """Llama a la API de Gemini para obtener respuestas de IA."""
         try:
             if not gemini_model:
                 logger.error("❌ Gemini no está configurado correctamente")
                 return self.get_fallback_response("")
             
-            logger.info("🔄 Enviando pregunta a Gemini API...")
+            logger.info("🔄 Enviando pregunta a Gemini 2.5 Flash API...")
             
             generation_config = {
                 "temperature": 0.3,
                 "top_p": 0.9,
                 "top_k": 40,
-                "max_output_tokens": 500,  # Un poco más de tokens para respuestas completas
+                "max_output_tokens": 800,
             }
+            
+            safety_settings = [
+                {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
+                {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
+                {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
+                {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"}
+            ]
             
             response = gemini_model.generate_content(
                 prompt,
-                generation_config=generation_config
+                generation_config=generation_config,
+                safety_settings=safety_settings
             )
             
             if response.text:
                 respuesta = response.text.strip()
-                logger.info("✅ Respuesta recibida de Gemini")
+                logger.info("✅ Respuesta recibida de Gemini 2.5 Flash")
                 return respuesta
             else:
                 logger.warning("❌ Gemini no devolvió texto en la respuesta")
@@ -268,15 +257,11 @@ Si pregunta "¿Por qué es importante?" → Analiza el impacto basado en el cont
             return self.get_fallback_response(prompt)
     
     def get_fallback_response(self, prompt: str) -> str:
-        """Respuestas de fallback mejoradas y más inteligentes."""
-        
-        # Si Gemini no está disponible, respuestas más contextuales
         if not gemini_model:
             return "🤖 Hola! Soy AntiBot de AntiHumo News. Actualmente estoy en modo de respuestas básicas. Puedo ayudarte a navegar el sitio y sus categorías. ¿En qué necesitas ayuda?"
         
         prompt_lower = prompt.lower()
         
-        # Respuestas contextuales mejoradas
         fallback_responses = {
             "hola": "¡Hola! 🤖 Soy AntiBot de AntiHumo News. Puedo ayudarte a entender noticias específicas o explicarte sobre nuestro sitio. ¿En qué necesitas ayuda?",
             "holaa": "¡Hola! 👋 Soy AntiBot. Puedo analizar noticias específicas o ayudarte a navegar AntiHumo News. ¿Sobre qué noticia quieres hablar?",
@@ -287,10 +272,11 @@ Si pregunta "¿Por qué es importante?" → Analiza el impacto basado en el cont
             "tecnología": "💻 En nuestra sección de Tecnología encontrarás las últimas novedades en innovación. Visita AntiHumo News para ver el contenido actualizado.",
             "ayuda": "🤖 Puedo ayudarte a entender noticias específicas, explicar categorías del sitio y guiarte en AntiHumo News. ¿Sobre qué noticia necesitas información?",
             "nasa": "🚀 Tenemos contenido de la NASA incluyendo la Astronomy Picture of the Day (APOD). ¡Es una de nuestras secciones más populares!",
-            "mercados": "📈 En AntiHumo News cubrimos noticias de mercados financieros y económicas. Revisa nuestra sección de Economía para estar actualizado."
+            "mercados": "📈 En AntiHumo News cubrimos noticias de mercados financieros y económicas. Revisa nuestra sección de Economía para estar actualizado.",
+            "wall street": "📊 Wall Street se basa en análisis de empresas, tendencias económicas, datos macroeconómicos y expectativas de mercado para hacer sus estimaciones.",
+            "economía": "💹 En nuestra sección de Economía encontrarás análisis de mercados, tendencias financieras y noticias económicas actualizadas."
         }
         
-        # Palabras bloqueadas - temas fuera de contexto
         palabras_fuera_contexto = [
             "calcula", "resuelve", "ecuación", "matemática pura", 
             "consejo médico", "consejo legal", "qué droga", "ilegal",
@@ -302,18 +288,17 @@ Si pregunta "¿Por qué es importante?" → Analiza el impacto basado en el cont
             if palabra in prompt_lower:
                 return "🚫 Lo siento, no puedo ayudarte con ese tipo de consultas. Mi especialidad es noticias y contenido de AntiHumo News."
         
-        # Buscar respuestas contextuales
         for keyword, response in fallback_responses.items():
             if keyword in prompt_lower:
                 return response
         
-        # Respuesta por defecto más útil
+        if "wall street" in prompt_lower or "estimación" in prompt_lower or "mercado" in prompt_lower:
+            return "📈 Wall Street basa sus estimaciones en análisis fundamental de empresas, tendencias macroeconómicas, datos históricos, proyecciones de crecimiento y condiciones del mercado global."
+        
         return "🤖 ¡Hola! Soy AntiBot de AntiHumo News. Puedo ayudarte a entender noticias específicas publicadas en nuestro sitio. ¿Tienes alguna noticia en mente sobre la que quieras hablar? También puedo explicarte las categorías y funcionalidades disponibles."
     
     def generar_respuesta(self, pregunta: str, noticia_id: Optional[int] = None, user_ip: str = "desconocida") -> Dict[str, Any]:
-        """Genera una respuesta contextual basada en la noticia o contexto general."""
         try:
-            # Verificar rate limit
             rate_limit_check = self.verificar_rate_limit(user_ip)
             
             if not rate_limit_check["permitido"]:
@@ -329,11 +314,9 @@ Si pregunta "¿Por qué es importante?" → Analiza el impacto basado en el cont
                     "rate_limit_info": rate_limit_check
                 }
             
-            # Limpieza periódica del cache (10% de probabilidad)
             if random.random() < 0.1:
                 self.limpiar_cache_antiguo()
             
-            # Obtener contexto según si hay noticia_id
             if noticia_id:
                 noticia_data = self.obtener_contexto_noticia(noticia_id)
                 if noticia_data:
@@ -352,14 +335,12 @@ Si pregunta "¿Por qué es importante?" → Analiza el impacto basado en el cont
                 noticia_info = "sin_noticia"
                 titulo_noticia = None
             
-            # Construir prompt final
             prompt_final = f"""{contexto}
 
-**PREGUNTA DEL USUARIO:** {pregunta}
+PREGUNTA DEL USUARIO: {pregunta}
 
-**RESPONDE AHORA** (en español, de forma natural y útil):"""
+RESPONDE AHORA (en español, de forma natural y útil):"""
             
-            # Obtener respuesta de Gemini
             respuesta = self.llamar_gemini_api(prompt_final)
             
             logger.info(f"✅ Respuesta generada - Tipo: {tipo_contexto}, Longitud: {len(respuesta)}")
@@ -389,16 +370,15 @@ Si pregunta "¿Por qué es importante?" → Analiza el impacto basado en el cont
             }
 
 
-# Inicializar el servicio
 chatbot_service = ChatBotService()
-print("✅ ChatBot Service con Gemini 1.5 Flash (30 preguntas/día) inicializado correctamente")
+print("✅ ChatBot Service con Gemini 2.5 Flash (30 preguntas/día) inicializado correctamente")
 
-# Test de funcionamiento al importar
 try:
     test_result = chatbot_service.generar_respuesta("Hola, ¿estás funcionando?", None, "test_init")
     if test_result["exito"]:
         print(f"✅ Test inicial exitoso: {test_result['respuesta'][:50]}...")
     else:
         print(f"⚠️ Test inicial con problemas: {test_result['respuesta']}")
+        print("🔧 El bot está en modo fallback. Verifica GEMINI_API_KEY_01 en Render.")
 except Exception as e:
     print(f"❌ Error en test inicial: {e}")
