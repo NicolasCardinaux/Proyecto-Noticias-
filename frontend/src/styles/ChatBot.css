@@ -580,13 +580,14 @@
 }
 
 .welcome-text {
-  display: -webkit-box !important;
-  -webkit-line-clamp: 2 !important; /* Máximo 2 líneas */
-  -webkit-box-orient: vertical !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: normal !important;
+  white-space: normal !important; 
+  overflow: visible !important; 
+  text-overflow: unset !important; 
+  display: block !important; 
+  max-width: 160px !important;
+  word-wrap: break-word !important; 
 }
+
 
 
 .welcome-message {
