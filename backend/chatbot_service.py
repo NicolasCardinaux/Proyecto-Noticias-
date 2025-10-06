@@ -41,7 +41,7 @@ supabase = supabase_service if supabase_service else supabase_anon
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY_01")
 GEMINI_MODEL = "gemini-2.5-flash"
-MAX_REQUESTS_PER_DAY = 50
+MAX_REQUESTS_PER_DAY = 25
 
 
 CATEGORIAS_NOTICIAS = {
