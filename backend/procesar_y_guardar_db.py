@@ -7,7 +7,7 @@ from tqdm import tqdm
 from datetime import datetime
 import hashlib
 import re
-import db
+import db 
 from bs4 import BeautifulSoup
 import trafilatura
 
@@ -28,31 +28,17 @@ CATEGORIAS = {
     "science": "Ciencia", "sports": "Deportes", "technology": "Tecnología", "general": "General"
 }
 
-
 MAX_NOTICIAS_POR_CATEGORIA = 2
 TIEMPO_ESPERA_ENTRE_REQUESTS = 2
-MAX_PALABRAS_RESUMEN = 350           
-MAX_PALABRAS_SCRAPING = 600            
-MIN_PALABRAS_CONTENIDO_VALIDO = 50    
+MAX_PALABRAS_RESUMEN = 350
+MAX_PALABRAS_SCRAPING = 600
+MIN_PALABRAS_CONTENIDO_VALIDO = 50
 MIN_PALABRAS_RESUMEN_SIGNIFICATIVO = 80
 
 def generar_hash_titulo(titulo):
     return hashlib.md5(titulo.strip().lower().encode('utf-8')).hexdigest()
 
-def validar_url_noticia(url):
-    """Valida que la URL sea de una fuente de noticias confiable"""
-    if not url or not isinstance(url, str):
-        return False
-    
-    dominios_confiables = [
-        'infobae.com', 'clarin.com', 'lanacion.com', 'pagina12.com.ar',
-        'ambito.com', 'cronista.com', 'telam.com.ar', 'perfil.com',
-        'reuters.com', 'bbc.com', 'cnn.com', 'bloomberg.com',
-        'elpais.com', 'elmundo.es', 'elespanol.com', 'lavanguardia.com',
-        'abc.es', 'elconfidencial.com', '20minutos.es'
-    ]
-    
-    return any(dominio in url.lower() for dominio in dominios_confiables)
+
 
 def obtener_noticias_por_categoria(categoria, max_noticias=MAX_NOTICIAS_POR_CATEGORIA, urls_existentes=None):
     if urls_existentes is None:
@@ -89,12 +75,12 @@ def obtener_noticias_por_categoria(categoria, max_noticias=MAX_NOTICIAS_POR_CATE
                 
             url_noticia = articulo.get("url")
             
+
             if (url_noticia not in urls_existentes and 
                 url_noticia not in urls_encontradas and
-                validar_url_noticia(url_noticia) and
                 len(articulo.get("title", "").strip()) > 10 and
                 len(articulo.get("description", "").strip()) > 50):
-               
+                
                 if not db.noticia_existe(articulo.get("title"), url_noticia):
                     articulo['categoria_asignada'] = CATEGORIAS.get(categoria, "General")
                     noticias_nuevas.append(articulo)
@@ -137,6 +123,7 @@ def scrapear_texto_robusto(url, fallback_description=None):
             )
             if content and len(content.split()) > 100:
                 print(f"✅ Trafilatura: {len(content.split())} palabras")
+
                 return ' '.join(content.split()[:MAX_PALABRAS_SCRAPING])
     except Exception as e:
         print(f"⚠️ Trafilatura falló: {e}")
@@ -174,7 +161,6 @@ def scrapear_texto_robusto(url, fallback_description=None):
         print(f"⚠️ BeautifulSoup falló: {e}")
 
 
-
     try:
         response = requests.get(url, headers=headers, timeout=8)
         response.raise_for_status()
@@ -193,7 +179,6 @@ def scrapear_texto_robusto(url, fallback_description=None):
             
     except Exception as e:
         print(f"⚠️ Regex cleaning falló: {e}")
-
 
 
     print(f"❌ Todos los métodos fallaron, usando descripción: {len(fallback_description.split()) if fallback_description else 0} palabras")
@@ -240,11 +225,13 @@ def resumir_texto_robusto(texto, titulo):
 
     if len(texto.split()) < MIN_PALABRAS_RESUMEN_SIGNIFICATIVO:
         return "Contenido insuficiente para generar un resumen significativo."
+    
+
+    if len(texto.split()) > MAX_PALABRAS_SCRAPING:
+        texto = ' '.join(texto.split()[:MAX_PALABRAS_SCRAPING])
+        print(f"✂️ Texto recortado para resumen a {MAX_PALABRAS_SCRAPING} palabras.")
 
     
-    if len(texto) > 8000:
-        texto = texto[:8000]
-
     prompt = f"""
 # CONTEXTO Y ROL
 Eres un periodista senior especializado en crear resúmenes ejecutivos para medios de comunicación. Tu tarea es transformar el texto proporcionado en un resumen periodístico de alta calidad.
@@ -314,6 +301,7 @@ def procesar_y_guardar_noticias():
     
     print("🕒 Iniciando proceso de obtención de noticias...")
     print("=" * 60)
+    print(f"📊 Hora de ejecución: {datetime.now()}")
     
     urls_existentes = db.obtener_urls_existentes()
     print(f"📊 Noticias existentes en la base de datos: {len(urls_existentes)}")
@@ -334,9 +322,14 @@ def procesar_y_guardar_noticias():
             if noticias_de_categoria:
                 todas_las_noticias.extend(noticias_de_categoria)
                 categorias_procesadas += 1
+                print(f"✅ Categoría {categoria_api}: {len(noticias_de_categoria)} noticias nuevas")
+            else:
+                print(f"⚠️ Categoría {categoria_api}: 0 noticias nuevas")
                 
-            
-        
+
+            if i < len(CATEGORIAS) - 1:
+                sleep(2)
+                
         except Exception as e:
             print(f"❌ Error procesando categoría {categoria_api}: {e}")
             continue
@@ -346,7 +339,8 @@ def procesar_y_guardar_noticias():
         return {
             "nuevas_guardadas": 0, 
             "mensaje": "No se encontraron noticias nuevas válidas",
-            "categorias_procesadas": 0
+            "categorias_procesadas": 0,
+            "timestamp": datetime.now().isoformat()
         }
     
     print(f"\n📝 Procesando y guardando {len(todas_las_noticias)} NOTICIAS NUEVAS...\n")
@@ -356,6 +350,7 @@ def procesar_y_guardar_noticias():
     
     for art in tqdm(todas_las_noticias, desc="Procesando noticias"):
         try:
+            print(f"\n🔍 Procesando: {art.get('title')[:60]}...")
             
             texto_completo = scrapear_texto_robusto(
                 art.get("url"), 
@@ -367,15 +362,15 @@ def procesar_y_guardar_noticias():
                 noticias_fallidas += 1
                 continue
                 
+            print(f"✅ Contenido obtenido: {len(texto_completo.split())} palabras")
             
             resumen = resumir_texto_robusto(texto_completo, art.get("title"))
             
-            
             if not all([art.get("title"), art.get("url"), art.get("publishedAt")]):
+                print(f"⚠️ Datos incompletos para: {art.get('title')[:60]}...")
                 noticias_fallidas += 1
                 continue
 
-            
             try:
                 fecha_obj = datetime.strptime(art.get("publishedAt"), "%Y-%m-%dT%H:%M:%SZ")
                 fecha_formateada = fecha_obj.strftime("%Y-%m-%d")
@@ -393,7 +388,6 @@ def procesar_y_guardar_noticias():
                 "titulo_hash": generar_hash_titulo(art.get("title"))
             }
 
-            
             db.insert_noticia(noticia)
             noticias_guardadas += 1
             print(f"✅ Guardada: {art.get('title')[:70]}...")
@@ -403,8 +397,9 @@ def procesar_y_guardar_noticias():
             noticias_fallidas += 1
             continue
 
-    
+
     try:
+        print("\n🗑️  Ejecutando limpieza de noticias antiguas...")
         db.delete_old_noticias(max_months=6)
     except Exception as e:
         print(f"⚠️ Error en limpieza: {e}")
@@ -426,7 +421,9 @@ def procesar_y_guardar_noticias():
         "categorias_procesadas": categorias_procesadas,
         "total_noticias": stats['total_noticias'],
         "total_clics": stats['total_clics'],
-        "noticias_hoy": stats['noticias_hoy']
+        "noticias_hoy": stats['noticias_hoy'],
+        "timestamp": datetime.now().isoformat(),
+        "proceso_exitoso": True
     }
 
 def ejecutar_crawler():
@@ -444,7 +441,9 @@ def ejecutar_crawler():
             "error": str(e), 
             "nuevas_guardadas": 0,
             "noticias_fallidas": 0,
-            "categorias_procesadas": 0
+            "categorias_procesadas": 0,
+            "timestamp": datetime.now().isoformat(),
+            "proceso_exitoso": False
         }
 
 if __name__ == "__main__":
