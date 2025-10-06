@@ -2,11 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-
 import ParticlesBackground from './ParticlesBackground';
 import CategoryFilter from './CategoryFilter';
 import '../styles/noticiasList.css';
-
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -16,6 +14,8 @@ function AllNews() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filtroActivo, setFiltroActivo] = useState('mas-recientes');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(30);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -27,6 +27,11 @@ function AllNews() {
       aplicarFiltros();
     }
   }, [noticias, filtroActivo]);
+
+  useEffect(() => {
+
+    setCurrentPage(1);
+  }, [filtroActivo]);
 
   const fetchAllNoticias = async () => {
     try {
@@ -69,6 +74,33 @@ function AllNews() {
     setFilteredNoticias(noticiasFiltradas);
   };
 
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentNoticias = filteredNoticias.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredNoticias.length / itemsPerPage);
+
+
+  const getPageNumbers = () => {
+    const pageNumbers = [];
+    const maxPagesToShow = 5;
+    
+    if (totalPages <= maxPagesToShow) {
+      for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i);
+      }
+    } else {
+      const startPage = Math.max(1, currentPage - 2);
+      const endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+      
+      for (let i = startPage; i <= endPage; i++) {
+        pageNumbers.push(i);
+      }
+    }
+    
+    return pageNumbers;
+  };
+
   const handleClick = (noticia) => {
     axios.post(`${API_BASE_URL}/api/noticias/${noticia.id}/click`)
       .catch(err => console.error('Error al registrar el clic:', err));
@@ -77,6 +109,12 @@ function AllNews() {
 
   const handleBackToHome = () => {
     navigate('/');
+  };
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const getTotalNoticiasText = () => {
@@ -91,6 +129,14 @@ function AllNews() {
       'titulo-za': 'Orden Z-A'
     };
     return textos[filtroActivo] || 'Más recientes primero';
+  };
+
+  const getSectionSubtitle = () => {
+    const totalText = getTotalNoticiasText();
+    const pageText = ` - Página ${currentPage} de ${totalPages}`;
+    const filterText = ` - ${getFiltroText()}`;
+    
+    return `${totalText}${pageText}${filterText}`;
   };
 
   return (
@@ -126,11 +172,10 @@ function AllNews() {
               Todas las Noticias
             </h1>
             <p className="section-subtitle">
-              {getTotalNoticiasText()} - {getFiltroText()}
+              {getSectionSubtitle()}
             </p>
             <div className="section-divider"></div>
             
-            {}
             <button 
               onClick={handleBackToHome}
               className="clear-filters-btn"
@@ -154,65 +199,110 @@ function AllNews() {
 
           {}
           {!loading && !error && filteredNoticias.length > 0 && (
-            <div className="noticias-grid">
-              {filteredNoticias.map((noticia) => (
-                <div
-                  key={noticia.id}
-                  className="noticia-card"
-                  onClick={() => handleClick(noticia)}
-                  data-category={noticia.categoria?.toLowerCase()}
-                >
-                  <div className="noticia-image-container">
-                    <img
-                      src={noticia.imagen}
-                      alt={noticia.titulo}
-                      className="noticia-image"
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src = 'https://via.placeholder.com/400x200/1a1a1a/ffffff?text=Imagen+No+Disponible';
-                      }}
-                    />
-                    <div className="noticia-category-badge">
-                      {noticia.categoria}
-                    </div>
-                    {filtroActivo === 'mas-populares' && noticia.clics > 0 && (
-                      <div className="noticia-popular-badge">
-                        {noticia.clics} clics
+            <>
+              <div className="noticias-grid">
+                {currentNoticias.map((noticia) => (
+                  <div
+                    key={noticia.id}
+                    className="noticia-card"
+                    onClick={() => handleClick(noticia)}
+                    data-category={noticia.categoria?.toLowerCase()}
+                  >
+                    <div className="noticia-image-container">
+                      <img
+                        src={noticia.imagen}
+                        alt={noticia.titulo}
+                        className="noticia-image"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = 'https://via.placeholder.com/400x200/1a1a1a/ffffff?text=Imagen+No+Disponible';
+                        }}
+                      />
+                      <div className="noticia-category-badge">
+                        {noticia.categoria}
                       </div>
-                    )}
+                      {filtroActivo === 'mas-populares' && noticia.clics > 0 && (
+                        <div className="noticia-popular-badge">
+                          {noticia.clics} clics
+                        </div>
+                      )}
+                    </div>
+                    <div className="noticia-content">
+                      <h2 className="noticia-title">
+                        {noticia.titulo}
+                      </h2>
+                      <p className="noticia-summary">
+                        {noticia.resumen}
+                      </p>
+                      <div className="noticia-meta">
+                        <span className="noticia-date">
+                          {new Date(noticia.fecha).toLocaleDateString('es-ES', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                          })}
+                        </span>
+                        <div className="noticia-meta-right">
+                          {noticia.fuente && (
+                            <span className="noticia-source">
+                              {noticia.fuente}
+                            </span>
+                          )}
+                          {filtroActivo !== 'mas-populares' && noticia.clics > 0 && (
+                            <span className="noticia-clics">
+                              {noticia.clics} clics
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div className="noticia-content">
-                    <h2 className="noticia-title">
-                      {noticia.titulo}
-                    </h2>
-                    <p className="noticia-summary">
-                      {noticia.resumen}
-                    </p>
-                    <div className="noticia-meta">
-                      <span className="noticia-date">
-                        {new Date(noticia.fecha).toLocaleDateString('es-ES', {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric'
-                        })}
-                      </span>
-                      <div className="noticia-meta-right">
-                        {noticia.fuente && (
-                          <span className="noticia-source">
-                            {noticia.fuente}
-                          </span>
-                        )}
-                        {filtroActivo !== 'mas-populares' && noticia.clics > 0 && (
-                          <span className="noticia-clics">
-                            {noticia.clics} clics
-                          </span>
-                        )}
-                      </div>
+                ))}
+              </div>
+
+              {}
+              {totalPages > 1 && (
+                <div className="pagination-container">
+                  <div className="pagination">
+                    {/* Botón Anterior */}
+                    <button
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className="pagination-btn pagination-prev"
+                    >
+                      &larr; Anterior
+                    </button>
+
+                    {}
+                    <div className="pagination-numbers">
+                      {getPageNumbers().map(number => (
+                        <button
+                          key={number}
+                          onClick={() => handlePageChange(number)}
+                          className={`pagination-number ${currentPage === number ? 'active' : ''}`}
+                        >
+                          {number}
+                        </button>
+                      ))}
                     </div>
+
+                    {}
+                    <button
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      className="pagination-btn pagination-next"
+                    >
+                      Siguiente &rarr;
+                    </button>
+                  </div>
+
+                  {}
+                  <div className="pagination-info">
+                    Mostrando {indexOfFirstItem + 1}-{Math.min(indexOfLastItem, filteredNoticias.length)} de {filteredNoticias.length} noticias
                   </div>
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           )}
 
           {!loading && !error && filteredNoticias.length === 0 && (
