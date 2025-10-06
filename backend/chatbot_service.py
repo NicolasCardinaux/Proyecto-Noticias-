@@ -1,7 +1,7 @@
 import os
 import requests
 from supabase import create_client
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
 import random
@@ -9,34 +9,49 @@ import google.generativeai as genai
 import time
 import logging
 
+# IMPORTANTE: Asegúrate de que este import apunte a tu archivo db.py
+import db 
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 load_dotenv()
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+SUPABASE_KEY_ANON = os.getenv("SUPABASE_KEY_ANON")
 
 try:
-    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
-    logger.info("✅ Supabase cliente inicializado correctamente")
+    supabase = create_client(SUPABASE_URL, SUPABASE_KEY_ANON)
+    logger.info("✅ Supabase cliente inicializado correctamente para chatbot")
 except Exception as e:
-    logger.error(f"❌ Error inicializando Supabase: {e}")
+    logger.error(f"❌ Error inicializando Supabase para chatbot: {e}")
     supabase = None
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY_01")
 GEMINI_MODEL = "gemini-2.5-flash"
 MAX_REQUESTS_PER_DAY = 30
 
+# Mapeo de categorías y sus sinónimos para el bot
+CATEGORIAS_NOTICIAS = {
+    "negocios": ["negocios", "mercado", "economia", "finanzas"],
+    "entretenimiento": ["entretenimiento", "farándula", "cine", "musica", "shows"],
+    "salud": ["salud", "medicina", "bienestar"],
+    "ciencia": ["ciencia", "investigacion", "descubrimientos"],
+    "deportes": ["deportes", "futbol", "basquet", "tenis"],
+    "tecnologia": ["tecnologia", "innovacion", "tech"],
+    "general": ["noticias", "general", "ultimas noticias"]
+}
+
+# Secciones especiales del Home que NO son noticias tradicionales
+SECCIONES_ESPECIALES = {
+    "clima_actual": "Clima Actual (muestra el tiempo en tu ciudad y otras ciudades del mundo)",
+    "mundo_futbol": "Mundo Fútbol (muestra resultados, calendarios de ligas como Premier, Liga, Champions y Serie A)",
+    "mundo_inversion": "Mundo Inversión (muestra datos de divisas, acciones y criptomonedas)",
+    "ventana_del_universo": "Ventana del Universo (muestra la 'Astronomy Picture of the Day' - APOD de la NASA)"
+}
+
 print("🔧 DIAGNÓSTICO GEMINI:")
 print(f"✅ GEMINI_API_KEY_01 existe: {bool(GEMINI_API_KEY)}")
-print(f"✅ Longitud API Key: {len(GEMINI_API_KEY or '')}")
-if GEMINI_API_KEY:
-    print(f"✅ Primeros 10 chars: {GEMINI_API_KEY[:10]}...")
-
-print(f"🔧 Inicializando ChatBot Service con Gemini 2.5 Flash...")
-print(f"✅ Límite: {MAX_REQUESTS_PER_DAY} preguntas por día por IP")
-print(f"✅ Supabase configurado: {bool(SUPABASE_URL)}")
 
 gemini_model = None
 try:
@@ -47,7 +62,7 @@ try:
         print("🔄 Probando conexión con Gemini 2.5 Flash...")
         test_response = gemini_model.generate_content("Responde solo 'CONECTADO'")
         if test_response and test_response.text:
-            print(f"✅ Gemini 2.5 Flash configurado correctamente - Test: {test_response.text}")
+            print(f"✅ Gemini 2.5 Flash configurado correctamente - Test: {test_response.text.strip()}")
         else:
             print("❌ Gemini respondió pero sin texto")
             gemini_model = None
@@ -58,8 +73,8 @@ except Exception as e:
     print(f"❌ Error configurando Gemini 2.5 Flash: {e}")
     gemini_model = None
 
-CONTEXTO_BASE_WEB = """
-Eres AntiBot, el asistente inteligente de AntiHumo News. Tu propósito es ayudar a los usuarios con información sobre noticias y contenido del sitio.
+CONTEXTO_BASE_WEB = f"""
+Eres AntiBot, el asistente inteligente de AntiHumo News. Tu propósito es ayudar a los usuarios con información veraz sobre noticias y contenido del sitio.
 
 Eres un especialista en noticias que puede:
 • Analizar y explicar noticias ESPECÍFICAS de AntiHumo News
@@ -68,25 +83,35 @@ Eres un especialista en noticias que puede:
 • Contextualizar información basada en noticias reales
 
 SOBRE ANTIHUMO NEWS:
-• Agregador de noticias argentinas y globales
-• Resúmenes con IA que eliminan amarillismo y sesgos
-• Información verificada y sin "humo" informativo
-• Secciones: Noticias, Clima, Deportes, Mercados, NASA, Tecnología
+• Agregador de noticias argentinas y globales.
+• Resúmenes con IA que eliminan amarillismo y sesgos.
+• Información verificada y sin "humo" informativo.
+
+ESTRUCTURA DEL SITIO:
+
+1. CATEGORÍAS DE NOTICIAS (Contenido noticioso y resumido):
+   • Negocios
+   • Entretenimiento
+   • Salud
+   • Ciencia
+   • Deportes
+   • Tecnología
+   • General
+
+2. SECCIONES ESPECIALES DEL HOME (Datos o contenido específico, NO noticioso):
+   • Clima Actual
+   • Mundo Fútbol
+   • Mundo Inversión
+   • Ventana del Universo (NASA - APOD)
 
 CÓMO RESPONDER:
-1. Cuando hay una noticia específica: Analiza y responde basado EN EL CONTENIDO de esa noticia
-2. Cuando es sobre el sitio: Explica funcionalidades y categorías
-3. Cuando es pregunta general sobre noticias: Responde brevemente si está relacionado con temas noticiosos actuales
-4. Cuando NO puedes responder: Di amablemente tu límite
+- Si el usuario pregunta por una noticia ESPECÍFICA (con ID): Analiza y responde basado EN EL CONTENIDO de esa noticia.
+- Si el usuario pide una RECOMENDACIÓN DE NOTICIA: **Debes usar el contexto de la noticia más reciente que te proporciona Python** y recomendarla.
+- Si el usuario pregunta por una SECCIÓN ESPECIAL (ej. Clima): Explica brevemente qué muestra esa sección y enfatiza que no son noticias tradicionales.
+- Para temas generales: Responde de forma útil, veraz y siempre amable.
 
 LÍMITES CLAROS:
-NO PUEDES:
-• Crear noticias ficticias o inventar información
-• Dar consejos médicos, legales o financieros
-• Hacer predicciones futuras no basadas en hechos
-• Responder sobre temas completamente ajenos a noticias
-
-Responde de forma útil, veraz y siempre basado en hechos reales cuando haya noticias de referencia.
+NO PUEDES: Crear noticias, dar consejos médicos/legales/financieros, o hacer predicciones futuras.
 """
 
 class ChatBotService:
@@ -156,14 +181,11 @@ class ChatBotService:
     def limpiar_cache_antiguo(self):
         fecha_actual = datetime.now().date()
         ips_a_eliminar = []
-        
         for ip, data in self.rate_limit_cache.items():
             if (fecha_actual - data['fecha']).days > 2:
                 ips_a_eliminar.append(ip)
-        
         for ip in ips_a_eliminar:
             del self.rate_limit_cache[ip]
-            
         if ips_a_eliminar:
             logger.info(f"🧹 Limpiadas {len(ips_a_eliminar)} IPs antiguas del cache")
     
@@ -172,18 +194,13 @@ class ChatBotService:
             if not supabase:
                 logger.error("❌ Supabase no está inicializado")
                 return None
-                
             response = supabase.table("noticias").select("*").eq("id", noticia_id).execute()
-            
             if not response.data:
                 logger.warning(f"❌ Noticia {noticia_id} no encontrada en Supabase")
                 return None
-            
             noticia = response.data[0]
             logger.info(f"✅ Noticia {noticia_id} encontrada: {noticia['titulo'][:50]}...")
-            
             return noticia
-            
         except Exception as e:
             logger.error(f"❌ Error obteniendo noticia {noticia_id}: {e}")
             return None
@@ -207,12 +224,6 @@ Eres un analista de noticias. El usuario te hará preguntas SOBRE ESTA NOTICIA E
 • Responde basado ÚNICAMENTE en la información proporcionada arriba
 • Si algo no está claro en la noticia, reconócelo amablemente
 • Sé objetivo y enfócate en los hechos presentados
-• Puedes explicar el contexto y significado de lo que SÍ está en la noticia
-
-EJEMPLO:
-Si el usuario pregunta "¿Qué pasó con [persona]?" → Explica lo que la noticia dice sobre esa persona
-Si pregunta "¿Cuándo ocurrió?" → Usa las fechas de la noticia
-Si pregunta "¿Por qué es importante?" → Analiza el impacto basado en el contenido
 """
         return contexto
     
@@ -264,24 +275,13 @@ Si pregunta "¿Por qué es importante?" → Analiza el impacto basado en el cont
         
         fallback_responses = {
             "hola": "¡Hola! 🤖 Soy AntiBot de AntiHumo News. Puedo ayudarte a entender noticias específicas o explicarte sobre nuestro sitio. ¿En qué necesitas ayuda?",
-            "holaa": "¡Hola! 👋 Soy AntiBot. Puedo analizar noticias específicas o ayudarte a navegar AntiHumo News. ¿Sobre qué noticia quieres hablar?",
-            "qué puedes hacer": "Puedo: 📰 Analizar noticias específicas publicadas, 🔍 Explicar categorías del sitio, 📊 Ayudarte a navegar AntiHumo News. ¿Sobre qué noticia quieres hablar?",
             "noticias": "📰 En AntiHumo News encontrarás noticias actualizadas de Argentina y el mundo, resumidas con IA para eliminar el amarillismo. ¡Explora las diferentes categorías!",
-            "clima": "🌤️ En AntiHumo News tenemos una sección de clima con pronósticos actualizados. Puedes consultarla en nuestro sitio para información meteorológica.",
-            "deportes": "⚽ Tenemos una sección dedicada a deportes con las últimas noticias. ¡Navega por la categoría Deportes en AntiHumo News para ver lo último!",
-            "tecnología": "💻 En nuestra sección de Tecnología encontrarás las últimas novedades en innovación. Visita AntiHumo News para ver el contenido actualizado.",
             "ayuda": "🤖 Puedo ayudarte a entender noticias específicas, explicar categorías del sitio y guiarte en AntiHumo News. ¿Sobre qué noticia necesitas información?",
-            "nasa": "🚀 Tenemos contenido de la NASA incluyendo la Astronomy Picture of the Day (APOD). ¡Es una de nuestras secciones más populares!",
-            "mercados": "📈 En AntiHumo News cubrimos noticias de mercados financieros y económicas. Revisa nuestra sección de Economía para estar actualizado.",
-            "wall street": "📊 Wall Street se basa en análisis de empresas, tendencias económicas, datos macroeconómicos y expectativas de mercado para hacer sus estimaciones.",
-            "economía": "💹 En nuestra sección de Economía encontrarás análisis de mercados, tendencias financieras y noticias económicas actualizadas."
         }
         
         palabras_fuera_contexto = [
-            "calcula", "resuelve", "ecuación", "matemática pura", 
-            "consejo médico", "consejo legal", "qué droga", "ilegal",
-            "futuro predicción", "horóscopo", "magia", "hechizo",
-            "fórmula química", "teorema", "álgebra", "trigonometría"
+            "calcula", "resuelve", "ecuación", "matemática pura", "consejo médico", "consejo legal", 
+            "qué droga", "ilegal", "futuro predicción", "horóscopo", "magia", "hechizo",
         ]
         
         for palabra in palabras_fuera_contexto:
@@ -292,17 +292,28 @@ Si pregunta "¿Por qué es importante?" → Analiza el impacto basado en el cont
             if keyword in prompt_lower:
                 return response
         
-        if "wall street" in prompt_lower or "estimación" in prompt_lower or "mercado" in prompt_lower:
-            return "📈 Wall Street basa sus estimaciones en análisis fundamental de empresas, tendencias macroeconómicas, datos históricos, proyecciones de crecimiento y condiciones del mercado global."
-        
         return "🤖 ¡Hola! Soy AntiBot de AntiHumo News. Puedo ayudarte a entender noticias específicas publicadas en nuestro sitio. ¿Tienes alguna noticia en mente sobre la que quieras hablar? También puedo explicarte las categorías y funcionalidades disponibles."
     
+    def clasificar_intencion(self, pregunta: str) -> Dict[str, Any]:
+        pregunta_lower = pregunta.lower()
+        
+        for categoria_base, sinonimos in CATEGORIAS_NOTICIAS.items():
+            if any(sinonimo in pregunta_lower for sinonimo in sinonimos) and any(
+                palabra in pregunta_lower for palabra in ["recomienda", "quiero ver", "buscame", "ultima noticia"]
+            ):
+                return {"tipo": "recomendacion_categoria", "categoria": categoria_base}
+                
+        for seccion_base, descripcion in SECCIONES_ESPECIALES.items():
+            if any(palabra in pregunta_lower for palabra in seccion_base.split('_') + seccion_base.split(' ')):
+                return {"tipo": "seccion_especial", "seccion": seccion_base}
+
+        return {"tipo": "general", "categoria": None}
+
     def generar_respuesta(self, pregunta: str, noticia_id: Optional[int] = None, user_ip: str = "desconocida") -> Dict[str, Any]:
         try:
             rate_limit_check = self.verificar_rate_limit(user_ip)
             
             if not rate_limit_check["permitido"]:
-                logger.warning(f"🚫 Rate limit excedido para IP: {user_ip}")
                 return {
                     "respuesta": rate_limit_check["mensaje"],
                     "tipo_contexto": "rate_limit",
@@ -313,33 +324,63 @@ Si pregunta "¿Por qué es importante?" → Analiza el impacto basado en el cont
                     "modelo": "rate_limit",
                     "rate_limit_info": rate_limit_check
                 }
+
+            intencion = self.clasificar_intencion(pregunta)
             
-            if random.random() < 0.1:
-                self.limpiar_cache_antiguo()
+            contexto = self.contexto_base
+            tipo_contexto = intencion["tipo"]
+            noticia_info = "sin_noticia"
+            titulo_noticia = None
+            prompt_adicional = ""
             
             if noticia_id:
                 noticia_data = self.obtener_contexto_noticia(noticia_id)
                 if noticia_data:
                     contexto = self.construir_contexto_noticia(noticia_data)
-                    tipo_contexto = "noticia"
+                    tipo_contexto = "noticia_especifica"
                     noticia_info = "noticia_encontrada"
                     titulo_noticia = noticia_data['titulo']
                 else:
-                    contexto = self.contexto_base
-                    tipo_contexto = "general"
                     noticia_info = "noticia_no_encontrada"
-                    titulo_noticia = None
-            else:
-                contexto = self.contexto_base
-                tipo_contexto = "general"
-                noticia_info = "sin_noticia"
-                titulo_noticia = None
-            
+
+            elif intencion["tipo"] == "recomendacion_categoria":
+                categoria = intencion["categoria"]
+                
+                # LLAMADA A LA BASE DE DATOS
+                ultima_noticia = db.get_latest_noticia_by_category(categoria) 
+                
+                if ultima_noticia:
+                    titulo_noticia = ultima_noticia['titulo']
+                    noticia_info = "recomendacion_encontrada"
+                    tipo_contexto = "recomendacion"
+                    
+                    prompt_adicional = f"""
+                    [ÚLTIMA NOTICIA DE {categoria.upper()}]
+                    TITULAR: {ultima_noticia['titulo']}
+                    RESUMEN: {ultima_noticia['resumen']}
+                    
+                    INSTRUCCIÓN: Reconoce la pregunta del usuario y recomiéndale esta noticia, citando su titular y resumen. Usa el prefijo 📰 en la respuesta.
+                    """
+                else:
+                    prompt_adicional = f"""
+                    INSTRUCCIÓN: El usuario preguntó por una noticia de {categoria.upper()}, pero no se encontró ninguna en la base de datos. Explica que la sección está momentáneamente sin contenido nuevo y anímalo a ver otra categoría como General o Deportes.
+                    """
+                    
+            elif intencion["tipo"] == "seccion_especial":
+                seccion = intencion["seccion"]
+                descripcion_seccion = SECCIONES_ESPECIALES.get(seccion, "una sección del home")
+                
+                prompt_adicional = f"""
+                INSTRUCCIÓN: El usuario preguntó por la sección '{seccion.replace('_', ' ').title()}'. Explica que esta sección es {descripcion_seccion} y que no es una noticia tradicional. Enfócate en la utilidad de esa sección. Usa el prefijo 🌐 en la respuesta.
+                """
+                
             prompt_final = f"""{contexto}
+            
+            {prompt_adicional}
 
-PREGUNTA DEL USUARIO: {pregunta}
+            PREGUNTA DEL USUARIO: {pregunta}
 
-RESPONDE AHORA (en español, de forma natural y útil):"""
+            RESPONDE AHORA (en español, de forma natural, siempre en el rol de AntiBot):"""
             
             respuesta = self.llamar_gemini_api(prompt_final)
             
@@ -371,7 +412,6 @@ RESPONDE AHORA (en español, de forma natural y útil):"""
 
 
 chatbot_service = ChatBotService()
-print("✅ ChatBot Service con Gemini 2.5 Flash (30 preguntas/día) inicializado correctamente")
 
 try:
     test_result = chatbot_service.generar_respuesta("Hola, ¿estás funcionando?", None, "test_init")
