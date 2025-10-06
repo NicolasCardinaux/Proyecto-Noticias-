@@ -743,7 +743,7 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-/* ESTILOS DE PAGINACIÓN */
+
 .pagination-container {
   display: flex;
   flex-direction: column;
@@ -844,7 +844,7 @@
   border: 1px solid #3e4451;
 }
 
-/* Efectos de hover mejorados */
+
 .pagination-number::before {
   content: '';
   position: absolute;
@@ -863,7 +863,7 @@
   opacity: 1;
 }
 
-/* Responsive para paginación */
+
 @media (max-width: 768px) {
   .pagination {
     flex-direction: column;
@@ -911,7 +911,7 @@
   }
 }
 
-/* Animaciones para la paginación */
+
 @keyframes paginationBounce {
   0%, 20%, 53%, 80%, 100% {
     transform: translate3d(0, 0, 0);
@@ -931,7 +931,6 @@
   animation: paginationBounce 0.6s ease;
 }
 
-/* Efecto de carga suave para cambios de página */
 .noticias-grid {
   transition: opacity 0.3s ease;
 }

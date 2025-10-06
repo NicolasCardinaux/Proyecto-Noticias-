@@ -26,7 +26,7 @@ function NoticiasList() {
   const [error, setError] = useState(null);
   const [filtroActivo, setFiltroActivo] = useState('mas-recientes');
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(30); // 30 noticias = 10 filas de 3
+  const [itemsPerPage] = useState(30); 
   const { category } = useParams();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -45,7 +45,7 @@ function NoticiasList() {
   }, [noticias, category, searchQuery, filterLatest, filterType, filtroActivo]);
 
   useEffect(() => {
-    // Resetear a página 1 cuando cambian los filtros
+
     setCurrentPage(1);
   }, [category, searchQuery, filterLatest, filterType, filtroActivo]);
 
@@ -128,13 +128,13 @@ function NoticiasList() {
     setFilteredNoticias(filtered);
   };
 
-  // Cálculos para paginación
+
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentNoticias = filteredNoticias.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredNoticias.length / itemsPerPage);
 
-  // Generar números de página para mostrar
+
   const getPageNumbers = () => {
     const pageNumbers = [];
     const maxPagesToShow = 5;
@@ -382,11 +382,11 @@ function NoticiasList() {
                   ))}
                 </div>
 
-                {/* PAGINACIÓN */}
+                {}
                 {totalPages > 1 && (
                   <div className="pagination-container">
                     <div className="pagination">
-                      {/* Botón Anterior */}
+                      {}
                       <button
                         onClick={() => handlePageChange(currentPage - 1)}
                         disabled={currentPage === 1}
@@ -395,7 +395,7 @@ function NoticiasList() {
                         &larr; Anterior
                       </button>
 
-                      {/* Números de página */}
+                      {}
                       <div className="pagination-numbers">
                         {getPageNumbers().map(number => (
                           <button
@@ -408,7 +408,7 @@ function NoticiasList() {
                         ))}
                       </div>
 
-                      {/* Botón Siguiente */}
+                      {}
                       <button
                         onClick={() => handlePageChange(currentPage + 1)}
                         disabled={currentPage === totalPages}
@@ -418,7 +418,7 @@ function NoticiasList() {
                       </button>
                     </div>
 
-                    {/* Información de página */}
+                    {}
                     <div className="pagination-info">
                       Mostrando {indexOfFirstItem + 1}-{Math.min(indexOfLastItem, filteredNoticias.length)} de {filteredNoticias.length} noticias
                     </div>
