@@ -2,11 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 
-
 import ParticlesBackground from './ParticlesBackground';
 import CategoryFilter from './CategoryFilter';
 import '../styles/noticiasList.css';
-
 
 import FeaturedNews from './FeaturedNews';
 import PopularPosts from './PopularPosts';
@@ -20,14 +18,15 @@ import NasaDataWidget from './NasaDataWidget';
 import EntertainmentSportsNews from './EntertainmentSportsNews';
 import QuoteOfTheDay from './QuoteOfTheDay';
 
-
 const API_BASE_URL = "https://proyecto-noticias-api.onrender.com";
 
 function NoticiasList() {
   const [noticias, setNoticias] = useState([]);
   const [filteredNoticias, setFilteredNoticias] = useState([]);
   const [error, setError] = useState(null);
-  const [filtroActivo, setFiltroActivo] = useState('mas-recientes'); 
+  const [filtroActivo, setFiltroActivo] = useState('mas-recientes');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(30); // 30 noticias = 10 filas de 3
   const { category } = useParams();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -43,7 +42,12 @@ function NoticiasList() {
     if (noticias.length > 0) {
       aplicarFiltros();
     }
-  }, [noticias, category, searchQuery, filterLatest, filterType, filtroActivo]); 
+  }, [noticias, category, searchQuery, filterLatest, filterType, filtroActivo]);
+
+  useEffect(() => {
+    // Resetear a página 1 cuando cambian los filtros
+    setCurrentPage(1);
+  }, [category, searchQuery, filterLatest, filterType, filtroActivo]);
 
   const fetchNoticias = async () => {
     try {
@@ -55,70 +59,53 @@ function NoticiasList() {
     }
   };
 
-
   const aplicarFiltros = () => {
     let filtered = [...noticias];
 
-
     if (filterLatest) {
-
       filtered = filtered;
-    }
-
-    else if (searchQuery && filterType !== 'fuente') {
+    } else if (searchQuery && filterType !== 'fuente') {
       const decodedQuery = decodeURIComponent(searchQuery).toLowerCase();
       filtered = filtered.filter(
         (noticia) =>
           noticia.titulo && noticia.titulo.toLowerCase().includes(decodedQuery)
       );
-    }
-
-    else if (searchQuery && filterType === 'fuente') {
+    } else if (searchQuery && filterType === 'fuente') {
       const decodedQuery = decodeURIComponent(searchQuery).toLowerCase();
       filtered = filtered.filter(
         (noticia) =>
           noticia.fuente &&
           noticia.fuente.toLowerCase().includes(decodedQuery)
       );
-    }
-
-    else if (category && category !== 'general') {
+    } else if (category && category !== 'general') {
       const decodedCategory = decodeURIComponent(category);
       filtered = filtered.filter(
         (noticia) =>
           noticia.categoria &&
           noticia.categoria.toLowerCase() === decodedCategory.toLowerCase()
       );
+    } else {
+      filtered = [];
     }
-
-    else {
-      filtered = []; 
-    }
-
 
     if (filtered.length > 0) {
       switch (filtroActivo) {
         case 'mas-recientes':
           filtered.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
           break;
-        
         case 'mas-populares':
           filtered.sort((a, b) => (b.clics || 0) - (a.clics || 0));
           break;
-        
         case 'titulo-az':
           filtered.sort((a, b) => a.titulo?.localeCompare(b.titulo || ''));
           break;
-        
         case 'titulo-za':
           filtered.sort((a, b) => b.titulo?.localeCompare(a.titulo || ''));
           break;
-        
         default:
           filtered.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
       }
     }
-
 
     if (filtered.length === 0) {
       if (searchQuery) {
@@ -141,6 +128,33 @@ function NoticiasList() {
     setFilteredNoticias(filtered);
   };
 
+  // Cálculos para paginación
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentNoticias = filteredNoticias.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredNoticias.length / itemsPerPage);
+
+  // Generar números de página para mostrar
+  const getPageNumbers = () => {
+    const pageNumbers = [];
+    const maxPagesToShow = 5;
+    
+    if (totalPages <= maxPagesToShow) {
+      for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i);
+      }
+    } else {
+      const startPage = Math.max(1, currentPage - 2);
+      const endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+      
+      for (let i = startPage; i <= endPage; i++) {
+        pageNumbers.push(i);
+      }
+    }
+    
+    return pageNumbers;
+  };
+
   const handleClick = (noticia) => {
     axios.post(`${API_BASE_URL}/api/noticias/${noticia.id}/click`)
       .catch(err => console.error('Error al registrar el clic:', err));
@@ -151,6 +165,11 @@ function NoticiasList() {
     navigate('/');
   };
 
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+    // Scroll suave hacia arriba
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const getFiltroText = () => {
     const textos = {
@@ -162,7 +181,6 @@ function NoticiasList() {
     return textos[filtroActivo] || 'Más recientes primero';
   };
 
-
   const getSectionTitle = () => {
     if (filterLatest) {
       return 'Todas las Noticias';
@@ -173,24 +191,23 @@ function NoticiasList() {
         return `Resultados para: "${searchQuery}"`;
       }
     } else if (category && category !== 'general') {
-
       const categoryName = category.charAt(0).toUpperCase() + category.slice(1);
       return `Noticias de ${categoryName}`;
     }
     return '';
   };
 
-
   const getSectionSubtitle = () => {
     if (filteredNoticias.length > 0) {
       const countText = `${filteredNoticias.length} noticia${filteredNoticias.length !== 1 ? 's' : ''} encontrada${filteredNoticias.length !== 1 ? 's' : ''}`;
+      const pageText = ` - Página ${currentPage} de ${totalPages}`;
       
       if (filterLatest) {
-        return `${countText} - ${getFiltroText()}`;
+        return `${countText}${pageText} - ${getFiltroText()}`;
       } else if (filterType === 'fuente') {
-        return `${countText} de esta fuente - ${getFiltroText()}`;
+        return `${countText}${pageText} de esta fuente - ${getFiltroText()}`;
       }
-      return `${countText} - ${getFiltroText()}`;
+      return `${countText}${pageText} - ${getFiltroText()}`;
     }
     return '';
   };
@@ -201,21 +218,17 @@ function NoticiasList() {
       <div className="relative z-10 min-h-screen bg-transparent flex flex-col">
         <CategoryFilter />
 
-        {}
         {(!category || category === 'general') && !searchQuery && !filterLatest && (
           <>
-            {}
             <div id="noticias-destacadas">
               <FeaturedNews />
             </div>
             
-            {}
             <div id="noticias-populares">
               <PopularPosts />
             </div>
             
             <div className="container mx-auto my-8 px-4">
-              {}
               <div id="clima-actual">
                 <div className="flex flex-col items-center mb-8">
                   <h2 className="relative z-10 text-4xl md:text-5xl font-bold text-[#b3000c] uppercase tracking-widest text-3d">
@@ -226,53 +239,43 @@ function NoticiasList() {
                 <WeatherWidget />
               </div>
               
-              {}
               <div id="ultimas-noticias">
                 <NewPosts />
               </div>
               
-              {}
               <div id="mundo-futbol">
                 <FootballDataWidget />
               </div>
               
-              {}
               <div id="noticias-interes">
                 <InterestPosts />
               </div>
               
-              {}
               <div id="mundo-inversion">
                 <MundoInversion /> 
               </div>
               
-              {}
               <div id="salud-ciencia">
                 <HealthScienceNews />
               </div>
               
-              {}
               <div id="ventana-universo">
                 <NasaDataWidget />
               </div>
               
-              {}
               <div id="entretenimiento-deportes">
                 <EntertainmentSportsNews />
               </div>
             </div>
             
-            {}
             <div id="frase-dia">
               <QuoteOfTheDay />
             </div>
           </>
         )}
 
-        {}
         {(searchQuery || (category && category !== 'general') || filterLatest) && (
           <div className="noticias-grid-container">
-            {}
             <div className="filtro-left-container">
               <div className="filtro-group">
                 <label htmlFor="orden-select" className="filtro-label">
@@ -309,7 +312,6 @@ function NoticiasList() {
                   </p>
                   <div className="section-divider"></div>
                   
-                  {}
                   {(searchQuery || category || filterLatest) && (
                     <button 
                       onClick={handleClearFilters}
@@ -321,7 +323,7 @@ function NoticiasList() {
                 </div>
                 
                 <div className="noticias-grid">
-                  {filteredNoticias.map((noticia) => (
+                  {currentNoticias.map((noticia) => (
                     <div
                       key={noticia.id}
                       className="noticia-card"
@@ -379,6 +381,49 @@ function NoticiasList() {
                     </div>
                   ))}
                 </div>
+
+                {/* PAGINACIÓN */}
+                {totalPages > 1 && (
+                  <div className="pagination-container">
+                    <div className="pagination">
+                      {/* Botón Anterior */}
+                      <button
+                        onClick={() => handlePageChange(currentPage - 1)}
+                        disabled={currentPage === 1}
+                        className="pagination-btn pagination-prev"
+                      >
+                        &larr; Anterior
+                      </button>
+
+                      {/* Números de página */}
+                      <div className="pagination-numbers">
+                        {getPageNumbers().map(number => (
+                          <button
+                            key={number}
+                            onClick={() => handlePageChange(number)}
+                            className={`pagination-number ${currentPage === number ? 'active' : ''}`}
+                          >
+                            {number}
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Botón Siguiente */}
+                      <button
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                        className="pagination-btn pagination-next"
+                      >
+                        Siguiente &rarr;
+                      </button>
+                    </div>
+
+                    {/* Información de página */}
+                    <div className="pagination-info">
+                      Mostrando {indexOfFirstItem + 1}-{Math.min(indexOfLastItem, filteredNoticias.length)} de {filteredNoticias.length} noticias
+                    </div>
+                  </div>
+                )}
               </>
             )}
 
@@ -390,7 +435,6 @@ function NoticiasList() {
           </div>
         )}
 
-        {}
         {!error && filteredNoticias.length === 0 && noticias.length === 0 && (
           <div className="loading-state">
             Cargando noticias...
