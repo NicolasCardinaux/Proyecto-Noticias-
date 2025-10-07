@@ -35,11 +35,63 @@ MAX_PALABRAS_SCRAPING = 600
 MIN_PALABRAS_CONTENIDO_VALIDO = 50
 MIN_PALABRAS_RESUMEN_SIGNIFICATIVO = 80
 
+
+RESUMENES_INVALIDOS = [
+    "Resumen no disponible - contenido insuficiente",
+    "Contenido insuficiente para generar un resumen significativo.",
+    "Resumen no disponible por limitaciones técnicas.",
+    "Resumen no disponible",
+    "contenido insuficiente",
+    "limitaciones técnicas"
+]
+
 def generar_hash_titulo(titulo):
     return hashlib.md5(titulo.strip().lower().encode('utf-8')).hexdigest()
 
 
+def limpiar_noticias_existentes_invalidas():
+    """Elimina noticias existentes en la base de datos que tengan resúmenes inválidos"""
+    print("🧹 Buscando noticias existentes con resúmenes inválidos...")
+    
+    try:
 
+        todas_noticias = db.get_noticias(limit=1000)
+        
+        noticias_invalidas = []
+        
+        for noticia in todas_noticias:
+            resumen = noticia.get('resumen', '')
+            
+
+            if any(invalido.lower() in resumen.lower() for invalido in RESUMENES_INVALIDOS):
+                noticias_invalidas.append(noticia['id'])
+                print(f"🚫 Encontrada noticia inválida: ID {noticia['id']} - {noticia['titulo'][:50]}...")
+        
+        if noticias_invalidas:
+            print(f"🗑️  Eliminando {len(noticias_invalidas)} noticias con resúmenes inválidos...")
+            
+            eliminadas_exitosas = 0
+            for noticia_id in noticias_invalidas:
+                try:
+
+                    if db.eliminar_noticia_por_id(noticia_id):
+                        eliminadas_exitosas += 1
+                        print(f"✅ Eliminada noticia ID {noticia_id}")
+                    else:
+                        print(f"⚠️ No se pudo eliminar noticia ID {noticia_id}")
+                except Exception as e:
+                    print(f"❌ Error eliminando noticia ID {noticia_id}: {e}")
+            
+            print(f"🎯 Limpieza completada: {eliminadas_exitosas}/{len(noticias_invalidas)} noticias inválidas eliminadas")
+            return eliminadas_exitosas
+        else:
+            print("✅ No se encontraron noticias con resúmenes inválidos")
+            return 0
+            
+    except Exception as e:
+        print(f"❌ Error en limpieza de noticias existentes: {e}")
+        return 0
+    
 def obtener_noticias_por_categoria(categoria, max_noticias=MAX_NOTICIAS_POR_CATEGORIA, urls_existentes=None):
     if urls_existentes is None:
         urls_existentes = set()
@@ -76,18 +128,21 @@ def obtener_noticias_por_categoria(categoria, max_noticias=MAX_NOTICIAS_POR_CATE
             url_noticia = articulo.get("url")
             
 
+            descripcion = articulo.get("description", "").strip()
+            titulo = articulo.get("title", "").strip()
+            
             if (url_noticia not in urls_existentes and 
                 url_noticia not in urls_encontradas and
-                len(articulo.get("title", "").strip()) > 10 and
-                len(articulo.get("description", "").strip()) > 50):
+                len(titulo) > 15 and 
+                len(descripcion) > 80 and  
+                not db.noticia_existe(titulo, url_noticia)):
                 
-                if not db.noticia_existe(articulo.get("title"), url_noticia):
-                    articulo['categoria_asignada'] = CATEGORIAS.get(categoria, "General")
-                    noticias_nuevas.append(articulo)
-                    urls_encontradas.add(url_noticia)
-                    
-                    if len(noticias_nuevas) >= max_noticias:
-                        break
+                articulo['categoria_asignada'] = CATEGORIAS.get(categoria, "General")
+                noticias_nuevas.append(articulo)
+                urls_encontradas.add(url_noticia)
+                
+                if len(noticias_nuevas) >= max_noticias:
+                    break
         
     except requests.exceptions.Timeout:
         print(f"⏰ Timeout al obtener noticias de {categoria}")
@@ -111,9 +166,9 @@ def scrapear_texto_robusto(url, fallback_description=None):
         'Upgrade-Insecure-Requests': '1',
     }
     
-
+  
     try:
-        downloaded = trafilatura.fetch_url(url, headers=headers)
+        downloaded = trafilatura.fetch_url(url) 
         if downloaded:
             content = trafilatura.extract(
                 downloaded, 
@@ -123,7 +178,6 @@ def scrapear_texto_robusto(url, fallback_description=None):
             )
             if content and len(content.split()) > 100:
                 print(f"✅ Trafilatura: {len(content.split())} palabras")
-
                 return ' '.join(content.split()[:MAX_PALABRAS_SCRAPING])
     except Exception as e:
         print(f"⚠️ Trafilatura falló: {e}")
@@ -170,7 +224,6 @@ def scrapear_texto_robusto(url, fallback_description=None):
         
         text = ' '.join(text.split())
         
-
         if len(text.split()) > 300: 
             print(f"✅ Regex cleaning (fallback robusto): {len(text.split())} palabras")
             return ' '.join(text.split()[:800]) 
@@ -190,7 +243,6 @@ def validar_contenido_noticia(texto, titulo):
     if not texto or len(texto.split()) < MIN_PALABRAS_CONTENIDO_VALIDO:
         return False
     
-
     patrones_no_deseados = [
         r'<!DOCTYPE', r'<html', r'<head>', r'<body>', r'function\s*\(',
         r'var\s+', r'const\s+', r'let\s+', r'classList\.', r'addEventListener',
@@ -205,7 +257,6 @@ def validar_contenido_noticia(texto, titulo):
             print(f"⚠️ Contenido rechazado por patrón: {patron}")
             return False
     
-
     palabras_clave_noticia = ['anunció', 'confirmó', 'informó', 'declaró', 'según', 'fuentes', 
                               'investigación', 'estudio', 'datos', 'informe', 'autoridades',
                               'gobierno', 'empresa', 'mercado', 'economía', 'política']
@@ -217,21 +268,17 @@ def validar_contenido_noticia(texto, titulo):
 def resumir_texto_robusto(texto, titulo):
     """Genera resúmenes robustos con validación de contenido"""
     
-    
     if not validar_contenido_noticia(texto, titulo):
         print("❌ Contenido no válido para resumir")
         return "Resumen no disponible - contenido insuficiente"
-    
 
     if len(texto.split()) < MIN_PALABRAS_RESUMEN_SIGNIFICATIVO:
         return "Contenido insuficiente para generar un resumen significativo."
-    
 
     if len(texto.split()) > MAX_PALABRAS_SCRAPING:
         texto = ' '.join(texto.split()[:MAX_PALABRAS_SCRAPING])
         print(f"✂️ Texto recortado para resumen a {MAX_PALABRAS_SCRAPING} palabras.")
 
-    
     prompt = f"""
 # CONTEXTO Y ROL
 Eres un periodista senior especializado en crear resúmenes ejecutivos para medios de comunicación. Tu tarea es transformar el texto proporcionado en un resumen periodístico de alta calidad.
@@ -280,8 +327,10 @@ Aplica la técnica de las **5W+H** de forma implícita:
         resumen = response.text.strip()
         
 
-        if len(resumen.split()) < 50 or len(resumen.split()) > MAX_PALABRAS_RESUMEN:
-            raise ValueError(f"Resumen fuera de los límites de longitud ({len(resumen.split())} palabras)")
+        if (len(resumen.split()) < 50 or 
+            len(resumen.split()) > MAX_PALABRAS_RESUMEN or
+            any(invalido in resumen for invalido in RESUMENES_INVALIDOS)):
+            raise ValueError(f"Resumen inválido o fuera de límites ({len(resumen.split())} palabras)")
             
         print(f"✅ Resumen generado: {len(resumen.split())} palabras")
         return resumen
@@ -289,10 +338,30 @@ Aplica la técnica de las **5W+H** de forma implícita:
     except Exception as e:
         print(f"⚠️ Error al generar resumen con Gemini: {repr(e)}")
         
-        sentences = re.split(r'[.!?]+', texto)
-        meaningful_sentences = [s.strip() for s in sentences if len(s.split()) > 8][:5]
-        fallback = ". ".join(meaningful_sentences) + "."
-        return fallback if len(fallback) > 50 else "Resumen no disponible por limitaciones técnicas."
+
+        if len(texto.split()) > 100:
+            sentences = re.split(r'[.!?]+', texto)
+            meaningful_sentences = [s.strip() for s in sentences if len(s.split()) > 8][:5]
+            fallback = ". ".join(meaningful_sentences) + "."
+            if len(fallback) > 80:  
+                return fallback
+        
+        return "Resumen no disponible - contenido insuficiente"
+
+def es_resumen_valido(resumen):
+    """🔥 VALIDA si el resumen es aceptable"""
+    if not resumen or len(resumen.strip()) == 0:
+        return False
+    
+
+    resumen_lower = resumen.lower()
+    if any(invalido.lower() in resumen_lower for invalido in RESUMENES_INVALIDOS):
+        return False
+    
+    if len(resumen.split()) < 40:
+        return False
+    
+    return True
 
 def procesar_y_guardar_noticias():
     """Proceso principal robusto de obtención y procesamiento de noticias"""
@@ -302,6 +371,9 @@ def procesar_y_guardar_noticias():
     print("🕒 Iniciando proceso de obtención de noticias...")
     print("=" * 60)
     print(f"📊 Hora de ejecución: {datetime.now()}")
+    
+  
+    noticias_eliminadas = limpiar_noticias_existentes_invalidas()
     
     urls_existentes = db.obtener_urls_existentes()
     print(f"📊 Noticias existentes en la base de datos: {len(urls_existentes)}")
@@ -326,7 +398,6 @@ def procesar_y_guardar_noticias():
             else:
                 print(f"⚠️ Categoría {categoria_api}: 0 noticias nuevas")
                 
-
             if i < len(CATEGORIAS) - 1:
                 sleep(2)
                 
@@ -338,6 +409,7 @@ def procesar_y_guardar_noticias():
         print("❌ No se encontraron noticias NUEVAS válidas para procesar.")
         return {
             "nuevas_guardadas": 0, 
+            "existentes_eliminadas": noticias_eliminadas, 
             "mensaje": "No se encontraron noticias nuevas válidas",
             "categorias_procesadas": 0,
             "timestamp": datetime.now().isoformat()
@@ -347,6 +419,7 @@ def procesar_y_guardar_noticias():
     
     noticias_guardadas = 0
     noticias_fallidas = 0
+    noticias_rechazadas = 0  
     
     for art in tqdm(todas_las_noticias, desc="Procesando noticias"):
         try:
@@ -365,6 +438,12 @@ def procesar_y_guardar_noticias():
             print(f"✅ Contenido obtenido: {len(texto_completo.split())} palabras")
             
             resumen = resumir_texto_robusto(texto_completo, art.get("title"))
+            
+
+            if not es_resumen_valido(resumen):
+                print(f"🚫 RESUMEN INVÁLIDO - Rechazando noticia: {resumen[:50]}...")
+                noticias_rechazadas += 1
+                continue
             
             if not all([art.get("title"), art.get("url"), art.get("publishedAt")]):
                 print(f"⚠️ Datos incompletos para: {art.get('title')[:60]}...")
@@ -397,9 +476,8 @@ def procesar_y_guardar_noticias():
             noticias_fallidas += 1
             continue
 
-
     try:
-        print("\n🗑️  Ejecutando limpieza de noticias antiguas...")
+        print("\n🗑️  Ejecutando limpieza de noticias antiguas...")
         db.delete_old_noticias(max_months=6)
     except Exception as e:
         print(f"⚠️ Error en limpieza: {e}")
@@ -407,6 +485,8 @@ def procesar_y_guardar_noticias():
     print(f"\n🎯 PROCESO COMPLETADO")
     print("=" * 50)
     print(f"✅ Noticias guardadas: {noticias_guardadas}")
+    print(f"🧹 Noticias existentes eliminadas: {noticias_eliminadas}")  # 🔥 NUEVO
+    print(f"🚫 Noticias rechazadas (resumen inválido): {noticias_rechazadas}")
     print(f"❌ Noticias fallidas: {noticias_fallidas}")
     print(f"📊 Categorías procesadas: {categorias_procesadas}/{len(CATEGORIAS)}")
     
@@ -417,6 +497,8 @@ def procesar_y_guardar_noticias():
     
     return {
         "nuevas_guardadas": noticias_guardadas,
+        "existentes_eliminadas": noticias_eliminadas,  # 🔥 NUEVO
+        "noticias_rechazadas": noticias_rechazadas,
         "noticias_fallidas": noticias_fallidas,
         "categorias_procesadas": categorias_procesadas,
         "total_noticias": stats['total_noticias'],
@@ -440,6 +522,8 @@ def ejecutar_crawler():
         return {
             "error": str(e), 
             "nuevas_guardadas": 0,
+            "existentes_eliminadas": 0,
+            "noticias_rechazadas": 0,
             "noticias_fallidas": 0,
             "categorias_procesadas": 0,
             "timestamp": datetime.now().isoformat(),

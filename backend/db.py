@@ -415,6 +415,33 @@ def increment_clics(noticia_id: int) -> bool:
         logger.error(f"❌ Error incrementando clics: {e}")
         return False
 
+def eliminar_noticia_por_id(noticia_id: int) -> bool:
+    """Elimina una noticia específica por ID de la base de datos."""
+    client = _get_client(use_service_role=True)
+    if not client:
+        logger.error("❌ No hay cliente de servicio disponible para eliminar")
+        return False
+    
+    try:
+
+        response_info = client.table("noticias").select("titulo").eq("id", noticia_id).execute()
+        titulo = response_info.data[0]['titulo'][:50] + "..." if response_info.data else "Desconocido"
+        
+
+        response = client.table("noticias").delete().eq("id", noticia_id).execute()
+        deleted_count = len(response.data) if response.data else 0
+        
+        if deleted_count > 0:
+            logger.info(f"🗑️  Noticia eliminada: ID {noticia_id} - '{titulo}'")
+            return True
+        else:
+            logger.warning(f"⚠️ No se encontró noticia con ID {noticia_id} para eliminar")
+            return False
+            
+    except Exception as e:
+        logger.error(f"❌ Error eliminando noticia {noticia_id}: {e}")
+        return False
+
 def delete_old_noticias(max_months: int = 6) -> bool:
     """Elimina noticias más antiguas que X meses."""
     client = _get_client(use_service_role=True)
