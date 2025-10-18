@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+/*import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import '../styles/NasaDataWidget.css';
 import NasaFondo from '../imagenes/Nasa.jpg';
@@ -307,4 +307,4 @@ function NasaDataWidget() {
     );
 }
 
-export default NasaDataWidget;
+export default NasaDataWidget;*/

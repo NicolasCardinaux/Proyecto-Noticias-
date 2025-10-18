@@ -14,7 +14,7 @@ import FootballDataWidget from './FootballDataWidget';
 import InterestPosts from './InterestPosts';
 import MundoInversion from './MundoInversion';
 import HealthScienceNews from './HealthScienceNews';
-import NasaDataWidget from './NasaDataWidget';
+//import NasaDataWidget from './NasaDataWidget';//
 import EntertainmentSportsNews from './EntertainmentSportsNews';
 import QuoteOfTheDay from './QuoteOfTheDay';
 
@@ -255,13 +255,13 @@ function NoticiasList() {
                 <MundoInversion /> 
               </div>
               
-              <div id="salud-ciencia">
+              {/*<div id="salud-ciencia">
                 <HealthScienceNews />
-              </div>
-              
+              </div>*/}
+             
               <div id="ventana-universo">
                 <NasaDataWidget />
-              </div>
+              </div>//
               
               <div id="entretenimiento-deportes">
                 <EntertainmentSportsNews />
