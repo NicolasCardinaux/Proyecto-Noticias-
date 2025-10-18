@@ -255,13 +255,13 @@ function NoticiasList() {
                 <MundoInversion /> 
               </div>
               
-              {/*<div id="salud-ciencia">
+              <div id="salud-ciencia">
                 <HealthScienceNews />
-              </div>*/}
+              </div>*
              
-              <div id="ventana-universo">
+              {/*<div id="ventana-universo">
                 <NasaDataWidget />
-              </div>//
+              </div>*/}
               
               <div id="entretenimiento-deportes">
                 <EntertainmentSportsNews />
