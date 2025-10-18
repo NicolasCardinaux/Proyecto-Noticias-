@@ -28,13 +28,13 @@ CATEGORIAS = {
     "science": "Ciencia", "sports": "Deportes", "technology": "Tecnología", "general": "General"
 }
 
-MAX_NOTICIAS_POR_CATEGORIA = 2
+MAX_NOTICIAS_POR_CATEGORIA = 3  # Aumenté ligeramente para compensar filtros más flexibles
 TIEMPO_ESPERA_ENTRE_REQUESTS = 2
 MAX_PALABRAS_RESUMEN = 350
 MAX_PALABRAS_SCRAPING = 600
-MIN_PALABRAS_CONTENIDO_VALIDO = 50
-MIN_PALABRAS_RESUMEN_SIGNIFICATIVO = 80
-
+MIN_PALABRAS_CONTENIDO_VALIDO = 30  # REDUCIDO de 50 a 30
+MIN_PALABRAS_RESUMEN_SIGNIFICATIVO = 40  # REDUCIDO de 80 a 40
+MIN_PALABRAS_DESCRIPCION = 40  # REDUCIDO de 80 a 40
 
 RESUMENES_INVALIDOS = [
     "Resumen no disponible - contenido insuficiente",
@@ -48,13 +48,11 @@ RESUMENES_INVALIDOS = [
 def generar_hash_titulo(titulo):
     return hashlib.md5(titulo.strip().lower().encode('utf-8')).hexdigest()
 
-
 def limpiar_noticias_existentes_invalidas():
     """Elimina noticias existentes en la base de datos que tengan resúmenes inválidos"""
     print("🧹 Buscando noticias existentes con resúmenes inválidos...")
     
     try:
-
         todas_noticias = db.get_noticias(limit=1000)
         
         noticias_invalidas = []
@@ -62,7 +60,6 @@ def limpiar_noticias_existentes_invalidas():
         for noticia in todas_noticias:
             resumen = noticia.get('resumen', '')
             
-
             if any(invalido.lower() in resumen.lower() for invalido in RESUMENES_INVALIDOS):
                 noticias_invalidas.append(noticia['id'])
                 print(f"🚫 Encontrada noticia inválida: ID {noticia['id']} - {noticia['titulo'][:50]}...")
@@ -73,7 +70,6 @@ def limpiar_noticias_existentes_invalidas():
             eliminadas_exitosas = 0
             for noticia_id in noticias_invalidas:
                 try:
-
                     if db.eliminar_noticia_por_id(noticia_id):
                         eliminadas_exitosas += 1
                         print(f"✅ Eliminada noticia ID {noticia_id}")
@@ -103,7 +99,7 @@ def obtener_noticias_por_categoria(categoria, max_noticias=MAX_NOTICIAS_POR_CATE
     
     try:
         url = (f"https://gnews.io/api/v4/top-headlines?"
-               f"category={categoria}&lang=es&max={max_noticias * 3}&apikey={GNEWS_API_KEY}")
+               f"category={categoria}&lang=es&max={max_noticias * 4}&apikey={GNEWS_API_KEY}")  # Aumenté el buffer
         
         sleep(TIEMPO_ESPERA_ENTRE_REQUESTS)
         
@@ -127,14 +123,14 @@ def obtener_noticias_por_categoria(categoria, max_noticias=MAX_NOTICIAS_POR_CATE
                 
             url_noticia = articulo.get("url")
             
-
             descripcion = articulo.get("description", "").strip()
             titulo = articulo.get("title", "").strip()
             
+            # CRITERIOS MÁS FLEXIBLES - REDUCIDOS
             if (url_noticia not in urls_existentes and 
                 url_noticia not in urls_encontradas and
-                len(titulo) > 15 and 
-                len(descripcion) > 80 and  
+                len(titulo) > 10 and  # REDUCIDO de 15 a 10
+                len(descripcion) > MIN_PALABRAS_DESCRIPCION and  # Usando la nueva variable
                 not db.noticia_existe(titulo, url_noticia)):
                 
                 articulo['categoria_asignada'] = CATEGORIAS.get(categoria, "General")
@@ -155,7 +151,7 @@ def obtener_noticias_por_categoria(categoria, max_noticias=MAX_NOTICIAS_POR_CATE
     return noticias_nuevas
 
 def scrapear_texto_robusto(url, fallback_description=None):
-    """Scraping robusto con múltiples métodos de extracción"""
+    """Scraping robusto con múltiples métodos de extracción - CRITERIOS MÁS FLEXIBLES"""
     
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
@@ -166,7 +162,7 @@ def scrapear_texto_robusto(url, fallback_description=None):
         'Upgrade-Insecure-Requests': '1',
     }
     
-  
+    # Trafilatura - CON UMBRAL MÁS BAJO
     try:
         downloaded = trafilatura.fetch_url(url) 
         if downloaded:
@@ -176,13 +172,13 @@ def scrapear_texto_robusto(url, fallback_description=None):
                 include_tables=False,
                 no_fallback=True
             )
-            if content and len(content.split()) > 100:
+            if content and len(content.split()) > 50:  # REDUCIDO de 100 a 50
                 print(f"✅ Trafilatura: {len(content.split())} palabras")
                 return ' '.join(content.split()[:MAX_PALABRAS_SCRAPING])
     except Exception as e:
         print(f"⚠️ Trafilatura falló: {e}")
 
-
+    # BeautifulSoup - CON UMBRALES MÁS BAJOS
     try:
         response = requests.get(url, headers=headers, timeout=10)
         response.raise_for_status()
@@ -192,29 +188,29 @@ def scrapear_texto_robusto(url, fallback_description=None):
         selectores = [
             'article .article-content', 'article .story-content', '.news-content',
             '.entry-content', '.post-content', '[class*="content"]',
-            'article p', '.article-body', '.news-body'
+            'article p', '.article-body', '.news-body', '.story-text', '.news-text'
         ]
         
         for selector in selectores:
             elements = soup.select(selector)
             if elements:
                 text_content = ' '.join([elem.get_text(strip=True) for elem in elements])
-                if len(text_content.split()) > 100:
+                if len(text_content.split()) > 50:  # REDUCIDO de 100 a 50
                     print(f"✅ BeautifulSoup con selector '{selector}': {len(text_content.split())} palabras")
                     return ' '.join(text_content.split()[:MAX_PALABRAS_SCRAPING])
         
-
+        # Párrafos individuales - MÁS FLEXIBLE
         paragraphs = soup.find_all('p')
         if paragraphs:
-            text_content = ' '.join([p.get_text(strip=True) for p in paragraphs if len(p.get_text(strip=True)) > 50])
-            if len(text_content.split()) > 100:
+            text_content = ' '.join([p.get_text(strip=True) for p in paragraphs if len(p.get_text(strip=True)) > 30])  # REDUCIDO de 50 a 30
+            if len(text_content.split()) > 40:  # REDUCIDO de 100 a 40
                 print(f"✅ Fallback párrafos: {len(text_content.split())} palabras")
                 return ' '.join(text_content.split()[:MAX_PALABRAS_SCRAPING])
                 
     except Exception as e:
         print(f"⚠️ BeautifulSoup falló: {e}")
 
-
+    # Regex cleaning - MÁS PERMISIVO
     try:
         response = requests.get(url, headers=headers, timeout=8)
         response.raise_for_status()
@@ -224,61 +220,92 @@ def scrapear_texto_robusto(url, fallback_description=None):
         
         text = ' '.join(text.split())
         
-        if len(text.split()) > 300: 
+        if len(text.split()) > 80:  # REDUCIDO de 300 a 80
             print(f"✅ Regex cleaning (fallback robusto): {len(text.split())} palabras")
-            return ' '.join(text.split()[:800]) 
+            return ' '.join(text.split()[:500])  # REDUCIDO el límite
         else:
             print(f"⚠️ Regex cleaning: contenido insuficiente/ruido ({len(text.split())} palabras)")
             
     except Exception as e:
         print(f"⚠️ Regex cleaning falló: {e}")
 
-
-    print(f"❌ Todos los métodos fallaron, usando descripción: {len(fallback_description.split()) if fallback_description else 0} palabras")
-    return fallback_description if fallback_description and len(fallback_description.split()) > 30 else None
+    # FALLBACK MÁS PERMISIVO
+    if fallback_description and len(fallback_description.split()) >= 20:  # REDUCIDO de 30 a 20
+        print(f"✅ Usando descripción fallback: {len(fallback_description.split())} palabras")
+        return fallback_description
+    
+    print(f"❌ Todos los métodos fallaron, contenido insuficiente")
+    return None
 
 def validar_contenido_noticia(texto, titulo):
-    """Valida que el contenido sea realmente una noticia y no código/ruido"""
-
+    """Valida que el contenido sea realmente una noticia - FILTROS MUY FLEXIBLES"""
+    
     if not texto or len(texto.split()) < MIN_PALABRAS_CONTENIDO_VALIDO:
+        print(f"⚠️ Contenido muy corto: {len(texto.split()) if texto else 0} palabras")
         return False
     
+    # PATRONES MUCHO MÁS ESPECÍFICOS para evitar falsos positivos
     patrones_no_deseados = [
-        r'<!DOCTYPE', r'<html', r'<head>', r'<body>', r'function\s*\(',
-        r'var\s+', r'const\s+', r'let\s+', r'classList\.', r'addEventListener',
-        r'@media', r'font-family', r'background-color', r'padding:',
-        r'margin:', r'display:\s*(flex|block|inline)', r'position:',
-        r'z-index:', r'window\.', r'document\.', r'\.getElementById',
+        r'<!DOCTYPE', r'<html', r'<head>', r'<body>', 
+        r'function\s*\(', r'classList\.', r'addEventListener',
+        r'@media', r'font-family', r'background-color',
+        r'window\.', r'document\.', r'\.getElementById',
         r'\.querySelector', r'\.addClass', r'\.removeClass'
     ]
     
+    # Solo buscar patrones si aparecen múltiples veces (evitar falsos positivos)
     for patron in patrones_no_deseados:
-        if re.search(patron, texto, re.IGNORECASE):
-            print(f"⚠️ Contenido rechazado por patrón: {patron}")
+        matches = re.findall(patron, texto, re.IGNORECASE)
+        if len(matches) > 2:  # Solo rechazar si aparece más de 2 veces
+            print(f"⚠️ Contenido rechazado por patrón múltiple: {patron} ({len(matches)} veces)")
             return False
     
-    palabras_clave_noticia = ['anunció', 'confirmó', 'informó', 'declaró', 'según', 'fuentes', 
-                              'investigación', 'estudio', 'datos', 'informe', 'autoridades',
-                              'gobierno', 'empresa', 'mercado', 'economía', 'política']
+    # ELIMINAR patrones que causan falsos positivos con lenguaje natural
+    patrones_problematicos = [
+        r'var\s+', r'const\s+', r'let\s+',  # DEMASIADOS FALSOS POSITIVOS
+        r'padding:', r'margin:', r'display:\s*(flex|block|inline)',
+        r'position:', r'z-index:'
+    ]
+    
+    # PALABRAS CLAVE MÁS FLEXIBLES
+    palabras_clave_noticia = [
+        'anunció', 'confirmó', 'informó', 'declaró', 'según', 'fuentes', 
+        'investigación', 'estudio', 'datos', 'informe', 'autoridades',
+        'gobierno', 'empresa', 'mercado', 'economía', 'política',
+        'afirmó', 'señaló', 'explicó', 'indicó', 'manifestó',
+        'expresó', 'reveló', 'destacó', 'comentó', 'mencionó',
+        'país', 'ciudad', 'presidente', 'ministro', 'director',
+        'año', 'mes', 'día', 'semana', 'horas', 'minutos'
+    ]
     
     palabras_encontradas = sum(1 for palabra in palabras_clave_noticia if palabra in texto.lower())
     
-    return palabras_encontradas >= 2
+    # ACEPTAR incluso si tiene solo 1 palabra clave (para noticias muy cortas)
+    tiene_suficientes_palabras_clave = palabras_encontradas >= 1
+    
+    # Verificar que sea texto legible (no código)
+    es_texto_legible = (
+        len(re.findall(r'[.!?]', texto)) > 2 or  # Tiene puntuación
+        len(re.findall(r'\b[a-zA-Záéíóúñ]{4,}\b', texto)) > 20  # Palabras largas
+    )
+    
+    return tiene_suficientes_palabras_clave and es_texto_legible
 
 def resumir_texto_robusto(texto, titulo):
-    """Genera resúmenes robustos con validación de contenido"""
+    """Genera resúmenes robustos con validación de contenido MÁS FLEXIBLE"""
     
     if not validar_contenido_noticia(texto, titulo):
         print("❌ Contenido no válido para resumir")
         return "Resumen no disponible - contenido insuficiente"
 
-    if len(texto.split()) < MIN_PALABRAS_RESUMEN_SIGNIFICATIVO:
+    if len(texto.split()) < MIN_PALABRAS_RESUMEN_SIGNIFICATIVO:  # Ahora 40 palabras mínimo
         return "Contenido insuficiente para generar un resumen significativo."
 
     if len(texto.split()) > MAX_PALABRAS_SCRAPING:
         texto = ' '.join(texto.split()[:MAX_PALABRAS_SCRAPING])
         print(f"✂️ Texto recortado para resumen a {MAX_PALABRAS_SCRAPING} palabras.")
 
+    # PROMPT ADAPTADO PARA TEXTOS MÁS CORTOS
     prompt = f"""
 # CONTEXTO Y ROL
 Eres un periodista senior especializado en crear resúmenes ejecutivos para medios de comunicación. Tu tarea es transformar el texto proporcionado en un resumen periodístico de alta calidad.
@@ -289,45 +316,37 @@ Eres un periodista senior especializado en crear resúmenes ejecutivos para medi
 ## FORMATO:
 - EXCLUSIVAMENTE un párrafo continuo
 - SIN saltos de línea, viñetas, números o encabezados
-- LONGITUD: 200-330 palabras (NUNCA exceder {MAX_PALABRAS_RESUMEN} palabras)
+- LONGITUD: 100-330 palabras (AJUSTADO para contenido más corto)
 - Lenguaje 100% en español
 
 ## CONTENIDO PERIODÍSTICO:
-Aplica la técnica de las **5W+H** de forma implícita:
+Aplica la técnica de las **5W+H** de forma implícita pero concisa:
 - **QUÉ**: Evento principal/descubrimiento/anuncio
-- **QUIÉN**: Actores principales (personas, empresas, instituciones)
-- **CUÁNDO**: Marco temporal relevante
-- **DÓNDE**: Ubicación/contexto geográfico
-- **POR QUÉ**: Causas o motivos subyacentes
-- **CÓMO**: Metodología o desarrollo del evento
+- **QUIÉN**: Actores principales
+- **CONTEXTO**: Información esencial
 
 ## ESTILO Y TONO:
 - Lenguaje formal pero accesible
-- Objetividad absoluta: cero opiniones, cero adjetivos valorativos
-- Densidad informativa: máxima información en mínimo espacio
-- Coherencia temporal: mantener secuencia lógica de eventos
-- Eliminar redundancias y información secundaria
+- Objetividad absoluta
+- Densidad informativa máxima
+- Adaptado al contenido disponible
 
-## CRITERIOS DE CALIDAD:
-✅ PRIORIZAR: Impacto, relevancia, consecuencias
-✅ MENCIONAR: Cifras, datos concretos, fechas clave
-✅ ESTRUCTURAR: De lo general a lo específico
-❌ ELIMINAR: Lenguaje promocional, sensacionalismo, juicios de valor
-❌ EVITAR: Repeticiones, información trivial, anécdotas irrelevantes
+## PARA CONTENIDO MÁS CORTO:
+Si el texto original es breve, crea un resumen conciso pero informativo que expanda ligeramente la información disponible.
 
 # TEXTO ORIGINAL PARA RESUMIR:
 {texto}
 
 # RESULTADO ESPERADO:
-[Tu resumen periodístico aquí, en un solo párrafo continuo]
+[Tu resumen periodístico aquí, en un solo párrafo continuo, adaptado a la longitud del contenido original]
 """
     
     try:
         response = model.generate_content(prompt)
         resumen = response.text.strip()
         
-
-        if (len(resumen.split()) < 50 or 
+        # CRITERIOS DE VALIDACIÓN MÁS FLEXIBLES
+        if (len(resumen.split()) < 30 or  # REDUCIDO de 50 a 30
             len(resumen.split()) > MAX_PALABRAS_RESUMEN or
             any(invalido in resumen for invalido in RESUMENES_INVALIDOS)):
             raise ValueError(f"Resumen inválido o fuera de límites ({len(resumen.split())} palabras)")
@@ -338,41 +357,40 @@ Aplica la técnica de las **5W+H** de forma implícita:
     except Exception as e:
         print(f"⚠️ Error al generar resumen con Gemini: {repr(e)}")
         
-
-        if len(texto.split()) > 100:
+        # FALLBACK MÁS PERMISIVO
+        if len(texto.split()) > 30:  # REDUCIDO de 100 a 30
             sentences = re.split(r'[.!?]+', texto)
-            meaningful_sentences = [s.strip() for s in sentences if len(s.split()) > 8][:5]
+            meaningful_sentences = [s.strip() for s in sentences if len(s.split()) > 5][:4]  # REDUCIDO umbral
             fallback = ". ".join(meaningful_sentences) + "."
-            if len(fallback) > 80:  
+            if len(fallback) > 50:  # REDUCIDO de 80 a 50
                 return fallback
         
         return "Resumen no disponible - contenido insuficiente"
 
 def es_resumen_valido(resumen):
-    """🔥 VALIDA si el resumen es aceptable"""
+    """🔥 VALIDA si el resumen es aceptable - CRITERIOS MÁS FLEXIBLES"""
     if not resumen or len(resumen.strip()) == 0:
         return False
     
-
     resumen_lower = resumen.lower()
     if any(invalido.lower() in resumen_lower for invalido in RESUMENES_INVALIDOS):
         return False
     
-    if len(resumen.split()) < 40:
+    if len(resumen.split()) < 25:  # REDUCIDO de 40 a 25 palabras mínimas
         return False
     
     return True
 
 def procesar_y_guardar_noticias():
-    """Proceso principal robusto de obtención y procesamiento de noticias"""
+    """Proceso principal robusto de obtención y procesamiento de noticias - MÁS PERMISIVO"""
     
     db.inicializar_db()
     
     print("🕒 Iniciando proceso de obtención de noticias...")
     print("=" * 60)
     print(f"📊 Hora de ejecución: {datetime.now()}")
+    print(f"🎯 UMBRALES FLEXIBLES: Mínimo {MIN_PALABRAS_CONTENIDO_VALIDO} palabras para contenido válido")
     
-  
     noticias_eliminadas = limpiar_noticias_existentes_invalidas()
     
     urls_existentes = db.obtener_urls_existentes()
@@ -439,7 +457,6 @@ def procesar_y_guardar_noticias():
             
             resumen = resumir_texto_robusto(texto_completo, art.get("title"))
             
-
             if not es_resumen_valido(resumen):
                 print(f"🚫 RESUMEN INVÁLIDO - Rechazando noticia: {resumen[:50]}...")
                 noticias_rechazadas += 1
@@ -485,7 +502,7 @@ def procesar_y_guardar_noticias():
     print(f"\n🎯 PROCESO COMPLETADO")
     print("=" * 50)
     print(f"✅ Noticias guardadas: {noticias_guardadas}")
-    print(f"🧹 Noticias existentes eliminadas: {noticias_eliminadas}")  # 🔥 NUEVO
+    print(f"🧹 Noticias existentes eliminadas: {noticias_eliminadas}")
     print(f"🚫 Noticias rechazadas (resumen inválido): {noticias_rechazadas}")
     print(f"❌ Noticias fallidas: {noticias_fallidas}")
     print(f"📊 Categorías procesadas: {categorias_procesadas}/{len(CATEGORIAS)}")
@@ -497,7 +514,7 @@ def procesar_y_guardar_noticias():
     
     return {
         "nuevas_guardadas": noticias_guardadas,
-        "existentes_eliminadas": noticias_eliminadas,  # 🔥 NUEVO
+        "existentes_eliminadas": noticias_eliminadas,
         "noticias_rechazadas": noticias_rechazadas,
         "noticias_fallidas": noticias_fallidas,
         "categorias_procesadas": categorias_procesadas,

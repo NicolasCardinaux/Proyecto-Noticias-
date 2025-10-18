@@ -18,10 +18,10 @@ import db
 from procesar_y_guardar_db import ejecutar_crawler
 from chatbot_service import chatbot_service
 
-# Inicialización de la aplicación Flask
+
 app = Flask(__name__)
 
-# Variable global para el scheduler
+
 scheduler = None
 
 # ==================== CONFIGURACIÓN CORS SIMPLIFICADA ====================
@@ -100,7 +100,7 @@ def mantener_servidor_activo():
     """Hace ping cada 2 minutos durante el período activo."""
     if APP_STATE["anti_sleep_activo"] and os.getenv('ENVIRONMENT') == 'production':
         try:
-            # Recrea el timer para el próximo ping
+
             APP_STATE["anti_sleep_timer"] = threading.Timer(120, mantener_servidor_activo)
             APP_STATE["anti_sleep_timer"].start()
             
@@ -173,16 +173,16 @@ def actualizar_frase_del_dia():
 def iniciar_scheduler():
     """Inicia el scheduler para ejecutar el crawler 4 veces al día y actualizar la frase."""
     
-    # Usamos la variable global para acceder a ella en atexit
+
     global scheduler 
     
     scheduler = BackgroundScheduler()
     
     tz_argentina = pytz.timezone('America/Argentina/Buenos_Aires')
     
-    # Ejecuciones del crawler
+
     horarios_crawler = [
-        # Activación 5 min antes del crawler
+
         (11, 55, 12, 0, 'mediodia'),
         (23, 55, 0, 0, 'medianoche'), 
         (5, 55, 6, 0, 'manana_temprano'),
@@ -190,21 +190,21 @@ def iniciar_scheduler():
     ]
     
     for hora_activar, minuto_activar, hora_crawler, minuto_crawler, nombre in horarios_crawler:
-        # Tarea 1: Activar Anti-Sleep
+
         scheduler.add_job(
             activar_anti_sleep,
             trigger=CronTrigger(hour=hora_activar, minute=minuto_activar, timezone=tz_argentina),
             id=f'activar_anti_sleep_{nombre}'
         )
         
-        # Tarea 2: Ejecutar Crawler
+
         scheduler.add_job(
             ejecutar_crawler_desde_scheduler,
             trigger=CronTrigger(hour=hora_crawler, minute=minuto_crawler, timezone=tz_argentina),
             id=f'crawler_{nombre}'
         )
     
-    # Frase del día a las 00:05 AM
+
     scheduler.add_job(
         actualizar_frase_del_dia,
         trigger=CronTrigger(hour=0, minute=5, timezone=tz_argentina),
@@ -231,7 +231,7 @@ def ejecutar_crawler_desde_scheduler():
         print(f"📊 Resultado: {resultado}")
         print("="*60 + "\n")
         
-        # Desactiva el anti-sleep 10 minutos después (buffer de seguridad)
+
         threading.Timer(600, desactivar_anti_sleep).start()
         print("⏰ Anti-sleep se desactivará automáticamente en 10 minutos")
         
@@ -309,7 +309,7 @@ def chat_con_noticia():
 def chat_debug():
     """Endpoint de diagnóstico para el chatbot"""
     try:
-        # Test del servicio completo
+
         test_result = chatbot_service.generar_respuesta("Hola, ¿estás funcionando?", None, "127.0.0.1")
         
         return jsonify({
@@ -348,7 +348,7 @@ def chat_debug():
 def chat_health_check():
     """Health check específico para el chatbot."""
     try:
-        # Usa una IP de prueba para evitar un rate limit real en el check
+
         test_response = chatbot_service.generar_respuesta("Hola, ¿estás funcionando?", None, "127.0.0.1")
         
         return jsonify({
@@ -398,7 +398,7 @@ def get_popular_posts():
 def get_random_posts():
     """Obtiene noticias aleatorias."""
     try:
-        # db.get_random_posts() debe manejar el sample_size = min(limit * 3, 50) internamente
+
         random_news = db.get_random_posts() 
         if not random_news:
             return jsonify({"message": "No se encontraron noticias aleatorias."}), 404
@@ -507,7 +507,7 @@ def frase_del_dia():
     """Devuelve la frase del día pre-cargada desde el scheduler."""
     today = datetime.date.today().isoformat()
 
-    # Si la caché está vacía o es de otro día, intenta actualizar sincrónicamente
+ 
     if APP_STATE["frase_cache"]["date"] != today or not APP_STATE["frase_cache"]["frase"]:
         print(f"⚠️ Caché de frase vacía o desactualizada. Forzando actualización síncrona.")
         actualizar_frase_del_dia()
@@ -539,7 +539,7 @@ def translate_apod():
     
     content_hash = hashlib.md5(f"{title}{explanation}".encode()).hexdigest()
     
-    # 1. Intentar obtener de la caché por fecha y usuario
+
     cached_translation = db.get_cached_apod_translation(apod_date, user_ip)
     if cached_translation:
         print(f"✅ Devolviendo traducción en caché para IP: {user_ip}")
@@ -552,12 +552,12 @@ def translate_apod():
     try:
         url = "https://api.mymemory.translated.net/get"
         
-        # 2. Traducir Título
+
         title_response = requests.get(url, params={"q": title, "langpair": "en|es"}, timeout=10)
         title_response.raise_for_status()
         translated_title = title_response.json()["responseData"]["translatedText"]
         
-        # 3. Traducir Explicación (en chunks si es larga)
+
         explanation_chunks = []
         chunk_size = 500
         for i in range(0, len(explanation), chunk_size):
@@ -568,7 +568,7 @@ def translate_apod():
         
         translated_explanation = " ".join(explanation_chunks)
         
-        # 4. Guardar en caché para futuros requests del mismo usuario
+
         db.save_apod_translation(
             apod_date, 
             content_hash, 
@@ -651,12 +651,11 @@ def search_noticias():
 @app.route("/api/health", methods=["GET"])
 def health_check():
     """Endpoint para verificar el estado del servidor."""
-    global scheduler # Usamos la variable global
+    global scheduler
     try:
-        # Prueba de conexión a la BD
+
         db.get_noticias(limit=1)
         
-        # Prueba de estado del Chatbot
         chat_status = "operational"
         try:
             test_chat = chatbot_service.generar_respuesta("Test de salud", None, "127.0.0.1")
@@ -664,7 +663,7 @@ def health_check():
         except Exception as e:
             chat_status = f"error: {str(e)}"
         
-        # Estado del Scheduler
+
         scheduler_status = "running" if scheduler and scheduler.running else "stopped"
         anti_sleep_status = "active" if APP_STATE["anti_sleep_activo"] else "inactive"
         frase_status = "cached" if APP_STATE["frase_cache"]["frase"] else "empty"
@@ -737,20 +736,18 @@ def ejecutar_aplicacion():
     """Función principal para inicializar el servidor y el scheduler de forma segura."""
     global scheduler
     
-    # === ARREGLO CRUCIAL DEL SCHEDULER ===
-    # Solo inicia el scheduler si NO estamos en el proceso de reloader de Flask
-    # (Esto evita la duplicación de tareas y el fallo silencioso)
+
     if not app.debug or os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
         print("Verificando inicio del Scheduler...")
-        # Llama a iniciar_scheduler()
+
         iniciar_scheduler()
     else:
         print("❌ Scheduler NO iniciado. Proceso secundario de Flask (reloader) detectado.")
 
-    # Asegura que el scheduler se apague limpiamente al salir
+
     atexit.register(lambda: scheduler.shutdown() if scheduler else None)
 
-    # --- Lógica de arranque y logs ---
+
     print("\n" + "="*60)
     print("🚀 Iniciando servidor AntiHumo News API")
     print(f"📅 Fecha/Hora actual (BA): {datetime.datetime.now(pytz.timezone('America/Argentina/Buenos_Aires')).strftime('%Y-%m-%d %H:%M:%S')}")
@@ -772,7 +769,7 @@ def ejecutar_aplicacion():
     
     print(f"\n🔧 Puerto: {port}, Debug: {debug_mode}")
     
-    # Arrancar la app
+
     app.run(host='0.0.0.0', port=port, debug=debug_mode)
 
 
