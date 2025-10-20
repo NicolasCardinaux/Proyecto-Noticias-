@@ -2,7 +2,7 @@ name: Ejecutar procesar_y_guardar_db.py 4 veces al día
 
 on:
   schedule:
-    # Ejecutar a las 00:00, 06:00, 12:00 y 18:00 Argentina (que son 03:00, 09:00, 15:00 y 21:00 UTC)
+    # 00:00, 06:00, 12:00 y 18:00 Argentina (03:00, 09:00, 15:00, 21:00 UTC)
     - cron: "0 3,9,15,21 * * *"
   workflow_dispatch:
 
@@ -26,6 +26,8 @@ jobs:
 
       - name: Crear archivo .env
         run: |
+          echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> backend/.env
+          echo "SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}" >> backend/.env
           echo "GNEWS_API_KEY=${{ secrets.GNEWS_API_KEY }}" >> backend/.env
           echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> backend/.env
           echo "ENVIRONMENT=production" >> backend/.env
