@@ -29,7 +29,7 @@ except Exception as e:
     logger.error(f"❌ Error inicializando Supabase anónimo: {e}")
 
 try:
-    SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+    SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_KEY")
     if SUPABASE_SERVICE_KEY:
         supabase_service = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
         logger.info("✅ Supabase cliente SERVICE ROLE inicializado correctamente")

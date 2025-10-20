@@ -15,7 +15,7 @@ load_dotenv()
 
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY") 
+SUPABASE_KEY = os.getenv("SUPABASE_KEY") 
 SUPABASE_KEY_ANON = os.getenv("SUPABASE_KEY_ANON") 
 
 if not SUPABASE_URL:
@@ -29,7 +29,7 @@ try:
         supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
         logger.info("✅ Cliente Supabase (Service Role) configurado")
     else:
-        logger.warning("⚠️ SUPABASE_SERVICE_ROLE_KEY no encontrada")
+        logger.warning("⚠️ SUPABASE_KEY no encontrada")
 except Exception as e:
     logger.error(f"❌ Error creando cliente Supabase (Service Role): {e}")
 
