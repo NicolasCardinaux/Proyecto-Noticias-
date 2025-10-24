@@ -5,7 +5,6 @@ import axios from 'axios';
 import ParticlesBackground from './ParticlesBackground';
 import CategoryFilter from './CategoryFilter';
 import '../styles/noticiasList.css';
-import noImagePlaceholder from '../imagenes/no-image.png';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -216,7 +215,7 @@ function AllNews() {
                         className="noticia-image"
                         onError={(e) => {
                           e.target.onerror = null;
-                          e.target.src = noImagePlaceholder;
+                          e.target.src = 'https://via.placeholder.com/400x200/1a1a1a/ffffff?text=Imagen+No+Disponible';
                         }}
                       />
                       <div className="noticia-category-badge">

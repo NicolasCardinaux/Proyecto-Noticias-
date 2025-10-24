@@ -7,7 +7,6 @@ import Breadcrumb from "./Breadcrumb";
 import NoticiasRelacionadas from "./NoticiasRelacionadas";
 import SidebarNoticia from "./SidebarNoticia";
 import "../styles/noticiaDetalle.css";
-import noImagePlaceholder from '../imagenes/no-image.png';
 
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
@@ -102,7 +101,7 @@ function NoticiaDetalle() {
                 alt={noticia.titulo}
                 className="imagen-principal"
                 onError={(e) => {
-                  e.target.src = noImagePlaceholder;
+                  e.target.src = 'https://via.placeholder.com/1200x600/1a1a1a/ffffff?text=Imagen+No+Disponible';
                 }}
               />
             </div>

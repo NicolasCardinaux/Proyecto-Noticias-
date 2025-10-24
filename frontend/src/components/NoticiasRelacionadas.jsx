@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import '../styles/NoticiasRelacionadas.css';
-import noImagePlaceholder from '../imagenes/no-image.png';
 
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
@@ -115,7 +114,7 @@ function NoticiasRelacionadas({ categoriaActual, noticiaActualId }) {
                   alt={noticia.titulo}
                   className="noticia-relacionada-image"
                   onError={(e) => {
-                    e.target.src = noImagePlaceholder;
+                    e.target.src = 'https://via.placeholder.com/300x200/1a1a1a/ffffff?text=Imagen+No+Disponible';
                   }}
                 />
                 <div className="noticia-relacionada-overlay"></div>

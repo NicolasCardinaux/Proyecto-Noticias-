@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import '../styles/PopularPosts.css';
-import noImagePlaceholder from '../imagenes/no-image.png';
 
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
@@ -73,7 +72,7 @@ function PopularPosts() {
                 alt={post.titulo}
                 className="post-image"
                 onError={(e) => {
-                  e.target.src = noImagePlaceholder;
+                  e.target.src = 'https://via.placeholder.com/400x200.png?text=Sin+Imagen';
                 }}
               />
               {}

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import '../styles/NewPosts.css';
-import noImagePlaceholder from '../imagenes/no-image.png';
+
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -67,7 +67,7 @@ function NewPosts() {
                 alt={post.titulo}
                 className="post-item-image"
                 onError={(e) => {
-                  e.target.src = noImagePlaceholder;
+                  e.target.src = 'https://via.placeholder.com/200x200/1a1a1a/ffffff?text=Sin+Imagen';
                 }}
               />
               {}
