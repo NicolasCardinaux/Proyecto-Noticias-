@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { FiUser, FiHash, FiStar, FiTrendingUp, FiEye, FiCalendar } from 'react-icons/fi';
 import '../styles/SidebarNoticia.css';
+import noImagePlaceholder from '../imagenes/no-image.png';
 
 
 const API_BASE_URL = "https://proyecto-noticias-api.onrender.com";
@@ -149,7 +150,7 @@ function SidebarNoticia({ fuente, categoria, noticiaActualId }) {
                     src={post.imagen}
                     alt={post.titulo}
                     onError={(e) => {
-                      e.target.src = 'https://via.placeholder.com/60x60/1a1a1a/ffffff?text=📰';
+                      e.target.src = noImagePlaceholder;
                     }}
                   />
                   <div className="post-rank-mini">#{index + 1}</div>

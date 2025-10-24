@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import '../styles/InterestPosts.css';
+import noImagePlaceholder from '../imagenes/no-image.png';
 
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
@@ -82,11 +83,11 @@ function InterestPosts() {
           <div key={post.id} className="interest-post-card" onClick={() => handlePostClick(post)}>
             <div className="interest-post-image-container">
               <img
-                src={post.imagen || 'https://via.placeholder.com/200x200/1a1a1a/ffffff?text=Sin+Imagen'}
+                src={post.imagen || noImagePlaceholder}
                 alt={post.titulo}
                 className="interest-post-image"
                 onError={(e) => {
-                  e.target.src = 'https://via.placeholder.com/200x200/1a1a1a/ffffff?text=Sin+Imagen';
+                  e.target.src = noImagePlaceholder;
                 }}
               />
               <div className="interest-post-image-overlay"></div>
